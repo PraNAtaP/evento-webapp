@@ -29,8 +29,39 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'role' => 'client',
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * Indicate that the user is a client.
+     */
+    public function client(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'client',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an Event Organizer (EO).
+     */
+    public function eo(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'eo',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a vendor.
+     */
+    public function vendor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'vendor',
+        ]);
     }
 
     /**
