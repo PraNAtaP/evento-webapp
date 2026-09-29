@@ -1,37 +1,73 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Login from "./pages/auth/Login";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import VendorDashboard from "./pages/vendor/VendorDashboard";
+import ClientDashboard from "./pages/client/ClientDashboard";
 
-function Home() {
-    return (
-        <div style={{ padding: "2rem" }}>
-            <h1>EVENTO App</h1>
-            <p>Arsitektur 1 Repo: Laravel Backend API + React Vite SPA</p>
-            <nav style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-                <Link to="/login">Login</Link>
-                <Link to="/eo/kanban">Papan Kanban EO</Link>
-                <Link to="/client/booking">Smart Calendar Klien</Link>
-            </nav>
-        </div>
-    );
+const queryClient = new QueryClient();
+
+function RootRedirect() {
+    const { isAuthenticated, user, isLoading, getRoleDashboard } = useAuth();
+
+    if (isLoading) {
+        return (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+                <p>Memuat...</p>
+            </div>
+        );
+    }
+
+    if (isAuthenticated && user) {
+        return <Navigate to={getRoleDashboard(user.role)} replace />;
+    }
+
+    return <Navigate to="/login" replace />;
 }
 
 export default function App() {
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route
-                    path="/login"
-                    element={<div>Halaman Login (3 Role)</div>}
-                />
-                <Route
-                    path="/eo/kanban"
-                    element={<div>Modul Kanban Board (EO)</div>}
-                />
-                <Route
-                    path="/client/booking"
-                    element={<div>Modul Smart Calendar (Klien)</div>}
-                />
-            </Routes>
-        </BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/" element={<RootRedirect />} />
+                        <Route path="/login" element={<Login />} />
+
+                        <Route
+                            path="/admin/dashboard"
+                            element={
+                                <ProtectedRoute allowedRoles={["eo"]}>
+                                    <AdminDashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        <Route
+                            path="/vendor/dashboard"
+                            element={
+                                <ProtectedRoute allowedRoles={["vendor"]}>
+                                    <VendorDashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        <Route
+                            path="/client/dashboard"
+                            element={
+                                <ProtectedRoute allowedRoles={["client"]}>
+                                    <ClientDashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Fallback */}
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </BrowserRouter>
+            </AuthProvider>
+        </QueryClientProvider>
     );
 }
