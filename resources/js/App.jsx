@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/auth/Login";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import KanbanPage from "./pages/admin/KanbanPage";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import ClientDashboard from "./pages/client/ClientDashboard";
 
@@ -43,6 +44,21 @@ export default function App() {
                                     <AdminDashboard />
                                 </ProtectedRoute>
                             }
+                        />
+
+                        <Route
+                            path="/admin/kanban"
+                            element={
+                                <ProtectedRoute allowedRoles={["eo"]}>
+                                    <KanbanPage />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Rute langsung untuk kemudahan pratinjau kanban */}
+                        <Route
+                            path="/kanban"
+                            element={<KanbanPage />}
                         />
 
                         <Route
