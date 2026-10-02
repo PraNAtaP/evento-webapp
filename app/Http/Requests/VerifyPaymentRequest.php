@@ -15,7 +15,7 @@ class VerifyPaymentRequest extends FormRequest
     {
         return [
             'action' => ['required', 'in:approve,reject'],
-            'rejection_note' => ['required_if:action,reject', 'string', 'max:500'],
+            'rejection_note' => ['nullable', 'required_if:action,reject', 'string', 'max:500'],
         ];
     }
 

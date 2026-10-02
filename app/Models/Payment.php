@@ -14,8 +14,11 @@ class Payment extends Model
         'event_id',
         'payment_type',
         'nominal',
+        'status',
         'payment_proof_url',
         'rejection_note',
+        'verified_by',
+        'verified_at',
     ];
 
     protected $casts = [
