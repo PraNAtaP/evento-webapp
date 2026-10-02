@@ -7,6 +7,7 @@ use App\Models\VendorPackage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+
 class VendorPackageController extends Controller
 {
     /**
@@ -48,7 +49,24 @@ class VendorPackageController extends Controller
             'package_name' => ['required', 'string', 'max:150'],
             'description' => ['required', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'image' => ['nullable', 'image', 'max:2048'],
         ]);
+
+        if ($request->hasFile('image')) {
+            \Cloudinary::config();
+
+            $upload = \Cloudinary\Uploader::upload(
+                $request->file('image')->getRealPath(),
+                [
+                    'folder' => 'evento/packages',
+                ]
+            );
+
+            $validated['image_url'] = $upload['secure_url'];
+            $validated['image_public_id'] = $upload['public_id'];
+        }
+
+        unset($validated['image']);
 
         $package = $vendor->packages()->create($validated);
 
