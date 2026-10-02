@@ -60,5 +60,8 @@ class DatabaseSeeder extends Seeder
                 'image_url' => null,
             ]
         );
+        $this->call([
+            PaymentSeeder::class,
+        ]);
     }
 }
