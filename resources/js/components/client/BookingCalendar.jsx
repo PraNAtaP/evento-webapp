@@ -10,7 +10,7 @@ import "./BookingCalendar.css";
  * @param {Date|null} [props.value] - Tanggal terpilih (controlled)
  * @param {function(Date):void} [props.onChange] - Callback saat tanggal dipilih
  */
-export default function BookingCalendar({ value, onChange }) {
+export default function BookingCalendar({ value, onChange, minDate = new Date() }) {
     const [internalDate, setInternalDate] = useState(new Date());
 
     const activeDate = value !== undefined ? value : internalDate;
@@ -53,6 +53,7 @@ export default function BookingCalendar({ value, onChange }) {
                     value={activeDate}
                     onChange={handleDateChange}
                     locale="id-ID"
+                    minDate={minDate}
                     prev2Label="«"
                     prevLabel="‹"
                     nextLabel="›"

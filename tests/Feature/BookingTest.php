@@ -137,6 +137,25 @@ class BookingTest extends TestCase
     }
 
     /**
+     * Memastikan klien tidak dapat memesan tanggal di masa lalu.
+     */
+    public function test_client_cannot_book_past_date(): void
+    {
+        $client = User::factory()->client()->create();
+        $pastDate = now()->subDays(3)->format('Y-m-d');
+
+        $response = $this->actingAs($client, 'sanctum')
+            ->postJson('/api/bookings', [
+                'event_name' => 'Acara Masa Lalu',
+                'event_date' => $pastDate,
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['event_date'])
+            ->assertJsonPath('errors.event_date.0', 'Tanggal acara tidak boleh tanggal yang sudah lewat.');
+    }
+
+    /**
      * Memastikan role non-klien (misalnya vendor atau EO) tidak dapat membuat booking.
      */
     public function test_non_client_role_cannot_create_booking(): void

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import BookingCalendar from "../../components/client/BookingCalendar";
+import BookingForm from "../../components/client/BookingForm";
 
 export default function ClientDashboard() {
     const { user, logout } = useAuth();
@@ -55,7 +56,7 @@ export default function ClientDashboard() {
                 {/* Greeting Section */}
                 <div>
                     <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                        Selamat Datang, {user?.name || "Client"}! 
+                        Selamat Datang, {user?.name || "Client"}!
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
                         Pilih jadwal dan pesan tanggal acara Anda melalui kalender di bawah.
@@ -64,38 +65,37 @@ export default function ClientDashboard() {
 
                 {/* Grid Konten */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                    {/* Kolom Kalender */}
-                    <div className="lg:col-span-7">
+                    {/* Kolom Kiri: Kalender */}
+                    <div className="lg:col-span-7 flex flex-col gap-4">
                         <BookingCalendar
                             value={selectedDate}
                             onChange={setSelectedDate}
+                            minDate={new Date()}
                         />
-                    </div>
 
-                    {/* Kolom Info Kalender */}
-                    <div className="lg:col-span-5 flex flex-col gap-6">
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-                            <span className="text-xs uppercase font-bold tracking-wider text-slate-400">
-                                Panduan Kalender
-                            </span>
-                            <h2 className="text-base font-bold text-slate-800 mt-1">
-                                Navigasi Tanggal Acara
-                            </h2>
-                            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                                Klik tanggal pada kalender untuk menentukan jadwal yang Anda inginkan. Anda dapat berpindah bulan atau tahun dengan mengklik tanda panah navigasi di bagian atas kalender.
-                            </p>
-
-                            <div className="mt-4 pt-4 border-t border-slate-100 space-y-2.5 text-xs">
-                                <div className="flex items-center gap-2 text-slate-600">
-                                    <span className="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>
-                                    <span>Tanggal yang sedang Anda pilih saat ini</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-slate-600">
-                                    <span className="w-3 h-3 rounded-full bg-slate-100 border border-blue-200 inline-block"></span>
-                                    <span>Hari ini</span>
-                                </div>
+                        {/* Petunjuk / Legenda */}
+                        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+                            <span className="font-semibold text-slate-700">Keterangan:</span>
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>
+                                <span>Tanggal Terpilih</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-slate-100 border border-blue-300 inline-block"></span>
+                                <span>Hari Ini</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-slate-100 border border-slate-200 inline-block opacity-60"></span>
+                                <span>Masa Lalu (Nonaktif)</span>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Kolom Kanan: Form Input Booking */}
+                    <div className="lg:col-span-5 flex flex-col gap-6">
+                        <BookingForm
+                            selectedDate={selectedDate}
+                        />
                     </div>
                 </div>
             </main>

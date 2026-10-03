@@ -50,9 +50,10 @@ class BookingController extends Controller
 
         $validated = $request->validate([
             'event_name' => ['required', 'string', 'max:150'],
-            'event_date' => ['required', 'date_format:Y-m-d', 'unique:events,event_date'],
+            'event_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today', 'unique:events,event_date'],
         ], [
             'event_date.unique' => 'Tanggal sudah terisi',
+            'event_date.after_or_equal' => 'Tanggal acara tidak boleh tanggal yang sudah lewat.',
             'event_date.required' => 'Tanggal acara wajib diisi.',
             'event_date.date_format' => 'Format tanggal acara harus YYYY-MM-DD.',
             'event_name.required' => 'Nama acara wajib diisi.',
