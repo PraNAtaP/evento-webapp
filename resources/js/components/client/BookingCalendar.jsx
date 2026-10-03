@@ -10,10 +10,24 @@ import "./BookingCalendar.css";
  * @param {Date|null} [props.value] - Tanggal terpilih (controlled)
  * @param {function(Date):void} [props.onChange] - Callback saat tanggal dipilih
  */
-export default function BookingCalendar({ value, onChange, minDate = new Date() }) {
+export default function BookingCalendar({
+    value,
+    onChange,
+    minDate = new Date(),
+    bookedDates = [],
+}) {
     const [internalDate, setInternalDate] = useState(new Date());
 
     const activeDate = value !== undefined ? value : internalDate;
+
+    // Helper mengubah objek Date ke format YYYY-MM-DD lokal
+    const formatDateToYMD = (date) => {
+        if (!date) return "";
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
 
     const handleDateChange = (newDate) => {
         if (value === undefined) {
@@ -22,6 +36,26 @@ export default function BookingCalendar({ value, onChange, minDate = new Date() 
         if (onChange) {
             onChange(newDate);
         }
+    };
+
+    // Nonaktifkan tanggal yang sudah terisi di database
+    const isTileDisabled = ({ date, view }) => {
+        if (view === "month") {
+            const dateStr = formatDateToYMD(date);
+            return bookedDates.includes(dateStr);
+        }
+        return false;
+    };
+
+    // Tambahkan class CSS khusus untuk tanggal yang sudah terisi
+    const getTileClassName = ({ date, view }) => {
+        if (view === "month") {
+            const dateStr = formatDateToYMD(date);
+            if (bookedDates.includes(dateStr)) {
+                return "react-calendar__tile--booked";
+            }
+        }
+        return "";
     };
 
     const formatReadableDate = (date) => {
@@ -54,6 +88,8 @@ export default function BookingCalendar({ value, onChange, minDate = new Date() 
                     onChange={handleDateChange}
                     locale="id-ID"
                     minDate={minDate}
+                    tileDisabled={isTileDisabled}
+                    tileClassName={getTileClassName}
                     prev2Label="«"
                     prevLabel="‹"
                     nextLabel="›"

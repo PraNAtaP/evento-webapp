@@ -1,11 +1,33 @@
 import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../api/axios";
 import BookingCalendar from "../../components/client/BookingCalendar";
 import BookingForm from "../../components/client/BookingForm";
 
 export default function ClientDashboard() {
     const { user, logout } = useAuth();
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const queryClient = useQueryClient();
+
+    // Mengambil daftar tanggal yang sudah terisi di database
+    const {
+        data: bookedDates = [],
+        isLoading: isDatesLoading,
+    } = useQuery({
+        queryKey: ["booked-dates"],
+        queryFn: async () => {
+            const response = await api.get("/bookings/booked-dates");
+            return Array.isArray(response.data)
+                ? response.data
+                : response.data?.booked_dates || [];
+        },
+    });
+
+    const handleBookingSuccess = () => {
+        // Refresh data tanggal terisi secara realtime di kalender
+        queryClient.invalidateQueries({ queryKey: ["booked-dates"] });
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
@@ -71,9 +93,10 @@ export default function ClientDashboard() {
                             value={selectedDate}
                             onChange={setSelectedDate}
                             minDate={new Date()}
+                            bookedDates={bookedDates}
                         />
 
-                        {/* Petunjuk / Legenda */}
+                        {/* Petunjuk / Legenda Kalender */}
                         <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
                             <span className="font-semibold text-slate-700">Keterangan:</span>
                             <div className="flex items-center gap-2">
@@ -85,8 +108,12 @@ export default function ClientDashboard() {
                                 <span>Hari Ini</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full bg-slate-100 border border-slate-200 inline-block opacity-60"></span>
-                                <span>Masa Lalu (Nonaktif)</span>
+                                <span className="w-3 h-3 rounded-full bg-slate-200 border border-slate-400 inline-block"></span>
+                                <span className="font-medium text-slate-700">Sudah Terisi (Nonaktif)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-slate-50 border border-slate-200 inline-block opacity-60"></span>
+                                <span>Masa Lalu</span>
                             </div>
                         </div>
                     </div>
@@ -95,6 +122,7 @@ export default function ClientDashboard() {
                     <div className="lg:col-span-5 flex flex-col gap-6">
                         <BookingForm
                             selectedDate={selectedDate}
+                            onBookingSuccess={handleBookingSuccess}
                         />
                     </div>
                 </div>
