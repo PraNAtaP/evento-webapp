@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'package_name',
     'description',
     'price',
+    'image_url',
+    'image_public_id',
 ])]
 class VendorPackage extends Model
 {

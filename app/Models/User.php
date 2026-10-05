@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'email', 'password', 'role'])]
@@ -55,5 +56,15 @@ class User extends Authenticatable
     public function events(): HasMany
     {
         return $this->hasMany(Event::class, 'client_id');
+    }
+
+    /**
+     * Get the vendor profile owned by the user.
+     *
+     * @return HasOne<Vendor, $this>
+     */
+    public function vendor(): HasOne
+    {
+        return $this->hasOne(Vendor::class);
     }
 }
