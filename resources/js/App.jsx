@@ -5,8 +5,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/auth/Login";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import KanbanPage from "./pages/admin/KanbanPage";
+import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import ClientDashboard from "./pages/client/ClientDashboard";
+import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,16 @@ export default function App() {
                             }
                         />
 
+                        {/* Rute Verifikasi Pembayaran untuk EO */}
+                        <Route
+                            path="/admin/payments"
+                            element={
+                                <ProtectedRoute allowedRoles={["eo"]}>
+                                    <PaymentVerificationPage />
+                                </ProtectedRoute>
+                            }
+                        />
+
                         {/* Rute langsung untuk kemudahan pratinjau kanban */}
                         <Route
                             path="/kanban"
@@ -75,6 +87,16 @@ export default function App() {
                             element={
                                 <ProtectedRoute allowedRoles={["client"]}>
                                     <ClientDashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Rute Payment Tracking untuk Client */}
+                        <Route
+                            path="/client/payments"
+                            element={
+                                <ProtectedRoute allowedRoles={["client"]}>
+                                    <PaymentTrackingPage />
                                 </ProtectedRoute>
                             }
                         />
