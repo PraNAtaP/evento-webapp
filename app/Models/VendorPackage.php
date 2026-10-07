@@ -48,4 +48,12 @@ class VendorPackage extends Model
     {
         return $this->hasMany(EventVendorAssignment::class, 'package_id');
     }
+
+    /**
+     * Get additional images for this package.
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(VendorPackageImage::class);
+    }
 }

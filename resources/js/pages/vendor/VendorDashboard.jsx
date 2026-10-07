@@ -14,6 +14,7 @@ export default function VendorDashboard() {
         description: "",
         price: "",
         image: null,
+        images: [],
     });
 
     // Menyimpan ID paket yang sedang diedit
@@ -21,6 +22,9 @@ export default function VendorDashboard() {
 
     // Menyimpan foto yang sedang dilihat
     const [selectedImage, setSelectedImage] = useState(null);
+
+    // Menyimpan foto lama saat edit
+    const [existingImages, setExistingImages] = useState([]);
 
     // Mengambil data paket saat halaman dibuka
     const fetchPackages = async () => {
@@ -56,9 +60,16 @@ export default function VendorDashboard() {
             formData.append("description", form.description);
             formData.append("price", form.price);
 
-            // Jika ada foto yang dipilih
+            // Jika ada foto utama
             if (form.image) {
                 formData.append("image", form.image);
+            }
+
+            // Jika ada beberapa foto tambahan
+            if (form.images.length > 0) {
+                form.images.forEach((image) => {
+                    formData.append("images[]", image);
+                });
             }
 
             if (editingId) {
@@ -91,9 +102,11 @@ export default function VendorDashboard() {
                 description: "",
                 price: "",
                 image: null,
+                images: [],
             });
 
             setEditingId(null);
+            setExistingImages([]);
 
             // Ambil data terbaru
             fetchPackages();
@@ -101,7 +114,22 @@ export default function VendorDashboard() {
             console.error("Gagal menyimpan paket:", error);
             console.error(error.response?.data);
 
-            alert("Gagal menyimpan paket");
+            const errors = error.response?.data?.errors;
+
+            if (errors) {
+                const messages = Object.values(errors).flat();
+                alert(messages.join("\n"));
+            } else if (error.response?.status === 500) {
+                alert("Terjadi kesalahan pada server. Silakan coba lagi.");
+            } else if (error.response?.data?.message) {
+                alert(error.response.data.message);
+            } else if (error.request) {
+                alert(
+                    "Koneksi bermasalah atau server tidak merespons. Silakan coba lagi."
+                );
+            } else {
+                alert("Gagal menyimpan paket. Silakan coba lagi.");
+            }
         }
     };
 
@@ -112,8 +140,31 @@ export default function VendorDashboard() {
             description: item.description,
             price: item.price,
             image: null,
+            images: [],
         });
 
+        // Menyimpan foto lama agar bisa ditampilkan di form edit
+        const oldImages = [];
+
+        // Foto utama
+        if (item.image_url) {
+            oldImages.push({
+                id: "main",
+                image_url: item.image_url,
+            });
+        }
+
+        // Foto tambahan
+        if (item.images && item.images.length > 0) {
+            item.images.forEach((image) => {
+                oldImages.push({
+                    id: image.id,
+                    image_url: image.image_url,
+                });
+            });
+        }
+
+        setExistingImages(oldImages);
         setEditingId(item.id);
     };
 
@@ -238,27 +289,41 @@ export default function VendorDashboard() {
                             </label>
 
                             <div className="flex items-center gap-2">
-                                {/* Nama file */}
-                                <div className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-500 h-[42px] flex items-center">
-                                    {form.image
-                                        ? form.image.name
+
+                                {/* Nama file yang dipilih */}
+                                <div className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-500 min-h-[42px] flex items-center">
+                                    {form.image || form.images.length > 0
+                                        ? [form.image, ...form.images]
+                                            .filter(Boolean)
+                                            .map((file) => file.name)
+                                            .join(", ")
                                         : "Belum ada foto dipilih"}
                                 </div>
 
                                 {/* Tombol pilih foto */}
-                                <label className="border border-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 cursor-pointer h-[42px] flex items-center">
+                                <label className="border border-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 cursor-pointer min-h-[42px] flex items-center">
                                     Pilih Foto
 
                                     <input
                                         type="file"
                                         name="image"
                                         accept="image/*"
-                                        onChange={(e) =>
+                                        multiple
+                                        onChange={(e) => {
+                                            const files = Array.from(
+                                                e.target.files
+                                            );
+
                                             setForm({
                                                 ...form,
-                                                image: e.target.files[0],
-                                            })
-                                        }
+
+                                                // Foto pertama menjadi foto utama
+                                                image: files[0] || null,
+
+                                                // Foto berikutnya menjadi foto tambahan
+                                                images: files.slice(1),
+                                            });
+                                        }}
                                         className="hidden"
                                     />
                                 </label>
@@ -267,6 +332,40 @@ export default function VendorDashboard() {
                             <p className="text-xs text-gray-400 mt-1">
                                 Maksimal 2 MB. Format gambar.
                             </p>
+
+                            {/* Foto yang sudah tersimpan */}
+                            {editingId && existingImages.length > 0 && (
+                                <div className="mt-4">
+                                    <p className="text-sm font-medium text-gray-700 mb-2">
+                                        Foto Saat Ini
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-3">
+                                        {existingImages.map((image) => (
+                                            <div
+                                                key={image.id}
+                                                className="relative"
+                                            >
+                                                <img
+                                                    src={image.image_url}
+                                                    alt="Foto paket"
+                                                    onClick={() =>
+                                                        setSelectedImage(
+                                                            image.image_url
+                                                        )
+                                                    }
+                                                    className="w-24 h-24 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <p className="text-xs text-gray-400 mt-2">
+                                        Foto di atas adalah foto yang saat ini
+                                        tersimpan.
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Tombol */}
@@ -285,12 +384,14 @@ export default function VendorDashboard() {
                                     type="button"
                                     onClick={() => {
                                         setEditingId(null);
+                                        setExistingImages([]);
 
                                         setForm({
                                             package_name: "",
                                             description: "",
                                             price: "",
                                             image: null,
+                                            images: [],
                                         });
                                     }}
                                     className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-lg transition"
@@ -373,17 +474,48 @@ export default function VendorDashboard() {
 
                                             {/* Foto Paket */}
                                             <td className="py-4 px-5">
-                                                {item.image_url ? (
-                                                    <img
-                                                        src={item.image_url}
-                                                        alt={item.package_name}
-                                                        onClick={() =>
-                                                            setSelectedImage(
-                                                                item.image_url
+                                                {item.image_url ||
+                                                item.images?.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {/* Foto utama */}
+                                                        {item.image_url && (
+                                                            <img
+                                                                src={
+                                                                    item.image_url
+                                                                }
+                                                                alt={
+                                                                    item.package_name
+                                                                }
+                                                                onClick={() =>
+                                                                    setSelectedImage(
+                                                                        item.image_url
+                                                                    )
+                                                                }
+                                                                className="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition"
+                                                            />
+                                                        )}
+
+                                                        {/* Foto tambahan */}
+                                                        {item.images?.map(
+                                                            (image) => (
+                                                                <img
+                                                                    key={image.id}
+                                                                    src={
+                                                                        image.image_url
+                                                                    }
+                                                                    alt={
+                                                                        item.package_name
+                                                                    }
+                                                                    onClick={() =>
+                                                                        setSelectedImage(
+                                                                            image.image_url
+                                                                        )
+                                                                    }
+                                                                    className="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition"
+                                                                />
                                                             )
-                                                        }
-                                                        className="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition"
-                                                    />
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <span className="text-gray-400 text-xs">
                                                         Tidak ada foto
