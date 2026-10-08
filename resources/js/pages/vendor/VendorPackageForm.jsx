@@ -185,6 +185,35 @@ export default function VendorPackageForm() {
             <div className="max-w-4xl mx-auto">
 
                 <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                
+                {/* Tombol Kembali */}
+                    <div className="mb-5">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                window.location.href = "/vendor/dashboard";
+                            }}
+                            className="inline-flex items-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-full transition shadow-sm"
+                        >
+                            {/* Icon Back */}
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                className="w-5 h-5"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M15 19l-7-7 7-7"
+                                />
+                            </svg>
+
+                            <span>Kembali ke Dashboard</span>
+                        </button>
+                    </div>
 
                     {/* Header Form */}
                     <div className="mb-5">
