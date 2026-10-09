@@ -7,8 +7,33 @@ import BookingForm from "../../components/client/BookingForm";
 
 export default function ClientDashboard() {
     const { user, logout } = useAuth();
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [category, setCategory] = useState("wedding");
     const queryClient = useQueryClient();
+
+    // Hitung tanggal minimal yang diizinkan sesuai H-min kategori
+    const getMinDateForCategory = (cat) => {
+        const minDays = {
+            wedding: 60,
+            seminar: 30,
+            birthday: 14,
+        }[cat] || 1;
+
+        const date = new Date();
+        date.setDate(date.getDate() + minDays);
+        return date;
+    };
+
+    const minDate = getMinDateForCategory(category);
+    const [selectedDate, setSelectedDate] = useState(() => getMinDateForCategory("wedding"));
+
+    // Jika kategori berubah dan selectedDate kurang dari batas H-min yang baru, sesuaikan selectedDate
+    const handleCategoryChange = (newCat) => {
+        setCategory(newCat);
+        const newMinDate = getMinDateForCategory(newCat);
+        if (selectedDate < newMinDate) {
+            setSelectedDate(newMinDate);
+        }
+    };
 
     // Mengambil daftar tanggal yang sudah terisi di database
     const {
@@ -81,7 +106,7 @@ export default function ClientDashboard() {
                         Selamat Datang, {user?.name || "Client"}!
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
-                        Pilih jadwal dan pesan tanggal acara Anda melalui kalender di bawah.
+                        Pilih jadwal dan lengkapi detail rencana acara Anda melalui formulir di bawah.
                     </p>
                 </div>
 
@@ -92,28 +117,29 @@ export default function ClientDashboard() {
                         <BookingCalendar
                             value={selectedDate}
                             onChange={setSelectedDate}
-                            minDate={new Date()}
+                            minDate={minDate}
                             bookedDates={bookedDates}
                         />
 
                         {/* Petunjuk / Legenda Kalender */}
-                        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-                            <span className="font-semibold text-slate-700">Keterangan:</span>
-                            <div className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>
-                                <span>Tanggal Terpilih</span>
+                        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col gap-2.5 text-xs text-slate-500">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <span className="font-semibold text-slate-700">Keterangan:</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>
+                                    <span>Tanggal Terpilih</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-3 h-3 rounded-full bg-slate-200 border border-slate-400 inline-block"></span>
+                                    <span className="font-medium text-slate-700">Sudah Terisi (Nonaktif)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-3 h-3 rounded-full bg-slate-50 border border-slate-200 inline-block opacity-60"></span>
+                                    <span>Belum Memenuhi H-Min</span>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full bg-slate-100 border border-blue-300 inline-block"></span>
-                                <span>Hari Ini</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full bg-slate-200 border border-slate-400 inline-block"></span>
-                                <span className="font-medium text-slate-700">Sudah Terisi (Nonaktif)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full bg-slate-50 border border-slate-200 inline-block opacity-60"></span>
-                                <span>Masa Lalu</span>
+                            <div className="pt-2 border-t border-slate-100 text-[11px] text-blue-600 font-medium">
+                                * Batas pemesanan untuk {category === "wedding" ? "Wedding (Minimal H-60)" : category === "seminar" ? "Seminar (Minimal H-30)" : "Birthday (Minimal H-14)"}. Tanggal sebelum batas waktu otomatis dinonaktifkan di kalender.
                             </div>
                         </div>
                     </div>
@@ -122,6 +148,8 @@ export default function ClientDashboard() {
                     <div className="lg:col-span-5 flex flex-col gap-6">
                         <BookingForm
                             selectedDate={selectedDate}
+                            category={category}
+                            onCategoryChange={handleCategoryChange}
                             onBookingSuccess={handleBookingSuccess}
                         />
                     </div>
