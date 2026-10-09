@@ -21,7 +21,14 @@ class EventFactory extends Factory
         return [
             'client_id' => User::factory()->client(),
             'event_name' => fake()->sentence(3),
-            'event_date' => fake()->unique()->dateTimeBetween('+1 week', '+1 year')->format('Y-m-d'),
+            'category' => fake()->randomElement(['wedding', 'seminar', 'birthday']),
+            'guest_count' => fake()->numberBetween(50, 500),
+            'budget' => fake()->randomFloat(2, 10000000, 100000000),
+            'has_own_venue' => false,
+            'venue' => null,
+            'event_date' => fake()->unique()->dateTimeBetween('+3 months', '+1 year')->format('Y-m-d'),
+            'is_multi_day' => false,
+            'end_date' => null,
             'kanban_status' => 'request',
         ];
     }
