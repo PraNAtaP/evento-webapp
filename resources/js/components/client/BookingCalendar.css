@@ -122,3 +122,36 @@
   color: #64748b !important;
 }
 
+/* Range Selection Styling */
+.evento-calendar-wrapper .react-calendar__tile--range {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-radius: 0 !important;
+}
+
+.evento-calendar-wrapper .react-calendar__tile--rangeStart {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-top-left-radius: 0.5rem !important;
+  border-bottom-left-radius: 0.5rem !important;
+  font-weight: 700 !important;
+}
+
+.evento-calendar-wrapper .react-calendar__tile--rangeEnd {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-top-right-radius: 0.5rem !important;
+  border-bottom-right-radius: 0.5rem !important;
+  font-weight: 700 !important;
+}
+
+.evento-calendar-wrapper .react-calendar__tile--rangeBothEnds {
+  border-radius: 0.5rem !important;
+}
+
+.evento-calendar-wrapper .react-calendar__tile--hover {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+

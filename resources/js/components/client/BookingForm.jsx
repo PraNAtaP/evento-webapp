@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { checkRangeOverlap, formatDateToYMD } from "./BookingCalendar";
 
 /**
  * Komponen Form Pemesanan Acara untuk Klien.
  * Menyediakan form input nama acara, kategori acara, jumlah tamu, anggaran,
- * kepemilikan venue, dan opsi multi-day.
+ * kepemilikan venue, serta rentang tanggal multi-hari terintegrasi kalender.
  *
  * @param {Object} props
- * @param {Date} props.selectedDate - Tanggal yang sedang dipilih dari kalender
+ * @param {Date|Array<Date>} props.selectedDate - Tanggal tunggal atau rentang [startDate, endDate]
+ * @param {boolean} [props.isMultiDay] - Status mode multi-day
+ * @param {function(boolean):void} [props.onMultiDayChange] - Callback saat mode multi-day berubah
+ * @param {Array<string>} [props.bookedDates] - Daftar tanggal terisi untuk validasi overlap
  * @param {function():void} [props.onBookingSuccess] - Callback saat booking berhasil dibuat
- * @param {string} [props.category] - Kategori yang sedang dipilih (opsional controlled)
+ * @param {string} [props.category] - Kategori terpilih (wedding, seminar, birthday)
  * @param {function(string):void} [props.onCategoryChange] - Callback saat kategori berubah
  */
 export default function BookingForm({
     selectedDate,
+    isMultiDay: propIsMultiDay,
+    onMultiDayChange,
+    bookedDates = [],
     onBookingSuccess,
     category: propCategory,
     onCategoryChange,
@@ -24,8 +31,9 @@ export default function BookingForm({
     const [budget, setBudget] = useState("");
     const [hasOwnVenue, setHasOwnVenue] = useState(false);
     const [venue, setVenue] = useState("");
-    const [isMultiDay, setIsMultiDay] = useState(false);
-    const [endDate, setEndDate] = useState("");
+
+    const [internalIsMultiDay, setInternalIsMultiDay] = useState(false);
+    const [customEndDate, setCustomEndDate] = useState("");
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -33,6 +41,14 @@ export default function BookingForm({
     const [successMessage, setSuccessMessage] = useState("");
 
     const category = propCategory !== undefined ? propCategory : internalCategory;
+    const isMultiDay = propIsMultiDay !== undefined ? propIsMultiDay : internalIsMultiDay;
+
+    // Menentukan startDate dan endDate dari selectedDate
+    const startDate = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate;
+    const calendarEndDate = Array.isArray(selectedDate) && selectedDate[1] ? selectedDate[1] : null;
+
+    // Effective end date (bisa dari kalender range atau manual input date)
+    const effectiveEndDateStr = customEndDate || (calendarEndDate ? formatDateToYMD(calendarEndDate) : "");
 
     const handleCategoryChange = (newCategory) => {
         if (propCategory === undefined) {
@@ -42,6 +58,25 @@ export default function BookingForm({
             onCategoryChange(newCategory);
         }
     };
+
+    const handleMultiDayToggle = (checked) => {
+        if (propIsMultiDay === undefined) {
+            setInternalIsMultiDay(checked);
+        }
+        if (onMultiDayChange) {
+            onMultiDayChange(checked);
+        }
+        if (!checked) {
+            setCustomEndDate("");
+        }
+    };
+
+    // Sinkronkan customEndDate jika calendarEndDate berubah dari kalender
+    useEffect(() => {
+        if (calendarEndDate) {
+            setCustomEndDate(formatDateToYMD(calendarEndDate));
+        }
+    }, [calendarEndDate]);
 
     // Flash message auto-dismiss setelah 5 detik
     useEffect(() => {
@@ -54,15 +89,6 @@ export default function BookingForm({
 
         return () => clearTimeout(timer);
     }, [successMessage, errorMessage]);
-
-    // Helper mengubah objek Date ke format YYYY-MM-DD lokal
-    const formatDateToYMD = (date) => {
-        if (!date) return "";
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    };
 
     const formatReadableDate = (date) => {
         if (!date) return "-";
@@ -80,9 +106,9 @@ export default function BookingForm({
         setFieldErrors({});
         setSuccessMessage("");
 
-        const formattedDate = formatDateToYMD(selectedDate);
+        const formattedStartDate = formatDateToYMD(startDate);
 
-        // Validasi cepat di sisi klien sebelum request
+        // Validasi cepat di sisi klien
         const errors = {};
         if (!eventName.trim()) {
             errors.event_name = ["Nama acara wajib diisi."];
@@ -99,17 +125,25 @@ export default function BookingForm({
         if (hasOwnVenue && !venue.trim()) {
             errors.venue = ["Nama gedung atau alamat lokasi acara wajib diisi jika sudah memiliki lokasi sendiri."];
         }
-        if (isMultiDay && !endDate) {
-            errors.end_date = ["Tanggal selesai acara wajib diisi untuk acara multi-hari."];
-        }
-        if (!formattedDate) {
+
+        if (!formattedStartDate) {
             setErrorMessage("Silakan pilih tanggal acara terlebih dahulu pada kalender.");
             return;
         }
 
+        if (isMultiDay) {
+            if (!effectiveEndDateStr) {
+                errors.end_date = ["Tanggal selesai acara wajib ditentukan untuk acara multi-hari."];
+            } else if (new Date(effectiveEndDateStr) < new Date(formattedStartDate)) {
+                errors.end_date = ["Tanggal selesai acara tidak boleh lebih awal dari tanggal mulai."];
+            } else if (checkRangeOverlap(startDate, new Date(effectiveEndDateStr), bookedDates)) {
+                errors.end_date = ["Rentang tanggal yang dipilih melewati tanggal yang sudah terisi."];
+            }
+        }
+
         if (Object.keys(errors).length > 0) {
             setFieldErrors(errors);
-            setErrorMessage("Silakan periksa kembali data formulir yang belum lengkap.");
+            setErrorMessage("Silakan periksa kembali data formulir yang belum sesuai.");
             return;
         }
 
@@ -123,9 +157,9 @@ export default function BookingForm({
                 budget: parseFloat(budget),
                 has_own_venue: Boolean(hasOwnVenue),
                 venue: hasOwnVenue ? venue.trim() : null,
-                event_date: formattedDate,
+                event_date: formattedStartDate,
                 is_multi_day: Boolean(isMultiDay),
-                end_date: isMultiDay && endDate ? endDate : null,
+                end_date: isMultiDay && effectiveEndDateStr ? effectiveEndDateStr : null,
             };
 
             const response = await api.post("/bookings", payload);
@@ -140,8 +174,7 @@ export default function BookingForm({
             setBudget("");
             setHasOwnVenue(false);
             setVenue("");
-            setIsMultiDay(false);
-            setEndDate("");
+            setCustomEndDate("");
 
             if (onBookingSuccess) {
                 onBookingSuccess(response.data?.event);
@@ -150,7 +183,6 @@ export default function BookingForm({
             if (error.response) {
                 const { status, data } = error.response;
                 if (status === 422) {
-                    // Validasi backend gagal (misal H-min tidak terpenuhi atau tanggal sudah terisi)
                     setErrorMessage(data.message || "Validasi gagal. Silakan periksa kembali data Anda.");
                     if (data.errors) {
                         setFieldErrors(data.errors);
@@ -178,7 +210,7 @@ export default function BookingForm({
                     Buat Jadwal Acara Baru
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                    Lengkapi detail acara dan pastikan tanggal pemesanan memenuhi ketentuan batas waktu.
+                    Lengkapi detail acara dan pastikan rentang tanggal tidak bertabrakan dengan jadwal yang sudah ada.
                 </p>
             </div>
 
@@ -253,11 +285,6 @@ export default function BookingForm({
                             {fieldErrors.category[0]}
                         </p>
                     )}
-                    <p className="text-[11px] text-slate-400 mt-1">
-                        {category === "wedding" && "Pemesanan acara pernikahan memerlukan persiapan minimal 60 hari."}
-                        {category === "seminar" && "Pemesanan acara seminar memerlukan persiapan minimal 30 hari."}
-                        {category === "birthday" && "Pemesanan acara ulang tahun memerlukan persiapan minimal 14 hari."}
-                    </p>
                 </div>
 
                 {/* 2. Nama Acara */}
@@ -287,87 +314,89 @@ export default function BookingForm({
                     )}
                 </div>
 
-                {/* 3. Tanggal Acara (Mulai) dari Kalender */}
-                <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                        Tanggal Acara {isMultiDay ? "(Tanggal Mulai)" : ""} <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative">
-                        <input
-                            type="text"
-                            readOnly
-                            value={formatReadableDate(selectedDate)}
-                            className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none cursor-default"
-                        />
-                        <span className="absolute right-3.5 top-3 text-slate-400 pointer-events-none">
-                            <svg
-                                width="14"
-                                height="14"
-                                className="w-3.5 h-3.5 text-slate-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                            >
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                <line x1="16" y1="2" x2="16" y2="6" />
-                                <line x1="8" y1="2" x2="8" y2="6" />
-                                <line x1="3" y1="10" x2="21" y2="10" />
-                            </svg>
-                        </span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                        Pilih tanggal langsung dengan mengklik tanggal di kalender sebelah kiri.
-                    </p>
-                </div>
-
-                {/* Opsi Multi-Day */}
+                {/* 3. Checkbox Acara Multi-Hari */}
                 <div className="pt-1">
                     <label className="inline-flex items-center gap-2 cursor-pointer select-none">
                         <input
                             type="checkbox"
                             checked={isMultiDay}
-                            onChange={(e) => setIsMultiDay(e.target.checked)}
+                            onChange={(e) => handleMultiDayToggle(e.target.checked)}
                             disabled={isSubmitting}
                             className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
                         />
-                        <span className="text-xs font-medium text-slate-700">
-                            Acara berlangsung lebih dari 1 hari (Multi-day)
+                        <span className="text-xs font-semibold text-slate-800">
+                            Acara lebih dari 1 hari (Rentang Hari / Multi-day)
                         </span>
                     </label>
+                    <p className="text-[11px] text-slate-400 ml-6 mt-0.5">
+                        Centang opsi ini untuk memilih tanggal mulai dan selesai secara langsung di kalender.
+                    </p>
                 </div>
 
-                {/* Tanggal Selesai (Jika Multi-Day) */}
-                {isMultiDay && (
-                    <div className="animate-fadeIn">
-                        <label
-                            htmlFor="endDate"
-                            className="block text-xs font-semibold text-slate-700 mb-1.5"
-                        >
-                            Tanggal Selesai Acara <span className="text-rose-500">*</span>
+                {/* 4. Tampilan Tanggal Acara */}
+                <div className={isMultiDay ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : ""}>
+                    {/* Tanggal Mulai */}
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                            {isMultiDay ? "Tanggal Mulai" : "Tanggal Acara"} <span className="text-rose-500">*</span>
                         </label>
-                        <input
-                            id="endDate"
-                            type="date"
-                            min={formatDateToYMD(selectedDate) || undefined}
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            disabled={isSubmitting}
-                            className={`w-full px-3.5 py-2.5 bg-white border ${
-                                fieldErrors.end_date ? "border-rose-400 ring-1 ring-rose-200" : "border-slate-300"
-                            } rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
-                        />
-                        {fieldErrors.end_date && (
-                            <p className="text-[11px] text-rose-600 mt-1">
-                                {fieldErrors.end_date[0]}
-                            </p>
-                        )}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                readOnly
+                                value={formatReadableDate(startDate)}
+                                className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none cursor-default"
+                            />
+                            <span className="absolute right-3.5 top-3 text-slate-400 pointer-events-none">
+                                <svg
+                                    width="14"
+                                    height="14"
+                                    className="w-3.5 h-3.5 text-slate-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                            </span>
+                        </div>
                     </div>
-                )}
 
-                {/* Grid 2 Kolom: Jumlah Tamu & Anggaran */}
+                    {/* Tanggal Selesai (Jika Multi-Day) */}
+                    {isMultiDay && (
+                        <div className="animate-fadeIn">
+                            <label
+                                htmlFor="endDateInput"
+                                className="block text-xs font-semibold text-slate-700 mb-1.5"
+                            >
+                                Tanggal Selesai <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                                id="endDateInput"
+                                type="date"
+                                min={formatDateToYMD(startDate) || undefined}
+                                value={effectiveEndDateStr}
+                                onChange={(e) => setCustomEndDate(e.target.value)}
+                                disabled={isSubmitting}
+                                className={`w-full px-3.5 py-2.5 bg-white border ${
+                                    fieldErrors.end_date ? "border-rose-400 ring-1 ring-rose-200" : "border-slate-300"
+                                } rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
+                            />
+                            {fieldErrors.end_date && (
+                                <p className="text-[11px] text-rose-600 mt-1">
+                                    {fieldErrors.end_date[0]}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* 5. Estimasi Jumlah Tamu & Anggaran */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* 4. Estimasi Jumlah Tamu */}
                     <div>
                         <label
                             htmlFor="guestCount"
@@ -394,7 +423,6 @@ export default function BookingForm({
                         )}
                     </div>
 
-                    {/* 5. Anggaran Acara */}
                     <div>
                         <label
                             htmlFor="budget"

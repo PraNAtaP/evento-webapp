@@ -8,6 +8,7 @@ import BookingForm from "../../components/client/BookingForm";
 export default function ClientDashboard() {
     const { user, logout } = useAuth();
     const [category, setCategory] = useState("wedding");
+    const [isMultiDay, setIsMultiDay] = useState(false);
     const queryClient = useQueryClient();
 
     // Hitung tanggal minimal yang diizinkan sesuai H-min kategori
@@ -30,8 +31,22 @@ export default function ClientDashboard() {
     const handleCategoryChange = (newCat) => {
         setCategory(newCat);
         const newMinDate = getMinDateForCategory(newCat);
-        if (selectedDate < newMinDate) {
-            setSelectedDate(newMinDate);
+        const currentCheckDate = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate;
+
+        if (currentCheckDate < newMinDate) {
+            setSelectedDate(isMultiDay ? [newMinDate, newMinDate] : newMinDate);
+        }
+    };
+
+    // Handler pergantian mode multi-day (range hari)
+    const handleMultiDayToggle = (checked) => {
+        setIsMultiDay(checked);
+        if (checked) {
+            const baseDate = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate;
+            setSelectedDate([baseDate, baseDate]);
+        } else {
+            const baseDate = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate;
+            setSelectedDate(baseDate);
         }
     };
 
@@ -106,7 +121,7 @@ export default function ClientDashboard() {
                         Selamat Datang, {user?.name || "Client"}!
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
-                        Pilih jadwal dan lengkapi detail rencana acara Anda melalui formulir di bawah.
+                        Pilih jadwal dan lengkapi detail rencana acara Anda melalui kalender pintar dan formulir di bawah.
                     </p>
                 </div>
 
@@ -119,6 +134,7 @@ export default function ClientDashboard() {
                             onChange={setSelectedDate}
                             minDate={minDate}
                             bookedDates={bookedDates}
+                            selectRange={isMultiDay}
                         />
 
                         {/* Petunjuk / Legenda Kalender */}
@@ -127,7 +143,7 @@ export default function ClientDashboard() {
                                 <span className="font-semibold text-slate-700">Keterangan:</span>
                                 <div className="flex items-center gap-2">
                                     <span className="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>
-                                    <span>Tanggal Terpilih</span>
+                                    <span>{isMultiDay ? "Rentang Terpilih" : "Tanggal Terpilih"}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="w-3 h-3 rounded-full bg-slate-200 border border-slate-400 inline-block"></span>
@@ -139,7 +155,7 @@ export default function ClientDashboard() {
                                 </div>
                             </div>
                             <div className="pt-2 border-t border-slate-100 text-[11px] text-blue-600 font-medium">
-                                * Batas pemesanan untuk {category === "wedding" ? "Wedding (Minimal H-60)" : category === "seminar" ? "Seminar (Minimal H-30)" : "Birthday (Minimal H-14)"}. Tanggal sebelum batas waktu otomatis dinonaktifkan di kalender.
+                                * Batas pemesanan untuk {category === "wedding" ? "Wedding (Minimal H-60)" : category === "seminar" ? "Seminar (Minimal H-30)" : "Birthday (Minimal H-14)"}. {isMultiDay ? "Pada mode multi-hari, rentang tidak boleh melewati tanggal yang sudah terisi." : "Tanggal sebelum batas waktu otomatis dinonaktifkan."}
                             </div>
                         </div>
                     </div>
@@ -148,6 +164,9 @@ export default function ClientDashboard() {
                     <div className="lg:col-span-5 flex flex-col gap-6">
                         <BookingForm
                             selectedDate={selectedDate}
+                            isMultiDay={isMultiDay}
+                            onMultiDayChange={handleMultiDayToggle}
+                            bookedDates={bookedDates}
                             category={category}
                             onCategoryChange={handleCategoryChange}
                             onBookingSuccess={handleBookingSuccess}
