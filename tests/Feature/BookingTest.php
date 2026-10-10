@@ -75,6 +75,8 @@ class BookingTest extends TestCase
                 'budget' => 75000000,
                 'has_own_venue' => true,
                 'venue' => 'Grand Ballroom Hotel Indonesia',
+                'lat' => -7.9797,
+                'lng' => 112.6304,
                 'event_date' => $validWeddingDate,
                 'is_multi_day' => false,
             ]);
@@ -89,6 +91,8 @@ class BookingTest extends TestCase
                     'guest_count' => 300,
                     'has_own_venue' => true,
                     'venue' => 'Grand Ballroom Hotel Indonesia',
+                    'lat' => -7.9797,
+                    'lng' => 112.6304,
                     'event_date' => $validWeddingDate,
                     'is_multi_day' => false,
                     'end_date' => null,
@@ -102,6 +106,8 @@ class BookingTest extends TestCase
             'category' => 'wedding',
             'guest_count' => 300,
             'event_date' => $validWeddingDate,
+            'lat' => -7.9797,
+            'lng' => 112.6304,
             'kanban_status' => 'request',
         ]);
     }
@@ -351,5 +357,82 @@ class BookingTest extends TestCase
             'event_date' => now()->addDays(35)->format('Y-m-d'),
         ]);
         $responsePost->assertUnauthorized();
+    }
+
+    /**
+     * Memastikan titik lokasi (lat/lng) wajib diisi jika klien memiliki venue sendiri.
+     */
+    public function test_booking_with_own_venue_requires_coordinates(): void
+    {
+        $client = User::factory()->client()->create();
+
+        $response = $this->actingAs($client, 'sanctum')
+            ->postJson('/api/bookings', [
+                'event_name' => 'Seminar Venue Sendiri',
+                'category' => 'seminar',
+                'guest_count' => 100,
+                'budget' => 20000000,
+                'has_own_venue' => true,
+                'venue' => 'Aula Kampus',
+                'event_date' => now()->addDays(40)->format('Y-m-d'),
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['lat', 'lng'])
+            ->assertJsonPath('errors.lat.0', 'Pilih titik lokasi venue di peta.');
+    }
+
+    /**
+     * Memastikan koordinat dipaksa null jika lokasi dipilih oleh EO.
+     */
+    public function test_booking_without_own_venue_forces_null_coordinates(): void
+    {
+        $client = User::factory()->client()->create();
+
+        $response = $this->actingAs($client, 'sanctum')
+            ->postJson('/api/bookings', [
+                'event_name' => 'Ulang Tahun Anak',
+                'category' => 'birthday',
+                'guest_count' => 30,
+                'budget' => 5000000,
+                'has_own_venue' => false,
+                'lat' => -7.9797,
+                'lng' => 112.6304,
+                'event_date' => now()->addDays(20)->format('Y-m-d'),
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('event.lat', null)
+            ->assertJsonPath('event.lng', null);
+
+        $this->assertDatabaseHas('events', [
+            'event_name' => 'Ulang Tahun Anak',
+            'lat' => null,
+            'lng' => null,
+        ]);
+    }
+
+    /**
+     * Memastikan koordinat di luar rentang valid ditolak.
+     */
+    public function test_booking_rejects_out_of_range_coordinates(): void
+    {
+        $client = User::factory()->client()->create();
+
+        $response = $this->actingAs($client, 'sanctum')
+            ->postJson('/api/bookings', [
+                'event_name' => 'Seminar Koordinat Salah',
+                'category' => 'seminar',
+                'guest_count' => 100,
+                'budget' => 20000000,
+                'has_own_venue' => true,
+                'venue' => 'Aula Kampus',
+                'lat' => 100,
+                'lng' => 200,
+                'event_date' => now()->addDays(40)->format('Y-m-d'),
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['lat', 'lng']);
     }
 }
