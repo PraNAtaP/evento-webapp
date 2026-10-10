@@ -50,7 +50,7 @@ export const formatDateToYMD = (date) => {
 };
 
 /**
- * Helper mengubah objek Date atau string YYYY-MM-DD ke format dd-MM-yyyy lokal
+ * Helper mengubah objek Date atau string YYYY-MM-DD ke format dd/MM/yyyy lokal
  */
 export const formatDateToDMY = (date) => {
     if (!date) return "";
@@ -69,7 +69,7 @@ export const formatDateToDMY = (date) => {
     const day = String(d.getDate()).padStart(2, "0");
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
+    return `${day}/${month}/${year}`;
 };
 
 /**

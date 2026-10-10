@@ -390,7 +390,7 @@ export default function BookingForm({
                                 type="text"
                                 readOnly
                                 value={formatDateToDMY(startDate)}
-                                placeholder="dd-MM-yyyy"
+                                placeholder="dd/MM/yyyy"
                                 className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none cursor-default font-mono tracking-wide"
                             />
                             <span className="absolute right-3.5 top-3 text-slate-400 pointer-events-none">
@@ -430,7 +430,7 @@ export default function BookingForm({
                                     type="text"
                                     readOnly
                                     value={effectiveEndDateStr ? formatDateToDMY(effectiveEndDateStr) : ""}
-                                    placeholder="dd-MM-yyyy"
+                                    placeholder="dd/MM/yyyy"
                                     className={`w-full pl-3.5 pr-10 py-2.5 bg-white border ${
                                         fieldErrors.end_date ? "border-rose-400 ring-1 ring-rose-200" : "border-slate-300"
                                     } rounded-xl text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer font-mono tracking-wide`}
