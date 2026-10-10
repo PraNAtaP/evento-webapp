@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
-import { checkRangeOverlap, formatDateToYMD } from "./BookingCalendar";
+import { checkRangeOverlap, formatDateToDMY, formatDateToYMD } from "./BookingCalendar";
 
 /**
  * Komponen Form Pemesanan Acara untuk Klien.
@@ -9,6 +9,7 @@ import { checkRangeOverlap, formatDateToYMD } from "./BookingCalendar";
  *
  * @param {Object} props
  * @param {Date|Array<Date>} props.selectedDate - Tanggal tunggal atau rentang [startDate, endDate]
+ * @param {function(Date|Array<Date>):void} [props.onDateChange] - Callback saat tanggal diubah via form
  * @param {boolean} [props.isMultiDay] - Status mode multi-day
  * @param {function(boolean):void} [props.onMultiDayChange] - Callback saat mode multi-day berubah
  * @param {Array<string>} [props.bookedDates] - Daftar tanggal terisi untuk validasi overlap
@@ -18,6 +19,7 @@ import { checkRangeOverlap, formatDateToYMD } from "./BookingCalendar";
  */
 export default function BookingForm({
     selectedDate,
+    onDateChange,
     isMultiDay: propIsMultiDay,
     onMultiDayChange,
     bookedDates = [],
@@ -68,6 +70,49 @@ export default function BookingForm({
         }
         if (!checked) {
             setCustomEndDate("");
+        }
+    };
+
+    // Handler sinkronisasi dua arah saat user mengubah tanggal selesai via form date picker
+    const handleEndDateChange = (newEndDateStr) => {
+        setCustomEndDate(newEndDateStr);
+
+        if (!newEndDateStr) return;
+
+        const parts = newEndDateStr.split("-");
+        if (parts.length !== 3) return;
+        const [y, m, d] = parts.map(Number);
+        const newEnd = new Date(y, m - 1, d);
+        newEnd.setHours(0, 0, 0, 0);
+
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+
+        if (newEnd < start) {
+            setFieldErrors((prev) => ({
+                ...prev,
+                end_date: ["Tanggal selesai acara tidak boleh lebih awal dari tanggal mulai."],
+            }));
+            return;
+        }
+
+        if (checkRangeOverlap(start, newEnd, bookedDates)) {
+            setFieldErrors((prev) => ({
+                ...prev,
+                end_date: ["Rentang tanggal yang dipilih melewati tanggal yang sudah terisi."],
+            }));
+            return;
+        }
+
+        setFieldErrors((prev) => {
+            const updated = { ...prev };
+            delete updated.end_date;
+            return updated;
+        });
+
+        // Sinkronkan ke kalender
+        if (onDateChange) {
+            onDateChange([start, newEnd]);
         }
     };
 
@@ -333,7 +378,7 @@ export default function BookingForm({
                     </p>
                 </div>
 
-                {/* 4. Tampilan Tanggal Acara */}
+                {/* 4. Tampilan Tanggal Acara (Format Seragam dd-MM-yyyy) */}
                 <div className={isMultiDay ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : ""}>
                     {/* Tanggal Mulai */}
                     <div>
@@ -344,8 +389,9 @@ export default function BookingForm({
                             <input
                                 type="text"
                                 readOnly
-                                value={formatReadableDate(startDate)}
-                                className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none cursor-default"
+                                value={formatDateToDMY(startDate)}
+                                placeholder="dd-MM-yyyy"
+                                className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none cursor-default font-mono tracking-wide"
                             />
                             <span className="absolute right-3.5 top-3 text-slate-400 pointer-events-none">
                                 <svg
@@ -364,6 +410,9 @@ export default function BookingForm({
                                 </svg>
                             </span>
                         </div>
+                        <p className="text-[10px] text-slate-400 mt-1">
+                            pilih dari kalender
+                        </p>
                     </div>
 
                     {/* Tanggal Selesai (Jika Multi-Day) */}
@@ -375,17 +424,48 @@ export default function BookingForm({
                             >
                                 Tanggal Selesai <span className="text-rose-500">*</span>
                             </label>
-                            <input
-                                id="endDateInput"
-                                type="date"
-                                min={formatDateToYMD(startDate) || undefined}
-                                value={effectiveEndDateStr}
-                                onChange={(e) => setCustomEndDate(e.target.value)}
-                                disabled={isSubmitting}
-                                className={`w-full px-3.5 py-2.5 bg-white border ${
-                                    fieldErrors.end_date ? "border-rose-400 ring-1 ring-rose-200" : "border-slate-300"
-                                } rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
-                            />
+                            <div className="relative">
+                                {/* Tampilan seragam teks berformat dd-MM-yyyy */}
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={effectiveEndDateStr ? formatDateToDMY(effectiveEndDateStr) : ""}
+                                    placeholder="dd-MM-yyyy"
+                                    className={`w-full pl-3.5 pr-10 py-2.5 bg-white border ${
+                                        fieldErrors.end_date ? "border-rose-400 ring-1 ring-rose-200" : "border-slate-300"
+                                    } rounded-xl text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer font-mono tracking-wide`}
+                                />
+                                <span className="absolute right-3.5 top-3 text-slate-400 pointer-events-none">
+                                    <svg
+                                        width="14"
+                                        height="14"
+                                        className="w-3.5 h-3.5 text-slate-400"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                    >
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                        <line x1="16" y1="2" x2="16" y2="6" />
+                                        <line x1="8" y1="2" x2="8" y2="6" />
+                                        <line x1="3" y1="10" x2="21" y2="10" />
+                                    </svg>
+                                </span>
+                                {/* Native datepicker overlay untuk memicu pemilih tanggal dan sinkronisasi real-time */}
+                                <input
+                                    id="endDateInput"
+                                    type="date"
+                                    min={formatDateToYMD(startDate) || undefined}
+                                    value={effectiveEndDateStr}
+                                    onChange={(e) => handleEndDateChange(e.target.value)}
+                                    disabled={isSubmitting}
+                                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                                    title="Pilih tanggal selesai acara"
+                                />
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-1">
+                                klik untuk buka pemilih tanggal
+                            </p>
                             {fieldErrors.end_date && (
                                 <p className="text-[11px] text-rose-600 mt-1">
                                     {fieldErrors.end_date[0]}
