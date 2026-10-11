@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'budget',
     'has_own_venue',
     'venue',
+    'lat',
+    'lng',
     'event_date',
     'is_multi_day',
     'end_date',
@@ -53,6 +55,8 @@ class Event extends Model
             'has_own_venue' => 'boolean',
             'guest_count' => 'integer',
             'budget' => 'decimal:2',
+            'lat' => 'float',
+            'lng' => 'float',
         ];
     }
 
