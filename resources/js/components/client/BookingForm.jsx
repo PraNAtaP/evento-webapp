@@ -612,6 +612,7 @@ export default function BookingForm({
                                 onChange={setLocation}
                                 disabled={isSubmitting}
                                 hasError={Boolean(fieldErrors.lat || fieldErrors.lng)}
+                                searchQuery={venue}
                             />
                             {(fieldErrors.lat || fieldErrors.lng) && (
                                 <p className="text-[11px] text-rose-600 mt-1">
