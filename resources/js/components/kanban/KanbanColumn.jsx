@@ -1,33 +1,69 @@
+import { useState } from "react";
 import KanbanCard from "./KanbanCard";
 
-export default function KanbanColumn({ column, cards = [] }) {
+// Warna teks counter mengikuti warna solid judul kolom (class ditulis penuh agar terdeteksi Tailwind)
+const COUNTER_TEXT_COLORS = {
+    "bg-amber-500": "text-amber-500",
+    "bg-blue-500": "text-blue-500",
+    "bg-purple-500": "text-purple-500",
+    "bg-emerald-500": "text-emerald-500",
+};
+
+export default function KanbanColumn({ column, cards = [], onMoveCard }) {
+    const [isDragOver, setIsDragOver] = useState(false);
+
+    const handleDragOver = (e) => {
+        // preventDefault wajib agar elemen ini menjadi drop target yang valid
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (!isDragOver) {
+            setIsDragOver(true);
+        }
+    };
+
+    const handleDragLeave = (e) => {
+        // Abaikan event leave saat pointer hanya pindah ke elemen anak
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            setIsDragOver(false);
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        const cardId = e.dataTransfer.getData("text/plain");
+        if (cardId && onMoveCard) {
+            onMoveCard(cardId, column.id);
+        }
+    };
+
     return (
-        <div className="flex flex-col w-80 min-w-[320px] max-w-[360px] shrink-0 bg-slate-100/80 rounded-2xl p-3.5 border border-slate-200/90 shadow-xs">
+        <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`flex flex-col w-80 min-w-[320px] max-w-[360px] shrink-0 rounded-2xl p-3.5 border shadow-xs transition-colors ${
+                isDragOver
+                    ? "bg-blue-50 border-blue-400 ring-2 ring-blue-300"
+                    : "bg-slate-100/80 border-slate-200/90"
+            }`}
+        >
             {/* Header Kolom */}
             <div className="pb-3 border-b border-slate-200/70 mb-3">
                 <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                        {/* Dot Status */}
-                        <span
-                            className={`w-2.5 h-2.5 rounded-full ${column.dotColor || "bg-slate-400"}`}
-                        />
-                        <h3 className="font-bold text-slate-800 text-sm tracking-tight">
-                            {column.title}
-                        </h3>
-                    </div>
+                    <h3
+                        className={`font-normal text-sm tracking-tight px-3 py-1 rounded-md text-white ${column.dotColor || "bg-slate-500"}`}
+                    >
+                        {column.title}
+                    </h3>
 
                     {/* Counter Badge */}
                     <span
-                        className={`text-xs font-semibold px-2 py-0.5 rounded-full ${column.badgeColor || "bg-slate-200 text-slate-700"}`}
+                        className={`text-sm font-semibold ${COUNTER_TEXT_COLORS[column.dotColor] || "text-slate-500"}`}
                     >
                         {cards.length}
                     </span>
                 </div>
-
-                {/* Subtitle Kolom */}
-                <p className="mt-1 text-[11px] text-slate-500">
-                    {column.subtitle || "Daftar Acara"}
-                </p>
             </div>
 
             {/* List Kartu */}

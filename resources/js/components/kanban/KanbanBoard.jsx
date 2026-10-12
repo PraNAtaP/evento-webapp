@@ -4,6 +4,7 @@ import { KANBAN_COLUMNS } from "../../data/kanbanData";
 export default function KanbanBoard({
     columns = KANBAN_COLUMNS,
     cards = [],
+    onMoveCard,
 }) {
     return (
         <div className="w-full">
@@ -20,6 +21,7 @@ export default function KanbanBoard({
                                 key={column.id}
                                 column={column}
                                 cards={columnCards}
+                                onMoveCard={onMoveCard}
                             />
                         );
                     })}

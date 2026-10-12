@@ -9,9 +9,20 @@ import {
 
 export default function KanbanPage() {
     const { user, logout } = useAuth();
-    const [events] = useState(DUMMY_KANBAN_EVENTS);
+    const [events, setEvents] = useState(DUMMY_KANBAN_EVENTS);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("Semua");
+
+    // Pindahkan kartu ke kolom lain: hanya mengubah status pada state lengkap (bukan hasil filter)
+    const handleMoveCard = (cardId, newStatus) => {
+        setEvents((prevEvents) =>
+            prevEvents.map((evt) =>
+                String(evt.id) === String(cardId) && evt.status !== newStatus
+                    ? { ...evt, status: newStatus }
+                    : evt
+            )
+        );
+    };
 
     // Filter kartu berdasarkan pencarian kata kunci dan kategori acara
     const filteredEvents = events.filter((evt) => {
@@ -201,7 +212,10 @@ export default function KanbanPage() {
 
                 {/* Kanban Board Container */}
                 <div className="flex-1">
-                    <KanbanBoard cards={filteredEvents} />
+                    <KanbanBoard
+                        cards={filteredEvents}
+                        onMoveCard={handleMoveCard}
+                    />
                 </div>
             </main>
         </div>
