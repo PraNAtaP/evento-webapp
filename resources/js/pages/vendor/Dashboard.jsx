@@ -5,30 +5,30 @@ export default function Dashboard() {
     const { user } = useAuth();
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8">
-            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm mb-6">
+        <div className="max-w-6xl mx-auto space-y-6">
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E8E2D7] shadow-xs">
                 <div>
-                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase">
+                    <span className="text-[11px] font-bold text-[#34402A] bg-[#CFD8C4] px-3 py-0.5 rounded-full border border-[#B8C4AB] uppercase inline-block mb-1.5">
                         Modul Vendor
                     </span>
-                    <h1 className="text-2xl font-bold text-gray-900 mt-2">Dashboard Mitra Vendor</h1>
-                    <p className="text-sm text-gray-500">
-                        Login sebagai Vendor: <span className="font-semibold">{user?.name}</span>. Kelola paket layanan dan tawaran pesanan acara.
+                    <h1 className="text-xl font-extrabold text-[#2F3931] tracking-tight">Dashboard Mitra Vendor</h1>
+                    <p className="text-xs text-[#738075] mt-0.5">
+                        Login sebagai Vendor: <span className="font-semibold text-[#2F3931]">{user?.name}</span>. Kelola paket layanan dan tawaran pesanan acara.
                     </p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                    <h2 className="text-base font-bold text-gray-900 mb-4">Tawaran Pesanan Masuk</h2>
-                    <div className="p-8 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl text-sm">
+                <div className="bg-white rounded-2xl p-6 border border-[#E8E2D7] shadow-xs">
+                    <h2 className="text-sm font-bold text-[#2F3931] mb-4">Tawaran Pesanan Masuk</h2>
+                    <div className="p-8 text-center text-[#738075] border-2 border-dashed border-[#E8E2D7] rounded-xl text-xs bg-[#FAF6F0]/40">
                         Belum ada tawaran pesanan baru dari EO.
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                    <h2 className="text-base font-bold text-gray-900 mb-4">Katalog Paket Layanan</h2>
-                    <div className="p-8 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl text-sm">
+                <div className="bg-white rounded-2xl p-6 border border-[#E8E2D7] shadow-xs">
+                    <h2 className="text-sm font-bold text-[#2F3931] mb-4">Katalog Paket Layanan</h2>
+                    <div className="p-8 text-center text-[#738075] border-2 border-dashed border-[#E8E2D7] rounded-xl text-xs bg-[#FAF6F0]/40">
                         Belum ada paket yang didaftarkan.
                     </div>
                 </div>

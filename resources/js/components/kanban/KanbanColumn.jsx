@@ -2,30 +2,30 @@ import KanbanCard from "./KanbanCard";
 
 export default function KanbanColumn({ column, cards = [] }) {
     return (
-        <div className="flex flex-col w-80 min-w-[320px] max-w-[360px] shrink-0 bg-slate-100/80 rounded-2xl p-3.5 border border-slate-200/90 shadow-xs">
+        <div className="flex flex-col w-80 min-w-[320px] max-w-[360px] shrink-0 bg-[#F5EFEB]/90 rounded-2xl p-4 border border-[#E8E2D7] shadow-xs">
             {/* Header Kolom */}
-            <div className="pb-3 border-b border-slate-200/70 mb-3">
+            <div className="pb-3 border-b border-[#E8E2D7] mb-3">
                 <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                         {/* Dot Status */}
                         <span
-                            className={`w-2.5 h-2.5 rounded-full ${column.dotColor || "bg-slate-400"}`}
+                            className={`w-2.5 h-2.5 rounded-full ${column.dotColor || "bg-[#CFD8C4]"}`}
                         />
-                        <h3 className="font-bold text-slate-800 text-sm tracking-tight">
+                        <h3 className="font-bold text-[#2F3931] text-sm tracking-tight">
                             {column.title}
                         </h3>
                     </div>
 
                     {/* Counter Badge */}
                     <span
-                        className={`text-xs font-semibold px-2 py-0.5 rounded-full ${column.badgeColor || "bg-slate-200 text-slate-700"}`}
+                        className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${column.badgeColor || "bg-white text-[#2F3931] border border-[#E8E2D7]"}`}
                     >
                         {cards.length}
                     </span>
                 </div>
 
                 {/* Subtitle Kolom */}
-                <p className="mt-1 text-[11px] text-slate-500">
+                <p className="mt-1 text-[11px] text-[#738075]">
                     {column.subtitle || "Daftar Acara"}
                 </p>
             </div>
