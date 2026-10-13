@@ -26,6 +26,7 @@ class PaymentSeeder extends Seeder
 
         if (! $client) {
             $this->command->error('❌ User client@evento.test tidak ditemukan. Jalankan DatabaseSeeder dulu: php artisan db:seed');
+
             return;
         }
 

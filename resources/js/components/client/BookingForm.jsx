@@ -268,15 +268,15 @@ export default function BookingForm({
     };
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col gap-5">
+        <div className="bg-white rounded-2xl border border-[#E8E2D7] p-6 shadow-xs flex flex-col gap-5">
             <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-[#738075] uppercase tracking-wider">
                     Formulir Pemesanan
                 </span>
-                <h3 className="text-lg font-bold text-slate-900 mt-0.5">
-                    Buat Jadwal Acara Baru
+                <h3 className="text-lg font-bold text-[#2F3931] mt-0.5">
+                    Ajukan Acara Baru
                 </h3>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-[#738075] mt-1">
                     Lengkapi detail acara dan pastikan rentang tanggal tidak bertabrakan dengan jadwal yang sudah ada.
                 </p>
             </div>
@@ -623,19 +623,19 @@ export default function BookingForm({
                     </div>
                 )}
 
-                {/* Tombol Submit */}
+                {/* Tombol Submit (Warna Pastel Peach #F3C3B2 Sesuai Mockup 1) */}
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="mt-2 w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                    className="mt-2 w-full px-4 py-3 bg-[#F3C3B2] hover:bg-[#EAAFA0] disabled:bg-[#F3C3B2]/50 text-[#2F3931] font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed border border-[#E8CEB2]"
                 >
                     {isSubmitting ? (
                         <>
-                            <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            <span className="w-3.5 h-3.5 border-2 border-[#2F3931] border-t-transparent rounded-full animate-spin"></span>
                             <span>Memproses Booking...</span>
                         </>
                     ) : (
-                        <span>Ajukan Booking Acara</span>
+                        <span>Ajukan Acara</span>
                     )}
                 </button>
             </form>

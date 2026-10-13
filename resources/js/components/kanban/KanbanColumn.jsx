@@ -1,14 +1,6 @@
 import { useState } from "react";
 import KanbanCard from "./KanbanCard";
 
-// Warna teks counter mengikuti warna solid judul kolom (class ditulis penuh agar terdeteksi Tailwind)
-const COUNTER_TEXT_COLORS = {
-    "bg-amber-500": "text-amber-500",
-    "bg-blue-500": "text-blue-500",
-    "bg-purple-500": "text-purple-500",
-    "bg-emerald-500": "text-emerald-500",
-};
-
 export default function KanbanColumn({ column, cards = [], onMoveCard }) {
     const [isDragOver, setIsDragOver] = useState(false);
 
@@ -42,24 +34,35 @@ export default function KanbanColumn({ column, cards = [], onMoveCard }) {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`flex flex-col w-80 min-w-[320px] max-w-[360px] shrink-0 rounded-2xl p-3.5 border shadow-xs transition-colors ${
+            style={{
+                backgroundColor: isDragOver ? "#ffffff" : column.columnBg || "rgba(241, 245, 249, 0.8)",
+                borderColor: isDragOver ? column.headerBg || "#3b82f6" : column.columnBorder || "#e2e8f0",
+            }}
+            className={`flex flex-col w-80 min-w-[320px] max-w-[360px] shrink-0 rounded-2xl p-3.5 border shadow-xs transition-all duration-200 ${
                 isDragOver
-                    ? "bg-blue-50 border-blue-400 ring-2 ring-blue-300"
-                    : "bg-slate-100/80 border-slate-200/90"
+                    ? "ring-2 ring-offset-1 ring-slate-400/40 shadow-md"
+                    : ""
             }`}
         >
             {/* Header Kolom */}
-            <div className="pb-3 border-b border-slate-200/70 mb-3">
+            <div className="pb-3 border-b border-[#E8E2D7] mb-3">
                 <div className="flex items-center justify-between gap-2">
                     <h3
-                        className={`font-normal text-sm tracking-tight px-3 py-1 rounded-md text-white ${column.dotColor || "bg-slate-500"}`}
+                        style={{
+                            backgroundColor: column.headerBg || column.color || "#64748b",
+                            color: column.headerText || "#ffffff",
+                        }}
+                        className="font-bold text-xs tracking-tight px-3 py-1 rounded-lg shadow-2xs"
                     >
                         {column.title}
                     </h3>
 
                     {/* Counter Badge */}
                     <span
-                        className={`text-sm font-semibold ${COUNTER_TEXT_COLORS[column.dotColor] || "text-slate-500"}`}
+                        style={{
+                            color: column.counterColor || "#475569",
+                        }}
+                        className="text-sm font-extrabold px-1"
                     >
                         {cards.length}
                     </span>

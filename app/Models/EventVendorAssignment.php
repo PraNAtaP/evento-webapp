@@ -18,6 +18,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class EventVendorAssignment extends Model
 {
     /**
+     * Bootstrap the model and its traits.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (EventVendorAssignment $assignment) {
+            if ($assignment->locked_price === null && $assignment->package_id) {
+                $package = $assignment->package ?? VendorPackage::find($assignment->package_id);
+                if ($package) {
+                    $assignment->locked_price = $package->price;
+                }
+            }
+        });
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

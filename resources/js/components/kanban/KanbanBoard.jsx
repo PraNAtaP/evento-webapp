@@ -13,7 +13,7 @@ export default function KanbanBoard({
                 <div className="flex gap-5 items-start min-w-max">
                     {columns.map((column) => {
                         const columnCards = cards.filter(
-                            (card) => card.status === column.id
+                            (card) => (card.kanban_status ?? card.status) === column.id
                         );
 
                         return (

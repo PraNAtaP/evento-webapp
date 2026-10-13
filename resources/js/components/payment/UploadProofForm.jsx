@@ -53,47 +53,52 @@
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-md p-6 max-w-md w-full">
-            <h2 className="text-lg font-semibold mb-4">Unggah Bukti Transfer</h2>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full border border-[#E8E2D7] shadow-xl text-[#2F3931]">
+                <h2 className="text-lg font-extrabold text-[#2F3931] mb-1">Unggah Bukti Transfer</h2>
+                <p className="text-xs text-[#738075] mb-4">Pastikan gambar bukti transfer struk / m-banking terbaca jelas.</p>
 
-            <form onSubmit={handleSubmit}>
-            <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={handleFileChange}
-                className="block w-full text-sm border rounded-md p-2"
-            />
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={handleFileChange}
+                        className="block w-full text-xs border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl p-2.5 text-[#2F3931] file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#DAEBE3] file:text-[#2C483D] cursor-pointer"
+                    />
 
-            {preview && (
-                <img
-                src={preview}
-                alt="Preview"
-                className="mt-3 max-h-48 rounded-md mx-auto"
-                />
-            )}
+                    {preview && (
+                        <img
+                            src={preview}
+                            alt="Preview Bukti Transfer"
+                            className="mt-3 max-h-48 rounded-xl mx-auto border border-[#E8E2D7] shadow-2xs object-contain"
+                        />
+                    )}
 
-            {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+                    {error && (
+                        <div className="mt-3 p-2.5 bg-[#F3C3B2]/30 border border-[#F3C3B2] text-[#6B3222] rounded-xl text-xs font-medium">
+                            {error}
+                        </div>
+                    )}
 
-            <div className="flex justify-end gap-2 mt-4">
-                <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 rounded-md text-sm border"
-                disabled={loading}
-                >
-                Batal
-                </button>
-                <button
-                type="submit"
-                className="bg-slate-900 text-white px-4 py-2 rounded-md text-sm disabled:opacity-50"
-                disabled={loading}
-                >
-                {loading ? 'Mengunggah...' : 'Unggah'}
-                </button>
+                    <div className="flex justify-end gap-2 mt-5 pt-3 border-t border-[#F0ECE1]">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 rounded-xl text-xs font-semibold border border-[#E8E2D7] text-[#738075] hover:bg-[#FAF6F0] transition cursor-pointer"
+                            disabled={loading}
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            className="bg-[#657166] hover:bg-[#556056] text-white px-5 py-2 rounded-xl text-xs font-bold border border-[#525C53] disabled:opacity-50 shadow-xs transition cursor-pointer"
+                            disabled={loading}
+                        >
+                            {loading ? 'Mengunggah...' : 'Unggah Bukti'}
+                        </button>
+                    </div>
+                </form>
             </div>
-            </form>
-        </div>
         </div>
     );
-    }
+}

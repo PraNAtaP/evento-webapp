@@ -7,4 +7,24 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Palette Tema Pastel Evento */
+    --color-pastel-blue: #99CDD8;
+    --color-pastel-mint: #DAEBE3;
+    --color-pastel-cream: #FDE8D3;
+    --color-pastel-peach: #F3C3B2;
+    --color-pastel-sage: #CFD8C4;
+    --color-pastel-moss: #657166;
+    --color-pastel-moss-hover: #556056;
+    --color-pastel-bg: #FAF6F0;
+    --color-pastel-surface: #FFFFFF;
+    --color-pastel-border: #E8E2D7;
+    --color-pastel-text: #2F3931;
+    --color-pastel-muted: #738075;
 }
+
+body {
+    background-color: var(--color-pastel-bg);
+    color: var(--color-pastel-text);
+}
+
