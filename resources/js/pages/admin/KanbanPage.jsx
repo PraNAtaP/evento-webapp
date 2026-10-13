@@ -36,24 +36,24 @@ export default function KanbanPage() {
     return (
         <div className="flex flex-col gap-6 max-w-7xl mx-auto">
             {/* Header Title */}
-            <div className="pb-2 border-b border-slate-200">
-                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-                    Papan Kanban Acara
+            <div className="pb-2 border-b border-[#E8E2D7]">
+                <h1 className="text-2xl font-extrabold text-[#2F3931] tracking-tight">
+                    Kanban Event Board
                 </h1>
-                <p className="text-xs text-slate-500 mt-1">
-                    Pantau kemajuan seluruh proyek event organizer mulai dari permintaan masuk, pembayaran DP, persiapan teknis, hingga selesai.
+                <p className="text-xs text-[#738075] mt-1">
+                    Geser kartu untuk mengubah status. Klik kartu untuk melihat detail dan validasi pembayaran.
                 </p>
             </div>
 
                 {/* Filter and Search Bar */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-[#E8E2D7] shadow-xs">
                     {/* Search Input */}
                     <div className="relative flex-1 min-w-[240px]">
                         <svg
                             width="16"
                             height="16"
                             style={{ minWidth: 16, minHeight: 16 }}
-                            className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+                            className="w-4 h-4 text-[#738075] absolute left-3 top-1/2 -translate-y-1/2"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -70,7 +70,7 @@ export default function KanbanPage() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Cari nama acara, nama klien, atau lokasi..."
-                            className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                            className="w-full pl-9 pr-3 py-2 text-xs bg-[#FAF6F0] border border-[#E8E2D7] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#CFD8C4] focus:border-[#657166] text-[#2F3931] placeholder-[#738075]/70 transition-colors"
                         />
                     </div>
 
@@ -80,10 +80,10 @@ export default function KanbanPage() {
                             <button
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
-                                className={`px-2.5 py-1 text-xs font-medium rounded-lg whitespace-nowrap transition-colors ${
+                                className={`px-3 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition-colors cursor-pointer ${
                                     selectedCategory === cat
-                                        ? "bg-blue-600 text-white shadow-xs"
-                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        ? "bg-[#657166] text-white shadow-xs"
+                                        : "bg-[#FAF6F0] text-[#556056] hover:bg-[#DAEBE3] hover:text-[#2F3931] border border-[#E8E2D7]"
                                 }`}
                             >
                                 {cat}

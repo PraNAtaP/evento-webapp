@@ -18,22 +18,22 @@ export default function KanbanCard({ card }) {
         switch (cat?.toLowerCase()) {
             case "pernikahan":
             case "wedding":
-                return "bg-rose-50 text-rose-700 border-rose-200";
+                return "bg-[#F3C3B2]/50 text-[#6B3728] border-[#F3C3B2]";
             case "gathering kantor":
             case "corporate":
-                return "bg-blue-50 text-blue-700 border-blue-200";
+                return "bg-[#99CDD8]/40 text-[#1F4B54] border-[#99CDD8]";
             case "ulang tahun":
             case "birthday":
-                return "bg-amber-50 text-amber-700 border-amber-200";
+                return "bg-[#FDE8D3] text-[#63482B] border-[#E8CEB2]";
             case "seminar":
-                return "bg-indigo-50 text-indigo-700 border-indigo-200";
+                return "bg-[#CFD8C4] text-[#33422A] border-[#B6C2AA]";
             default:
-                return "bg-slate-100 text-slate-700 border-slate-200";
+                return "bg-[#DAEBE3] text-[#2F3931] border-[#CFD8C4]";
         }
     };
 
     return (
-        <div className="bg-white rounded-xl p-4 shadow-xs border border-slate-200/80 hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col gap-3 cursor-pointer group">
+        <div className="bg-white rounded-xl p-4 shadow-xs border border-[#E8E2D7] hover:shadow-md hover:border-[#657166] transition-all duration-200 flex flex-col gap-3 cursor-pointer group">
             {/* Header Kartu: Kategori & Sisa Hari */}
             <div className="flex items-center justify-between gap-2">
                 <span
@@ -48,8 +48,8 @@ export default function KanbanCard({ card }) {
                     <span
                         className={`text-[11px] font-medium ${
                             daysLeft <= 7
-                                ? "text-rose-600 font-semibold"
-                                : "text-slate-500"
+                                ? "text-[#C05641] font-bold"
+                                : "text-[#738075]"
                         }`}
                     >
                         {daysLeft <= 0 ? "Hari Ini" : `${daysLeft} hari lagi`}
@@ -133,14 +133,14 @@ export default function KanbanCard({ card }) {
             </div>
 
             {/* Footer Kartu: Tanggal Event & Nilai Kontrak (Rupiah) */}
-            <div className="pt-2.5 mt-auto border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
+            <div className="pt-2.5 mt-auto border-t border-[#E8E2D7] flex items-center justify-between gap-2 text-xs">
                 {/* Tanggal Event */}
-                <div className="flex items-center gap-1.5 text-slate-600 font-medium">
+                <div className="flex items-center gap-1.5 text-[#556056] font-medium">
                     <svg
                         width="14"
                         height="14"
                         style={{ minWidth: 14, minHeight: 14 }}
-                        className="w-3.5 h-3.5 text-slate-400 shrink-0"
+                        className="w-3.5 h-3.5 text-[#738075] shrink-0"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -156,7 +156,7 @@ export default function KanbanCard({ card }) {
                 </div>
 
                 {/* Nilai Kontrak */}
-                <span className="text-slate-900 font-bold bg-slate-50 px-2.5 py-1 rounded-md text-[11px] border border-slate-200">
+                <span className="text-[#2F3931] font-bold bg-[#FAF6F0] px-2.5 py-1 rounded-md text-[11px] border border-[#E8E2D7]">
                     {formatRupiah(contractValue)}
                 </span>
             </div>

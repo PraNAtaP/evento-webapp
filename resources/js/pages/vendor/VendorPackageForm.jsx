@@ -181,19 +181,19 @@ export default function VendorPackageForm() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="min-h-screen bg-[#FAF6F0] py-8 px-4 text-[#2F3931]">
             <div className="max-w-4xl mx-auto">
 
-                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <div className="bg-white rounded-2xl p-6 md:p-8 border border-[#E8E2D7] shadow-xs">
                 
                 {/* Tombol Kembali */}
-                    <div className="mb-5">
+                    <div className="mb-6">
                         <button
                             type="button"
                             onClick={() => {
                                 window.location.href = "/vendor/dashboard";
                             }}
-                            className="inline-flex items-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-full transition shadow-sm"
+                            className="inline-flex items-center gap-2 bg-[#FAF6F0] hover:bg-[#F2ECE3] text-[#2F3931] font-semibold px-4 py-2 rounded-xl text-xs border border-[#E8E2D7] transition shadow-2xs cursor-pointer"
                         >
                             {/* Icon Back */}
                             <svg
@@ -202,7 +202,7 @@ export default function VendorPackageForm() {
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2.5"
-                                className="w-5 h-5"
+                                className="w-4 h-4 text-[#657166]"
                             >
                                 <path
                                     strokeLinecap="round"
@@ -216,28 +216,31 @@ export default function VendorPackageForm() {
                     </div>
 
                     {/* Header Form */}
-                    <div className="mb-5">
-                        <h1 className="text-2xl font-bold text-gray-900">
+                    <div className="mb-6">
+                        <span className="inline-block text-[11px] font-bold text-[#33422A] bg-[#CFD8C4] px-3 py-0.5 rounded-full border border-[#B6C2AA] mb-1.5">
+                            KATALOG VENDOR
+                        </span>
+                        <h1 className="text-xl font-extrabold text-[#2F3931] tracking-tight">
                             {isEdit
                                 ? "Edit Paket Jasa"
                                 : "Tambah Paket Jasa"}
                         </h1>
 
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-xs text-[#738075] mt-1">
                             Isi informasi paket jasa yang ingin
-                            ditawarkan.
+                            ditawarkan kepada klien dan EO.
                         </p>
                     </div>
 
                     {/* Form */}
                     <form
                         onSubmit={handleSubmit}
-                        className="space-y-4"
+                        className="space-y-5"
                     >
 
                         {/* Nama Paket */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
                                 Nama Paket
                             </label>
 
@@ -247,14 +250,14 @@ export default function VendorPackageForm() {
                                 value={form.package_name}
                                 onChange={handleChange}
                                 required
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/40 rounded-xl px-3.5 py-2.5 text-sm text-[#2F3931] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition"
                                 placeholder="Contoh: Paket Dekorasi Pernikahan"
                             />
                         </div>
 
                         {/* Deskripsi */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
                                 Deskripsi
                             </label>
 
@@ -264,19 +267,19 @@ export default function VendorPackageForm() {
                                 onChange={handleChange}
                                 required
                                 rows="3"
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                                className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/40 rounded-xl px-3.5 py-2.5 text-sm text-[#2F3931] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] resize-none transition"
                                 placeholder="Deskripsi paket jasa"
                             />
                         </div>
 
                         {/* Harga */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
                                 Harga
                             </label>
 
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#738075]">
                                     Rp
                                 </span>
 
@@ -287,7 +290,7 @@ export default function VendorPackageForm() {
                                     onChange={handleChange}
                                     required
                                     min="0"
-                                    className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/40 rounded-xl pl-10 pr-3.5 py-2.5 text-sm text-[#2F3931] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition font-medium"
                                     placeholder="5000000"
                                 />
                             </div>
@@ -295,14 +298,14 @@ export default function VendorPackageForm() {
 
                         {/* Foto Paket */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
                                 Foto Paket
                             </label>
 
                             <div className="flex items-center gap-2">
 
                                 {/* Nama file */}
-                                <div className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-500 min-h-[42px] flex items-center">
+                                <div className="flex-1 border border-[#E8E2D7] bg-[#FAF6F0]/40 rounded-xl px-3.5 py-2.5 text-xs text-[#738075] min-h-[42px] flex items-center">
                                     {form.image ||
                                     form.images.length > 0
                                         ? [
@@ -319,7 +322,7 @@ export default function VendorPackageForm() {
                                 </div>
 
                                 {/* Tombol pilih foto */}
-                                <label className="border border-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 cursor-pointer min-h-[42px] flex items-center">
+                                <label className="border border-[#E8E2D7] bg-[#DAEBE3] hover:bg-[#cbe0d7] text-[#2F3931] rounded-xl px-4 py-2.5 text-xs font-bold cursor-pointer min-h-[42px] flex items-center transition shadow-2xs">
                                     Pilih Foto
 
                                     <input
@@ -353,8 +356,8 @@ export default function VendorPackageForm() {
                                 </label>
                             </div>
 
-                            <p className="text-xs text-gray-400 mt-1">
-                                Maksimal 2 MB. Format gambar.
+                            <p className="text-[11px] text-[#738075] mt-1">
+                                Maksimal 2 MB. Format gambar (JPG, PNG).
                             </p>
 
                             {/* Foto lama saat edit */}
@@ -362,7 +365,7 @@ export default function VendorPackageForm() {
                                 existingImages.length >
                                     0 && (
                                     <div className="mt-4">
-                                        <p className="text-sm font-medium text-gray-700 mb-2">
+                                        <p className="text-xs font-bold text-[#2F3931] mb-2">
                                             Foto Saat Ini
                                         </p>
 
@@ -385,27 +388,25 @@ export default function VendorPackageForm() {
                                                                     image.image_url
                                                                 )
                                                             }
-                                                            className="w-24 h-24 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition"
+                                                            className="w-20 h-20 object-cover rounded-xl border border-[#E8E2D7] cursor-pointer hover:opacity-85 transition shadow-2xs"
                                                         />
                                                     </div>
                                                 )
                                             )}
                                         </div>
 
-                                        <p className="text-xs text-gray-400 mt-2">
-                                            Foto di atas adalah
-                                            foto yang saat ini
-                                            tersimpan.
+                                        <p className="text-[11px] text-[#738075] mt-2">
+                                            Klik foto untuk melihat ukuran penuh.
                                         </p>
                                     </div>
                                 )}
                         </div>
 
                         {/* Tombol Simpan */}
-                        <div className="pt-2">
+                        <div className="pt-3">
                             <button
                                 type="submit"
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition"
+                                className="bg-[#F3C3B2] hover:bg-[#ebb7a5] text-[#55271C] text-xs font-bold px-6 py-2.5 rounded-xl border border-[#E5B5A4] transition shadow-xs cursor-pointer"
                             >
                                 {isEdit
                                     ? "Update Paket"

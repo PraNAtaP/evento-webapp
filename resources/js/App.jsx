@@ -19,15 +19,9 @@ function RootRedirect() {
 
     if (isLoading) {
         return (
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    minHeight: "100vh",
-                }}
-            >
-                <p>Memuat...</p>
+            <div className="flex flex-col justify-center items-center min-h-screen bg-[#FAF6F0]">
+                <div className="w-8 h-8 border-3 border-[#657166] border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p className="text-xs text-[#738075]">Memuat sesi EVENTO...</p>
             </div>
         );
     }

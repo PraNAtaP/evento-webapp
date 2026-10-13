@@ -273,14 +273,14 @@ export default function BookingCalendar({
 
     return (
         <div className="evento-calendar-wrapper flex flex-col gap-4">
-            <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs">
+            <div className="bg-white rounded-2xl border border-[#E8E2D7] p-4 sm:p-6 shadow-xs">
                 {/* Header Kalender & Badge Batas Waktu Kategori */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 pb-3 border-b border-[#E8E2D7]">
                     <div>
-                        <h3 className="text-base font-bold text-slate-800">
+                        <h3 className="text-base font-bold text-[#2F3931]">
                             Kalender Pemesanan Acara
                         </h3>
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-xs text-[#738075] mt-0.5">
                             {selectRange
                                 ? "Mode Rentang Hari: Klik tanggal mulai, lalu klik tanggal selesai acara."
                                 : "Gunakan tombol navigasi panah untuk berpindah bulan atau tahun."}
@@ -288,7 +288,7 @@ export default function BookingCalendar({
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-1 text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 rounded-full">
+                        <span className="px-3 py-1 text-[11px] font-bold bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2] rounded-full">
                             {catConfig.label}: {catConfig.badgeText}
                         </span>
                     </div>
@@ -406,28 +406,28 @@ export default function BookingCalendar({
                 </div>
 
                 {/* Preview Tanggal Terpilih */}
-                <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
-                    <span className="text-slate-500 font-medium">
+                <div className="mt-4 pt-3 border-t border-[#E8E2D7] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+                    <span className="text-[#738075] font-medium">
                         {selectRange ? "Rentang Acara Terpilih:" : "Tanggal Terpilih:"}
                     </span>
 
                     {selectRange && Array.isArray(activeDate) ? (
                         activeDate[0] && activeDate[1] && activeDate[0].getTime() !== activeDate[1].getTime() ? (
                             <div className="flex items-center gap-2">
-                                <span className="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                                <span className="font-bold text-[#2F3931] bg-[#DAEBE3] px-3.5 py-1.5 rounded-full border border-[#CFD8C4]">
                                     {formatReadableDate(activeDate[0])} — {formatReadableDate(activeDate[1])}
                                 </span>
-                                <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                                <span className="text-[11px] font-semibold text-[#63482B] bg-[#FDE8D3] px-2 py-0.5 rounded-md border border-[#E8CEB2]">
                                     {calculateDuration(activeDate[0], activeDate[1])} Hari
                                 </span>
                             </div>
                         ) : (
-                            <span className="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                            <span className="font-bold text-[#2F3931] bg-[#DAEBE3] px-3.5 py-1.5 rounded-full border border-[#CFD8C4]">
                                 {formatReadableDate(activeDate[0] || activeDate)} (Klik tanggal selesai)
                             </span>
                         )
                     ) : (
-                        <span className="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                        <span className="font-bold text-[#2F3931] bg-[#DAEBE3] px-3.5 py-1.5 rounded-full border border-[#CFD8C4]">
                             {formatReadableDate(Array.isArray(activeDate) ? activeDate[0] : activeDate)}
                         </span>
                     )}
