@@ -81,60 +81,16 @@ export default function ClientDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-            {/* Header */}
-            <header className="bg-white border-b border-slate-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <span className="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-lg flex items-center justify-center shadow-xs">
-                            E
-                        </span>
-                        <div>
-                            <span className="font-extrabold text-base tracking-tight text-slate-900 block leading-tight">
-                                EVENTO
-                            </span>
-                            <span className="text-[10px] font-semibold tracking-wider text-blue-600 uppercase">
-                                Client Portal
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center border border-blue-200">
-                                {user?.name ? user.name.charAt(0).toUpperCase() : "C"}
-                            </div>
-                            <div className="hidden sm:block text-left">
-                                <p className="text-xs font-semibold text-slate-800 leading-none">
-                                    {user?.name || "Client"}
-                                </p>
-                                <p className="text-[10px] text-slate-500 mt-0.5">
-                                    Role: Customer / Client
-                                </p>
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={logout}
-                            className="px-3 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-rose-200 cursor-pointer"
-                        >
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            {/* Main Content */}
-            <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col gap-8">
-                {/* Greeting Section */}
-                <div>
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                        Selamat Datang, {user?.name || "Client"}!
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Pilih jadwal dan lengkapi detail rencana acara Anda melalui kalender pintar dan formulir di bawah.
-                    </p>
-                </div>
+        <div className="flex flex-col gap-8 max-w-7xl mx-auto">
+            {/* Greeting Section */}
+            <div>
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                    Selamat Datang, {user?.name || "Client"}!
+                </h1>
+                <p className="text-sm text-slate-500 mt-1">
+                    Pilih jadwal dan lengkapi detail rencana acara Anda melalui kalender pintar dan formulir di bawah.
+                </p>
+            </div>
 
                 {/* Grid Konten */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -239,7 +195,6 @@ export default function ClientDashboard() {
                         />
                     </div>
                 </div>
-            </main>
         </div>
     );
 }
