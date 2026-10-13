@@ -38,14 +38,14 @@ export default function AdminDashboard() {
 
     return (
         <div className="flex flex-col gap-8 max-w-7xl mx-auto">
-            {/* Header Greeting */}
+            {/* Greeting */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h1 className="text-2xl font-black text-[#2F3931] tracking-tight">
-                        Dashboard Analitik
+                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                        Selamat Datang, {user?.name || "Admin EO"}! 👋
                     </h1>
-                    <p className="text-xs text-[#738075] mt-0.5">
-                        Ringkasan pendapatan, margin, dan jumlah acara EO Evento.
+                    <p className="text-sm text-slate-500 mt-1">
+                        Pusat kendali operasional Event Organizer (EO) Evento.
                     </p>
                 </div>
 
@@ -235,31 +235,6 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Featured Kanban Action Card */}
-            <div className="bg-[#657166] text-white rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#FDE8D3]">
-                        Workflow Operasional
-                    </span>
-                    <h3 className="text-xl font-bold mt-1 text-white">
-                        Kelola Papan Kanban Event Acara
-                    </h3>
-                    <p className="text-xs text-[#DAEBE3] mt-1 max-w-xl leading-relaxed">
-                        Pantau status acara secara terstruktur: Request, DP Paid, On Progress, hingga Selesai.
-                    </p>
-                </div>
-
-                <Link
-                    to="/admin/kanban"
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#F3C3B2] hover:bg-[#EAAFA0] text-[#2F3931] font-bold text-xs shadow-xs transition-colors whitespace-nowrap cursor-pointer border border-[#E8CEB2]"
-                >
-                    <span>Buka Papan Kanban</span>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                </Link>
             </div>
         </div>
     );

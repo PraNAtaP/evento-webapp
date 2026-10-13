@@ -1,46 +1,104 @@
 /**
- * Definisi 4 Kolom Kanban Manajemen Event Organizer (EO)
+ * Definisi 6 Kolom Tahapan Alur Kerja Kanban Manajemen Event Organizer (EO)
  */
 export const KANBAN_COLUMNS = [
     {
         id: "request",
         title: "Request",
         subtitle: "Permintaan Masuk",
-        badgeColor: "bg-[#99CDD8]/40 text-[#1F4B54] border border-[#99CDD8]",
-        dotColor: "bg-[#99CDD8]",
+        color: "#99cdd8",
+        headerBg: "#99cdd8",
+        headerText: "#184048",
+        counterColor: "#1d4c55",
+        columnBg: "rgba(153, 205, 216, 0.16)",
+        columnBorder: "#88bcc7",
+        badgeColor: "bg-[#99cdd8]/30 text-[#184048]",
+        dotColor: "bg-[#99cdd8]",
     },
     {
-        id: "dp_paid",
-        title: "DP Paid",
-        subtitle: "DP Terverifikasi",
-        badgeColor: "bg-[#F3C3B2]/50 text-[#6B3728] border border-[#F3C3B2]",
-        dotColor: "bg-[#F3C3B2]",
+        id: "drafting_quotation",
+        title: "Penyusunan Penawaran",
+        subtitle: "Penawaran EO",
+        color: "#DAEbe3",
+        headerBg: "#DAEbe3",
+        headerText: "#224436",
+        counterColor: "#295342",
+        columnBg: "rgba(218, 235, 227, 0.28)",
+        columnBorder: "#b8d9cc",
+        badgeColor: "bg-[#DAEbe3]/50 text-[#224436]",
+        dotColor: "bg-[#DAEbe3]",
+    },
+    {
+        id: "client_review",
+        title: "Review Klien",
+        subtitle: "Menunggu Review",
+        color: "#fde8d3",
+        headerBg: "#fde8d3",
+        headerText: "#5a3a1d",
+        counterColor: "#6c4522",
+        columnBg: "rgba(253, 232, 211, 0.32)",
+        columnBorder: "#ebd1b7",
+        badgeColor: "bg-[#fde8d3]/60 text-[#5a3a1d]",
+        dotColor: "bg-[#fde8d3]",
+    },
+    {
+        id: "awaiting_dp",
+        title: "Menunggu DP",
+        subtitle: "Pembayaran DP",
+        color: "#f3c3b2",
+        headerBg: "#f3c3b2",
+        headerText: "#552316",
+        counterColor: "#6a2d1d",
+        columnBg: "rgba(243, 195, 178, 0.24)",
+        columnBorder: "#e4ad9b",
+        badgeColor: "bg-[#f3c3b2]/50 text-[#552316]",
+        dotColor: "bg-[#f3c3b2]",
     },
     {
         id: "on_progress",
-        title: "On Progress",
+        title: "Persiapan",
         subtitle: "Persiapan Teknis",
-        badgeColor: "bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2]",
-        dotColor: "bg-[#FDE8D3]",
+        color: "#cfd8c4",
+        headerBg: "#cfd8c4",
+        headerText: "#2d3a28",
+        counterColor: "#394932",
+        columnBg: "rgba(207, 216, 196, 0.28)",
+        columnBorder: "#b9c4ad",
+        badgeColor: "bg-[#cfd8c4]/50 text-[#2d3a28]",
+        dotColor: "bg-[#cfd8c4]",
     },
     {
         id: "done",
         title: "Done",
         subtitle: "Selesai Diselenggarakan",
-        badgeColor: "bg-[#CFD8C4] text-[#33422A] border border-[#B6C2AA]",
-        dotColor: "bg-[#CFD8C4]",
+        color: "#657166",
+        headerBg: "#657166",
+        headerText: "#ffffff",
+        counterColor: "#4a544b",
+        columnBg: "rgba(101, 113, 102, 0.12)",
+        columnBorder: "#788579",
+        badgeColor: "bg-[#657166]/20 text-[#657166]",
+        dotColor: "bg-[#657166]",
     },
 ];
 
 /**
- * Daftar Kategori Acara dalam Bahasa Indonesia
+ * Mapping Kategori Acara dari Enum Database ('wedding', 'seminar', 'birthday')
+ */
+export const CATEGORY_LABELS = {
+    wedding: "Pernikahan",
+    seminar: "Seminar",
+    birthday: "Ulang Tahun",
+};
+
+/**
+ * Filter Kategori Acara untuk UI Tab Filter
  */
 export const EVENT_CATEGORIES = [
-    "Semua",
-    "Pernikahan",
-    "Gathering Kantor",
-    "Ulang Tahun",
-    "Seminar",
+    { value: "all", label: "Semua" },
+    { value: "wedding", label: "Pernikahan" },
+    { value: "seminar", label: "Seminar" },
+    { value: "birthday", label: "Ulang Tahun" },
 ];
 
 /**
@@ -66,25 +124,31 @@ export const formatRupiah = (amount, isShort = false) => {
 };
 
 /**
- * Menghitung badge status pembayaran berdasarkan persentase jumlahDibayar / nilaiKontrak
- * serta mendukung status khusus seperti 'menunggu_invoice' (warna netral).
+ * Helper untuk format tanggal dari format database YYYY-MM-DD ke format lokal Indonesia
  */
-export const getPaymentStatus = (nilaiKontrak = 0, jumlahDibayar = 0, customStatus = null) => {
-    // 1. Status khusus: Menunggu Invoice (Warna Netral)
-    if (customStatus === "menunggu_invoice") {
-        return {
-            label: "Menunggu Invoice",
-            percentage: 0,
-            badgeClass: "bg-slate-100 text-slate-700 border-slate-300",
-            dotColor: "bg-slate-400",
-        };
+export const formatEventDate = (dateStr) => {
+    if (!dateStr) return "-";
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr;
+        return new Intl.DateTimeFormat("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        }).format(date);
+    } catch {
+        return dateStr;
     }
+};
 
-    const safeKontrak = Number(nilaiKontrak) || 0;
-    const safeDibayar = Number(jumlahDibayar) || 0;
+/**
+ * Menghitung badge status pembayaran berdasarkan persentase paid_amount / agreed_price
+ */
+export const getPaymentStatus = (agreedPrice = 0, paidAmount = 0) => {
+    const safeAgreed = Number(agreedPrice) || 0;
+    const safePaid = Number(paidAmount) || 0;
 
-    // 2. Belum ada pembayaran sama sekali
-    if (safeDibayar <= 0) {
+    if (safePaid <= 0) {
         return {
             label: "Belum Bayar (0%)",
             percentage: 0,
@@ -93,8 +157,7 @@ export const getPaymentStatus = (nilaiKontrak = 0, jumlahDibayar = 0, customStat
         };
     }
 
-    // 3. Sudah lunas (>= 100%)
-    if (safeDibayar >= safeKontrak && safeKontrak > 0) {
+    if (safePaid >= safeAgreed && safeAgreed > 0) {
         return {
             label: "Lunas (100%)",
             percentage: 100,
@@ -103,8 +166,7 @@ export const getPaymentStatus = (nilaiKontrak = 0, jumlahDibayar = 0, customStat
         };
     }
 
-    // 4. Pembayaran sebagian (Persentase)
-    const percentage = safeKontrak > 0 ? Math.round((safeDibayar / safeKontrak) * 100) : 0;
+    const percentage = safeAgreed > 0 ? Math.round((safePaid / safeAgreed) * 100) : 0;
 
     if (percentage <= 50) {
         return {
@@ -124,20 +186,21 @@ export const getPaymentStatus = (nilaiKontrak = 0, jumlahDibayar = 0, customStat
 };
 
 /**
- * Helper untuk menghitung statistik keseluruhan (Dashboard / Summary)
+ * Helper untuk menghitung statistik keseluruhan
  */
 export const calculateKanbanSummary = (events = []) => {
     return events.reduce(
         (acc, item) => {
-            const kontrak = Number(item.nilaiKontrak ?? item.budget) || 0;
-            const dibayar = Number(item.jumlahDibayar) || 0;
+            const contract = Number(item.agreed_price ?? item.estimated_budget ?? item.budget) || 0;
+            const paid = Number(item.paid_amount ?? item.jumlahDibayar) || 0;
 
-            acc.totalNilaiKontrak += kontrak;
-            acc.totalDibayar += dibayar;
-            acc.totalSisaPembayaran += Math.max(0, kontrak - dibayar);
+            acc.totalNilaiKontrak += contract;
+            acc.totalDibayar += paid;
+            acc.totalSisaPembayaran += Math.max(0, contract - paid);
             acc.totalAcara += 1;
 
-            if (item.status === "done") {
+            const status = item.kanban_status ?? item.status;
+            if (status === "done") {
                 acc.acaraSelesai += 1;
             } else {
                 acc.acaraAktif += 1;
@@ -157,18 +220,20 @@ export const calculateKanbanSummary = (events = []) => {
 };
 
 /**
- * Helper untuk menghitung statistik per kolom (Jumlah kartu, total kontrak, total dibayar)
+ * Helper untuk menghitung statistik per kolom
  */
 export const getColumnStats = (events = [], columnId = "") => {
-    const columnCards = events.filter((card) => card.status === columnId);
+    const columnCards = events.filter(
+        (card) => (card.kanban_status ?? card.status) === columnId
+    );
 
     const totalNilaiKontrak = columnCards.reduce(
-        (sum, card) => sum + (Number(card.nilaiKontrak ?? card.budget) || 0),
+        (sum, card) => sum + (Number(card.agreed_price ?? card.estimated_budget ?? card.budget) || 0),
         0
     );
 
     const totalDibayar = columnCards.reduce(
-        (sum, card) => sum + (Number(card.jumlahDibayar) || 0),
+        (sum, card) => sum + (Number(card.paid_amount ?? card.jumlahDibayar) || 0),
         0
     );
 
@@ -182,131 +247,132 @@ export const getColumnStats = (events = [], columnId = "") => {
 };
 
 /**
- * Data Dummy 9 Acara EO Lengkap (Angka Number pada nilaiKontrak & jumlahDibayar)
+ * Data Dummy Acara EO untuk DEV / Offline Preview
  */
 export const DUMMY_KANBAN_EVENTS = [
     // 1. Kolom: Request
     {
-        id: "evt-01",
-        status: "request",
-        namaEvent: "Pernikahan Rian & Natasha",
-        namaKlien: "Rian Hidayat",
-        kategori: "Pernikahan",
-        tanggalEvent: "14 Nov 2026",
-        lokasi: "Hotel Mulia Senayan, Jakarta",
-        nilaiKontrak: 85000000,
-        jumlahDibayar: 0,
-        customStatus: null,
-        hariTersisa: 45,
-    },
-    {
-        id: "evt-02",
-        status: "request",
-        namaEvent: "Seminar AI & Digital Transformation",
-        namaKlien: "PT Fintek Digital Nusantara",
-        kategori: "Seminar",
-        tanggalEvent: "28 Okt 2026",
-        lokasi: "ICE BSD Hall 3, Tangerang",
-        nilaiKontrak: 42000000,
-        jumlahDibayar: 0,
-        customStatus: "menunggu_invoice",
-        hariTersisa: 28,
+        id: 1,
+        client_id: 1,
+        client: { id: 1, name: "Rian Hidayat", email: "rian@example.com" },
+        event_name: "Pernikahan Rian & Natasha",
+        category: "wedding",
+        guest_count: 500,
+        estimated_budget: 85000000,
+        agreed_price: null,
+        quotation_total: 0,
+        dp_percentage: 30,
+        has_own_venue: true,
+        venue: "Hotel Mulia Senayan, Jakarta",
+        event_date: "2026-11-14",
+        is_multi_day: false,
+        end_date: null,
+        kanban_status: "request",
+        paid_amount: 0,
     },
 
-    // 2. Kolom: DP Paid
+    // 2. Kolom: Drafting Quotation
     {
-        id: "evt-03",
-        status: "dp_paid",
-        namaEvent: "Pernikahan Tradisional Dimas & Sarah",
-        namaKlien: "Sarah Wijaya",
-        kategori: "Pernikahan",
-        tanggalEvent: "18 Okt 2026",
-        lokasi: "The Dharmawangsa, Jakarta Selatan",
-        nilaiKontrak: 125000000,
-        jumlahDibayar: 37500000, // 30%
-        customStatus: null,
-        hariTersisa: 18,
-    },
-    {
-        id: "evt-04",
-        status: "dp_paid",
-        namaEvent: "Ulang Tahun Sweet 17th Aurel",
-        namaKlien: "Ibu Maya Kartika",
-        kategori: "Ulang Tahun",
-        tanggalEvent: "08 Nov 2026",
-        lokasi: "Plataran Menteng, Jakarta",
-        nilaiKontrak: 32000000,
-        jumlahDibayar: 16000000, // 50%
-        customStatus: null,
-        hariTersisa: 39,
+        id: 2,
+        client_id: 2,
+        client: { id: 2, name: "PT Fintek Nusantara", email: "fintek@example.com" },
+        event_name: "Seminar AI & Digital Transformation",
+        category: "seminar",
+        guest_count: 250,
+        estimated_budget: 45000000,
+        agreed_price: null,
+        quotation_total: 42000000,
+        dp_percentage: 30,
+        has_own_venue: true,
+        venue: "ICE BSD Hall 3, Tangerang",
+        event_date: "2026-10-28",
+        is_multi_day: false,
+        end_date: null,
+        kanban_status: "drafting_quotation",
+        paid_amount: 0,
     },
 
-    // 3. Kolom: On Progress
+    // 3. Kolom: Client Review
     {
-        id: "evt-05",
-        status: "on_progress",
-        namaEvent: "Gathering Kantor Tahunan PT Nusantara",
-        namaKlien: "PT Nusantara Prima Group",
-        kategori: "Gathering Kantor",
-        tanggalEvent: "05 Okt 2026",
-        lokasi: "The Ritz-Carlton Pacific Place",
-        nilaiKontrak: 160000000,
-        jumlahDibayar: 112000000, // 70%
-        customStatus: null,
-        hariTersisa: 5,
-    },
-    {
-        id: "evt-06",
-        status: "on_progress",
-        namaEvent: "Seminar Nasional Kesehatan 2026",
-        namaKlien: "Asosiasi Medika Indonesia",
-        kategori: "Seminar",
-        tanggalEvent: "12 Okt 2026",
-        lokasi: "Jakarta Convention Center (JCC)",
-        nilaiKontrak: 65000000,
-        jumlahDibayar: 32500000, // 50%
-        customStatus: null,
-        hariTersisa: 12,
-    },
-    {
-        id: "evt-07",
-        status: "on_progress",
-        namaEvent: "Pesta Ulang Tahun Emas Ke-50 Bpk. Hendra",
-        namaKlien: "Hendra Gunawan",
-        kategori: "Ulang Tahun",
-        tanggalEvent: "24 Okt 2026",
-        lokasi: "Hotel Indonesia Kempinski, Jakarta",
-        nilaiKontrak: 48000000,
-        jumlahDibayar: 38400000, // 80%
-        customStatus: null,
-        hariTersisa: 24,
+        id: 3,
+        client_id: 3,
+        client: { id: 3, name: "Sarah Wijaya", email: "sarah@example.com" },
+        event_name: "Pernikahan Tradisional Dimas & Sarah",
+        category: "wedding",
+        guest_count: 700,
+        estimated_budget: 125000000,
+        agreed_price: null,
+        quotation_total: 125000000,
+        dp_percentage: 35,
+        has_own_venue: true,
+        venue: "The Dharmawangsa, Jakarta Selatan",
+        event_date: "2026-10-18",
+        is_multi_day: true,
+        end_date: "2026-10-19",
+        kanban_status: "client_review",
+        paid_amount: 0,
     },
 
-    // 4. Kolom: Done
+    // 4. Kolom: Awaiting DP
     {
-        id: "evt-08",
-        status: "done",
-        namaEvent: "Gathering Akbar Family Day PT Auto Global",
-        namaKlien: "PT Wahana Auto Global",
-        kategori: "Gathering Kantor",
-        tanggalEvent: "20 Sep 2026",
-        lokasi: "Taman Mini Indonesia Indah (TMII)",
-        nilaiKontrak: 210000000,
-        jumlahDibayar: 210000000, // 100%
-        customStatus: null,
-        hariTersisa: 0,
+        id: 4,
+        client_id: 4,
+        client: { id: 4, name: "Ibu Maya Kartika", email: "maya@example.com" },
+        event_name: "Sweet 17th Birthday Party Aurel",
+        category: "birthday",
+        guest_count: 120,
+        estimated_budget: 35000000,
+        agreed_price: 35000000,
+        quotation_total: 35000000,
+        dp_percentage: 30,
+        has_own_venue: false,
+        venue: "Plataran Menteng, Jakarta Pusat",
+        event_date: "2026-11-08",
+        is_multi_day: false,
+        end_date: null,
+        kanban_status: "awaiting_dp",
+        paid_amount: 0, // Unpaid
     },
+
+    // 5. Kolom: On Progress
     {
-        id: "evt-09",
-        status: "done",
-        namaEvent: "Resepsi Pernikahan Kevin & Vania",
-        namaKlien: "Kevin Ardiansyah",
-        kategori: "Pernikahan",
-        tanggalEvent: "15 Sep 2026",
-        lokasi: "Ayana Midplaza, Jakarta",
-        nilaiKontrak: 115000000,
-        jumlahDibayar: 115000000, // 100%
-        customStatus: null,
-        hariTersisa: 0,
+        id: 5,
+        client_id: 5,
+        client: { id: 5, name: "PT Nusantara Prima Group", email: "nusantara@example.com" },
+        event_name: "Seminar Akbar Strategi Bisnis 2027",
+        category: "seminar",
+        guest_count: 400,
+        estimated_budget: 60000000,
+        agreed_price: 60000000,
+        quotation_total: 60000000,
+        dp_percentage: 30,
+        has_own_venue: true,
+        venue: "The Ritz-Carlton Pacific Place, Jakarta",
+        event_date: "2026-10-25",
+        is_multi_day: false,
+        end_date: null,
+        kanban_status: "on_progress",
+        paid_amount: 18000000, // DP Lunas 30%
+    },
+
+    // 6. Kolom: Done
+    {
+        id: 6,
+        client_id: 6,
+        client: { id: 6, name: "Kevin Ardiansyah", email: "kevin@example.com" },
+        event_name: "Resepsi Pernikahan Kevin & Vania",
+        category: "wedding",
+        guest_count: 600,
+        estimated_budget: 115000000,
+        agreed_price: 115000000,
+        quotation_total: 115000000,
+        dp_percentage: 30,
+        has_own_venue: true,
+        venue: "Ayana Midplaza, Jakarta",
+        event_date: "2026-09-15",
+        is_multi_day: false,
+        end_date: null,
+        kanban_status: "done",
+        paid_amount: 115000000, // Lunas 100%
     },
 ];

@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 import BookingCalendar, { generateWhatsAppUrl } from "../../components/client/BookingCalendar";
 import BookingForm from "../../components/client/BookingForm";
+import ClientQuotationsSection from "../../components/client/ClientQuotationsSection";
 
 export default function ClientDashboard() {
     const { user, logout } = useAuth();
@@ -92,7 +93,10 @@ export default function ClientDashboard() {
                 </p>
             </div>
 
-                {/* Grid Konten */}
+                {/* Penawaran Masuk (Client Review) */}
+            <ClientQuotationsSection />
+
+            {/* Grid Konten */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     {/* Kolom Kiri: Kalender & Notice Edukatif */}
                     <div className="lg:col-span-7 flex flex-col gap-4">

@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\ClientEventController;
 use App\Http\Controllers\Api\EventSummaryController;
+use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\VendorPackageController;
 use Illuminate\Support\Facades\Route;
@@ -17,12 +19,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/event-summary', [EventSummaryController::class, 'index'])
         ->name('api.admin.event-summary');
 
+    // Modul Kanban Acara (EO)
+    Route::middleware('role:eo')->group(function () {
+        Route::get('/admin/kanban', [KanbanController::class, 'index'])
+            ->name('api.admin.kanban.index');
+        Route::patch('/admin/kanban/{event}/move', [KanbanController::class, 'move'])
+            ->name('api.admin.kanban.move');
+    });
+
     // Booking Acara (Modul Klien - Dian)
     Route::get('/bookings/booked-dates', [BookingController::class, 'bookedDates'])
         ->name('api.bookings.booked-dates');
     Route::post('/bookings', [BookingController::class, 'store'])
         ->middleware('role:client')
         ->name('api.bookings.store');
+
+    // Event & Review Penawaran (Modul Klien)
+    Route::middleware('role:client')->group(function () {
+        Route::get('/client/events', [ClientEventController::class, 'index'])
+            ->name('api.client.events.index');
+        Route::get('/client/events/{event}', [ClientEventController::class, 'show'])
+            ->name('api.client.events.show');
+        Route::post('/client/events/{event}/approve-quotation', [ClientEventController::class, 'approveQuotation'])
+            ->name('api.client.events.approve-quotation');
+        Route::post('/client/events/{event}/request-revision', [ClientEventController::class, 'requestRevision'])
+            ->name('api.client.events.request-revision');
+    });
 
     // Modul Vendor Packages (Agnes)
     Route::get('/vendor/packages', [VendorPackageController::class, 'index'])
