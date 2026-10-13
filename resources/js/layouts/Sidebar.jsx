@@ -10,53 +10,73 @@ import { useAuth } from "../context/AuthContext";
 const ROLE_MENUS = {
     eo: [
         {
-            title: "Ringkasan Event",
-            path: "/admin/dashboard",
-            badge: "Overview",
-            icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-            ),
-        },
-        {
-            title: "Kanban Workflow",
+            title: "Kanban board",
             path: "/admin/kanban",
             badge: null,
             icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                 </svg>
             ),
         },
         {
-            title: "Verifikasi Pembayaran",
+            title: "Katalog vendor",
+            path: "/vendor/dashboard",
+            badge: null,
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+            ),
+        },
+        {
+            title: "Pendaftar vendor",
             path: "/admin/payments",
             badge: null,
             icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            ),
+        },
+        {
+            title: "Pembayaran",
+            path: "/admin/payments",
+            badge: null,
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+            ),
+        },
+        {
+            title: "Dashboard analitik",
+            path: "/admin/dashboard",
+            badge: null,
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
             ),
         },
     ],
     vendor: [
         {
-            title: "Daftar Paket Jasa",
+            title: "Katalog paket",
             path: "/vendor/dashboard",
             badge: null,
             icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
             ),
         },
         {
-            title: "Tambah Paket Baru",
+            title: "Tambah paket baru",
             path: "/vendor/packages/create",
             badge: "Baru",
             icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             ),
@@ -64,22 +84,52 @@ const ROLE_MENUS = {
     ],
     client: [
         {
-            title: "Jadwal & Booking",
+            title: "Kalender booking",
             path: "/client/dashboard",
             badge: null,
             icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
             ),
         },
         {
-            title: "Tracking Pembayaran",
+            title: "Pengajuan saya",
+            path: "/client/dashboard",
+            badge: null,
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            ),
+        },
+        {
+            title: "Penawaran vendor",
+            path: "/vendor/dashboard",
+            badge: null,
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+            ),
+        },
+        {
+            title: "Pembayaran",
             path: "/client/payments",
             badge: null,
             icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+            ),
+        },
+        {
+            title: "Riwayat",
+            path: "/client/payments",
+            badge: null,
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             ),
         },
@@ -88,22 +138,16 @@ const ROLE_MENUS = {
 
 const ROLE_METADATA = {
     eo: {
-        roleLabel: "Event Organizer",
-        badgeColor: "bg-blue-100 text-blue-700 border-blue-200",
-        activeItemClass: "bg-blue-50 text-blue-700 font-semibold border-r-4 border-blue-600",
-        avatarBg: "bg-blue-600 text-white",
+        roleLabel: "EO",
+        subLabel: "Masuk sebagai EO",
     },
     vendor: {
-        roleLabel: "Vendor Partner",
-        badgeColor: "bg-emerald-100 text-emerald-700 border-emerald-200",
-        activeItemClass: "bg-emerald-50 text-emerald-700 font-semibold border-r-4 border-emerald-600",
-        avatarBg: "bg-emerald-600 text-white",
+        roleLabel: "Vendor",
+        subLabel: "Masuk sebagai Vendor",
     },
     client: {
-        roleLabel: "Customer / Klien",
-        badgeColor: "bg-sky-100 text-sky-700 border-sky-200",
-        activeItemClass: "bg-sky-50 text-sky-700 font-semibold border-r-4 border-sky-600",
-        avatarBg: "bg-sky-600 text-white",
+        roleLabel: "Klien",
+        subLabel: "Masuk sebagai Klien",
     },
 };
 
@@ -128,37 +172,33 @@ export default function Sidebar({ isOpen, onClose }) {
                 />
             )}
 
-            {/* Sidebar Container */}
+            {/* Sidebar Container: Tema Pastel Deep Slate Green #657166 */}
             <aside
-                className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+                className={`fixed top-0 bottom-0 left-0 z-50 w-60 bg-[#657166] text-[#DAEBE3] flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
                     isOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >
                 {/* Header Brand */}
-                <div className="h-16 border-b border-slate-100 px-5 flex items-center justify-between">
+                <div className="h-16 px-5 flex items-center justify-between border-b border-white/10">
                     <Link
                         to="/"
                         onClick={onClose}
-                        className="flex items-center gap-3 group"
+                        className="flex items-center gap-2.5 group"
                     >
-                        <span className="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-lg flex items-center justify-center shadow-xs group-hover:bg-blue-700 transition-colors">
+                        {/* Lingkaran Logo Coral/Peach #F3C3B2 */}
+                        <span className="w-7 h-7 rounded-full bg-[#F3C3B2] text-[#424C43] font-black text-sm flex items-center justify-center shadow-xs">
                             E
                         </span>
-                        <div>
-                            <span className="font-extrabold text-base tracking-tight text-slate-900 block leading-tight">
-                                EVENTO
-                            </span>
-                            <span className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
-                                Management Platform
-                            </span>
-                        </div>
+                        <span className="font-extrabold text-lg tracking-tight text-white block lowercase">
+                            evento
+                        </span>
                     </Link>
 
                     {/* Mobile Close Button */}
                     <button
                         type="button"
                         onClick={onClose}
-                        className="lg:hidden p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                        className="lg:hidden p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
                         title="Tutup menu"
                         aria-label="Tutup menu"
                     >
@@ -168,45 +208,31 @@ export default function Sidebar({ isOpen, onClose }) {
                     </button>
                 </div>
 
-                {/* Role Badge Indicator */}
-                <div className="px-5 py-3 bg-slate-50 border-b border-slate-100">
-                    <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-medium text-slate-500">Peran Akun:</span>
-                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${meta.badgeColor}`}>
-                            {meta.roleLabel}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Navigation Menus */}
-                <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-                    <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        Menu Navigasi
-                    </p>
-
+                {/* Navigation Menus (Pill button seperti pada mockup) */}
+                <div className="flex-1 overflow-y-auto py-5 px-3.5 space-y-1.5">
                     {menus.map((menu) => {
                         const isActive = location.pathname === menu.path;
 
                         return (
                             <Link
-                                key={menu.path}
+                                key={menu.title}
                                 to={menu.path}
                                 onClick={onClose}
-                                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all ${
+                                className={`flex items-center justify-between px-4 py-2.5 rounded-full text-xs transition-all ${
                                     isActive
-                                        ? meta.activeItemClass
-                                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium"
+                                        ? "bg-[#FDE8D3] text-[#424C43] font-bold shadow-xs"
+                                        : "text-[#DAEBE3] hover:text-white hover:bg-white/10 font-medium"
                                 }`}
                             >
-                                <div className="flex items-center gap-3">
-                                    <span className={isActive ? "text-current" : "text-slate-400"}>
+                                <div className="flex items-center gap-2.5">
+                                    <span className={isActive ? "text-[#424C43]" : "text-[#DAEBE3]/80"}>
                                         {menu.icon}
                                     </span>
-                                    <span>{menu.title}</span>
+                                    <span className="capitalize">{menu.title}</span>
                                 </div>
 
                                 {menu.badge && (
-                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-100 text-blue-700">
+                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#F3C3B2] text-[#424C43]">
                                         {menu.badge}
                                     </span>
                                 )}
@@ -215,32 +241,36 @@ export default function Sidebar({ isOpen, onClose }) {
                     })}
                 </div>
 
-                {/* User Profile Footer & Logout */}
-                <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className={`w-9 h-9 rounded-full ${meta.avatarBg} font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0`}>
-                            {userInitial}
+                {/* Bottom Card: Masuk sebagai Klien / EO / Vendor (Seperti Mockup) */}
+                <div className="p-3.5 border-t border-white/10">
+                    <div className="bg-white rounded-2xl p-3 shadow-xs text-[#2F3931]">
+                        <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#E8E2D7]">
+                            <div className="flex items-center gap-2 min-w-0">
+                                <div className="w-7 h-7 rounded-full bg-[#F3C3B2] text-[#424C43] font-bold text-xs flex items-center justify-center shrink-0">
+                                    {userInitial}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-[11px] font-bold text-[#2F3931] truncate leading-tight">
+                                        {user?.name || "Pengguna"}
+                                    </p>
+                                    <p className="text-[9px] text-[#738075] truncate">
+                                        {meta.subLabel}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-slate-800 truncate leading-tight">
-                                {user?.name || "Pengguna"}
-                            </p>
-                            <p className="text-[11px] text-slate-400 truncate">
-                                {user?.email || "user@evento.test"}
-                            </p>
-                        </div>
-                    </div>
 
-                    <button
-                        type="button"
-                        onClick={logout}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/80 border border-rose-200 rounded-xl transition-colors cursor-pointer"
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        <span>Keluar (Logout)</span>
-                    </button>
+                        <button
+                            type="button"
+                            onClick={logout}
+                            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 text-[11px] font-semibold text-[#424C43] bg-[#FDE8D3] hover:bg-[#F3C3B2] rounded-xl transition-colors cursor-pointer border border-[#E8CEB2]"
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span>Keluar</span>
+                        </button>
+                    </div>
                 </div>
             </aside>
         </>

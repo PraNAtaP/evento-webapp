@@ -6,32 +6,32 @@ import { useAuth } from "../context/AuthContext";
  */
 const ROUTE_TITLES = {
     "/admin/dashboard": {
-        title: "Ringkasan Event & Keuangan",
-        subtitle: "Pantau performa event, total pendapatan, dan status operasional",
+        title: "Dashboard Analitik",
+        subtitle: "Ringkasan pendapatan, margin, dan jumlah acara",
     },
     "/admin/kanban": {
-        title: "Kanban Workflow",
-        subtitle: "Manajemen tahapan alur kerja dan penugasan vendor acara",
+        title: "Kanban Event Board",
+        subtitle: "Geser kartu untuk mengubah status. Klik kartu untuk melihat detail.",
     },
     "/admin/payments": {
         title: "Verifikasi Pembayaran",
         subtitle: "Tinjau dan konfirmasi bukti transfer pembayaran DP dan pelunasan",
     },
     "/vendor/dashboard": {
-        title: "Katalog Paket Jasa",
+        title: "Katalog Penawaran Vendor",
         subtitle: "Kelola paket penawaran jasa dan portofolio vendor Anda",
     },
     "/vendor/packages/create": {
-        title: "Tambah Paket Jasa",
+        title: "Tambah Paket Baru",
         subtitle: "Publikasikan paket penawaran baru beserta rincian harga dan foto",
     },
     "/client/dashboard": {
-        title: "Jadwal & Reservasi Acara",
-        subtitle: "Pilih tanggal acara yang tersedia dan ajukan reservasi baru",
+        title: "Smart Calendar Booking",
+        subtitle: "Pilih tanggal acara. Tanggal yang sudah terisi otomatis nonaktif.",
     },
     "/client/payments": {
-        title: "Pelacakan Pembayaran",
-        subtitle: "Pantau tagihan DP, pelunasan, dan unggah bukti transfer",
+        title: "Pelacakan Pembayaran & DP",
+        subtitle: "Pantau tagihan DP 50%, pelunasan, dan unggah bukti transfer",
     },
 };
 
@@ -48,27 +48,27 @@ export default function Header({ onToggleSidebar }) {
                   subtitle: "Perbarui informasi nama paket, harga, atau foto",
               }
             : {
-                  title: "Dashboard EVENTO",
-                  subtitle: "Sistem Manajemen Event Organizer & Vendor",
+                  title: "EVENTO",
+                  subtitle: "Sistem Manajemen Acara & Penawaran Vendor",
               });
 
     const roleBadges = {
-        eo: { label: "EO Internal", color: "bg-blue-50 text-blue-700 border-blue-200" },
-        vendor: { label: "Vendor Partner", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-        client: { label: "Klien / Pemesan", color: "bg-sky-50 text-sky-700 border-sky-200" },
+        eo: { label: "EO Internal", color: "bg-[#99CDD8]/40 text-[#1F4B54] border-[#99CDD8]" },
+        vendor: { label: "Vendor Mitra", color: "bg-[#CFD8C4] text-[#33422A] border-[#B6C2AA]" },
+        client: { label: "Klien / Pemesan", color: "bg-[#FDE8D3] text-[#63482B] border-[#E8CEB2]" },
     };
 
     const currentBadge = roleBadges[user?.role] || roleBadges.client;
 
     return (
-        <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-xs border-b border-slate-200 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <header className="sticky top-0 z-30 h-16 bg-[#FAF6F0]/90 backdrop-blur-xs border-b border-[#E8E2D7] px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             {/* Sisi Kiri: Hamburger & Judul Halaman */}
             <div className="flex items-center gap-3">
                 {/* Tombol Hamburger Mobile */}
                 <button
                     type="button"
                     onClick={onToggleSidebar}
-                    className="lg:hidden p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                    className="lg:hidden p-2 text-[#657166] hover:text-[#424C43] hover:bg-white rounded-xl transition-colors cursor-pointer border border-[#E8E2D7]"
                     title="Buka menu navigasi"
                     aria-label="Buka menu navigasi"
                 >
@@ -79,32 +79,32 @@ export default function Header({ onToggleSidebar }) {
 
                 {/* Judul Halaman */}
                 <div>
-                    <h2 className="text-base font-extrabold text-slate-900 leading-tight">
+                    <h2 className="text-base font-extrabold text-[#2F3931] leading-tight">
                         {currentMeta.title}
                     </h2>
-                    <p className="hidden md:block text-[11px] text-slate-500 mt-0.5">
+                    <p className="hidden md:block text-[11px] text-[#738075] mt-0.5">
                         {currentMeta.subtitle}
                     </p>
                 </div>
             </div>
 
-            {/* Sisi Kanan: Role Badge, Avatar & Aksi Cepat */}
+            {/* Sisi Kanan: Role Badge & Avatar */}
             <div className="flex items-center gap-3">
                 {/* Badge Role */}
-                <span className={`hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border ${currentBadge.color}`}>
+                <span className={`hidden sm:inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold border ${currentBadge.color}`}>
                     {currentBadge.label}
                 </span>
 
                 {/* Info Akun Pengguna */}
-                <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
-                    <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                <div className="flex items-center gap-2.5 pl-2 border-l border-[#E8E2D7]">
+                    <div className="w-8 h-8 rounded-full bg-[#657166] text-[#FDE8D3] font-bold text-xs flex items-center justify-center shadow-xs">
                         {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
                     </div>
                     <div className="hidden sm:block text-left">
-                        <p className="text-xs font-bold text-slate-800 leading-none">
+                        <p className="text-xs font-bold text-[#2F3931] leading-none">
                             {user?.name || "Pengguna"}
                         </p>
-                        <p className="text-[10px] text-slate-400 capitalize mt-0.5">
+                        <p className="text-[10px] text-[#738075] capitalize mt-0.5">
                             {user?.role || "user"}
                         </p>
                     </div>
@@ -114,7 +114,7 @@ export default function Header({ onToggleSidebar }) {
                 <button
                     type="button"
                     onClick={logout}
-                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                    className="p-2 text-[#738075] hover:text-[#424C43] hover:bg-[#FDE8D3] rounded-xl transition-colors cursor-pointer border border-transparent hover:border-[#E8CEB2]"
                     title="Keluar dari akun"
                     aria-label="Logout"
                 >

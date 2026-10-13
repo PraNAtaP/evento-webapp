@@ -1,4 +1,4 @@
-/* Evento Modern React Calendar Theme */
+/* Evento Modern React Calendar - Pastel Theme */
 @import 'react-calendar/dist/Calendar.css';
 
 .evento-calendar-wrapper {
@@ -9,11 +9,11 @@
   width: 100%;
   max-width: 100%;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 1rem;
+  border: 1px solid #E8E2D7;
+  border-radius: 1.25rem;
   padding: 1.25rem;
   font-family: inherit;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
 }
 
 .evento-calendar-wrapper .react-calendar__navigation {
@@ -27,21 +27,21 @@
   min-width: 44px;
   background: none;
   font-size: 0.95rem;
-  font-weight: 700;
-  color: #1e293b;
-  border-radius: 0.5rem;
+  font-weight: 800;
+  color: #2F3931;
+  border-radius: 0.75rem;
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .evento-calendar-wrapper .react-calendar__navigation button:hover:enabled {
-  background-color: #f1f5f9;
-  color: #2563eb;
+  background-color: #DAEBE3;
+  color: #657166;
 }
 
 .evento-calendar-wrapper .react-calendar__navigation button:disabled {
   background-color: transparent;
-  color: #cbd5e1;
+  color: #CFD8C4;
   cursor: not-allowed;
 }
 
@@ -50,7 +50,7 @@
   text-transform: uppercase;
   font-weight: 700;
   font-size: 0.75rem;
-  color: #64748b;
+  color: #738075;
   padding-bottom: 0.5rem;
 }
 
@@ -67,89 +67,92 @@
   font-weight: 500;
   padding: 0.75rem 0.25rem;
   border-radius: 0.5rem;
-  color: #334155;
+  color: #2F3931;
   transition: all 0.15s ease;
   cursor: pointer;
 }
 
 .evento-calendar-wrapper .react-calendar__month-view__days__day--neighboringMonth {
-  color: #cbd5e1;
+  color: #CFD8C4;
+  opacity: 0.6;
 }
 
 .evento-calendar-wrapper .react-calendar__tile:enabled:hover,
 .evento-calendar-wrapper .react-calendar__tile:enabled:focus {
-  background-color: #eff6ff;
-  color: #2563eb;
+  background-color: #FDE8D3;
+  color: #2F3931;
 }
 
 .evento-calendar-wrapper .react-calendar__tile--now {
-  background: #f8fafc;
+  background: #FAF6F0;
   font-weight: 700;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
+  color: #657166;
+  border: 1px solid #CFD8C4;
 }
 
+/* Tanggal Terpilih: Slate / Moss Green #657166 (Sesuai Mockup) */
 .evento-calendar-wrapper .react-calendar__tile--active,
 .evento-calendar-wrapper .react-calendar__tile--active:enabled:hover,
 .evento-calendar-wrapper .react-calendar__tile--active:enabled:focus {
-  background: #2563eb !important;
+  background: #657166 !important;
   color: #ffffff !important;
   font-weight: 700;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 6px -1px rgba(101, 113, 102, 0.3);
 }
 
 .evento-calendar-wrapper .react-calendar__tile:disabled {
-  background-color: #f8fafc;
-  color: #cbd5e1;
+  background-color: #FAF6F0;
+  color: #CFD8C4;
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.7;
   pointer-events: auto !important;
 }
 
-/* Tanggal yang sudah terisi (booked) - Abu-abu & Disabled */
+/* Tanggal yang sudah terisi (booked) - Deep Moss Green #657166 */
 .evento-calendar-wrapper .react-calendar__tile--booked,
 .evento-calendar-wrapper .react-calendar__tile--booked:disabled {
-  background-color: #e2e8f0 !important;
-  color: #64748b !important;
-  font-weight: 600;
+  background-color: #657166 !important;
+  color: #ffffff !important;
+  font-weight: 700;
   cursor: not-allowed !important;
-  opacity: 0.9 !important;
+  opacity: 0.95 !important;
   position: relative;
   pointer-events: auto !important;
+  border-radius: 0.5rem;
 }
 
 .evento-calendar-wrapper .react-calendar__tile--booked:hover {
-  background-color: #e2e8f0 !important;
-  color: #64748b !important;
+  background-color: #556056 !important;
+  color: #ffffff !important;
 }
 
-/* Tanggal di bawah batas persiapan minimal kategori (below lead time) */
+/* Tanggal di bawah batas persiapan minimal kategori (Urgent / Terblokir - Pastel Peach #F3C3B2) */
 .evento-calendar-wrapper .react-calendar__tile--below-lead-time,
 .evento-calendar-wrapper .react-calendar__tile--below-lead-time:disabled {
-  background-color: #f8fafc !important;
-  color: #94a3b8 !important;
+  background-color: #F3C3B2 !important;
+  color: #424C43 !important;
+  font-weight: 600;
   cursor: not-allowed !important;
-  opacity: 0.55 !important;
+  opacity: 0.85 !important;
   pointer-events: auto !important;
-  transition: all 0.15s ease;
+  border-radius: 0.5rem;
 }
 
 .evento-calendar-wrapper .react-calendar__tile--below-lead-time:hover {
-  background-color: #fef2f2 !important;
-  color: #dc2626 !important;
-  opacity: 0.9 !important;
+  background-color: #EAAFA0 !important;
+  color: #424C43 !important;
 }
 
-/* Range Selection Styling */
+/* Range Selection Styling - Pastel Mint #DAEBE3 */
 .evento-calendar-wrapper .react-calendar__tile--range {
-  background: #eff6ff !important;
-  color: #1d4ed8 !important;
+  background: #DAEBE3 !important;
+  color: #2F3931 !important;
   border-radius: 0 !important;
 }
 
 .evento-calendar-wrapper .react-calendar__tile--rangeStart {
-  background: #2563eb !important;
+  background: #657166 !important;
   color: #ffffff !important;
   border-top-left-radius: 0.5rem !important;
   border-bottom-left-radius: 0.5rem !important;
@@ -157,7 +160,7 @@
 }
 
 .evento-calendar-wrapper .react-calendar__tile--rangeEnd {
-  background: #2563eb !important;
+  background: #657166 !important;
   color: #ffffff !important;
   border-top-right-radius: 0.5rem !important;
   border-bottom-right-radius: 0.5rem !important;
@@ -169,19 +172,19 @@
 }
 
 .evento-calendar-wrapper .react-calendar__tile--hover {
-  background-color: #dbeafe !important;
-  color: #1e40af !important;
+  background-color: #FDE8D3 !important;
+  color: #2F3931 !important;
 }
 
 /* Animasi pulse sorotan kartu emergency */
 @keyframes emergencyPulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-    border-color: #10b981;
+    box-shadow: 0 0 0 0 rgba(243, 195, 178, 0.5);
+    border-color: #F3C3B2;
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.2);
-    border-color: #059669;
+    box-shadow: 0 0 0 6px rgba(243, 195, 178, 0.25);
+    border-color: #EAAFA0;
   }
 }
 
