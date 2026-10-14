@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'eo_offer_status',
     'client_approval',
     'locked_price',
+    'rejection_reason',
 ])]
 class EventVendorAssignment extends Model
 {
