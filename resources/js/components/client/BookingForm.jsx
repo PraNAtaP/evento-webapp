@@ -18,6 +18,7 @@ import LocationPicker from "../location/LocationPicker";
  * @param {string} [props.category] - Kategori terpilih (wedding, seminar, birthday)
  * @param {function(string):void} [props.onCategoryChange] - Callback saat kategori berubah
  * @param {{has_own_venue?: boolean, venue?: string|null, lat?: number|string|null, lng?: number|string|null}} [props.initialEvent] - Data awal (mis. saat edit) untuk venue & titik lokasi
+ * @param {function({lat: number, lng: number}|null):void} [props.onLocationChange] - Callback saat titik lokasi berubah (null jika dikosongkan)
  */
 export default function BookingForm({
     selectedDate,
@@ -29,6 +30,7 @@ export default function BookingForm({
     category: propCategory,
     onCategoryChange,
     initialEvent,
+    onLocationChange,
 }) {
     const [eventName, setEventName] = useState("");
     const [internalCategory, setInternalCategory] = useState("wedding");
@@ -41,6 +43,11 @@ export default function BookingForm({
             ? { lat: Number(initialEvent.lat), lng: Number(initialEvent.lng) }
             : null
     );
+
+    // Laporkan titik lokasi ke induk (mis. Widget Musim) tanpa mengubah perilaku peta
+    useEffect(() => {
+        onLocationChange?.(location);
+    }, [location, onLocationChange]);
 
     const [internalIsMultiDay, setInternalIsMultiDay] = useState(false);
     const [customEndDate, setCustomEndDate] = useState("");

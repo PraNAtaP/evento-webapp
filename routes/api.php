@@ -6,9 +6,10 @@ use App\Http\Controllers\Api\ClientEventController;
 use App\Http\Controllers\Api\EventSummaryController;
 use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
-use App\Http\Controllers\Api\VendorPackageController;
 use App\Http\Controllers\Api\VendorJobController;
+use App\Http\Controllers\Api\VendorPackageController;
 use App\Http\Controllers\Api\VendorProgressController;
+use App\Http\Controllers\SeasonController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
@@ -16,6 +17,11 @@ Route::post('/login', [AuthController::class, 'login'])->name('api.login');
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me'])->name('api.me');
     Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
+
+    // Widget Musim (perkiraan musim Open-Meteo)
+    Route::post('/musim', SeasonController::class)
+        ->middleware('throttle:30,1')
+        ->name('api.musim');
 
     // Dashboard Analitik EO
     Route::get('/admin/event-summary', [EventSummaryController::class, 'index'])
