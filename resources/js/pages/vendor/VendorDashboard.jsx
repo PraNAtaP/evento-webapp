@@ -10,6 +10,10 @@ export default function VendorDashboard() {
     const [packages, setPackages] = useState([]);
     // Menyimpan daftar tawaran pekerjaan dari EO
     const [jobOffers, setJobOffers] = useState([]);
+    // Menyimpan tawaran yang sedang dipilih untuk ditolak
+    const [selectedOffer, setSelectedOffer] = useState(null);
+    // Menyimpan alasan penolakan
+    const [rejectionReason, setRejectionReason] = useState("");
     // Mengambil data paket
     const fetchPackages = async () => {
         try {
@@ -27,6 +31,37 @@ export default function VendorDashboard() {
             setJobOffers(response.data.data);
         } catch (error) {
             console.error("Gagal mengambil tawaran pekerjaan:", error);
+        }
+    };
+
+    // Menerima atau menolak tawaran pekerjaan
+    const handleJobResponse = async (assignmentId, status, reason = null) => {
+        try {
+            await api.patch(`/vendor/job-offers/${assignmentId}/response`, {
+                status,
+                ...(status === "rejected"
+                    ? { rejection_reason: reason }
+                    : {}),
+            });
+
+            alert(
+                status === "accepted"
+                    ? "Tawaran pekerjaan berhasil diterima."
+                    : "Tawaran pekerjaan berhasil ditolak."
+            );
+
+            setSelectedOffer(null);
+            setRejectionReason("");
+
+            // Perbarui daftar tawaran setelah direspons
+            await fetchJobOffers();
+        } catch (error) {
+            console.error("Gagal merespons tawaran:", error);
+
+            alert(
+                error.response?.data?.message ||
+                "Gagal menyimpan respons tawaran."
+            );
         }
     };
 
@@ -112,6 +147,65 @@ export default function VendorDashboard() {
                                     <p className="text-sm text-[#738075] mt-1">
                                         Paket: {offer.package?.package_name || "Paket tidak tersedia"}
                                     </p>
+                                    <div className="flex gap-2 mt-3">
+                                        <button
+                                            onClick={() => handleJobResponse(offer.id, "accepted")}
+                                            className="bg-[#657166] hover:bg-[#556056] text-white text-xs font-semibold px-3 py-2 rounded-lg"
+                                        >
+                                            Terima Job
+                                        </button>
+
+                                        <button
+                                            onClick={() => {
+                                                setSelectedOffer(offer.id);
+                                                setRejectionReason("");
+                                            }}
+                                            className="bg-[#F3C3B2]/50 hover:bg-[#F3C3B2]/80 text-[#6B3222] text-xs font-semibold px-3 py-2 rounded-lg"
+                                        >
+                                            Tolak Job
+                                        </button>
+                                    </div>
+                                    {selectedOffer === offer.id && (
+                                    <div className="mt-3 space-y-2">
+                                        <textarea
+                                            value={rejectionReason}
+                                            onChange={(e) => setRejectionReason(e.target.value)}
+                                            placeholder="Tuliskan alasan penolakan..."
+                                            className="w-full border border-[#E8E2D7] rounded-lg p-3 text-sm"
+                                            rows={3}
+                                        />
+
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    if (!rejectionReason.trim()) {
+                                                        alert("Alasan penolakan wajib diisi.");
+                                                        return;
+                                                    }
+
+                                                    handleJobResponse(
+                                                        offer.id,
+                                                        "rejected",
+                                                        rejectionReason.trim()
+                                                    );
+                                                }}
+                                                className="bg-[#657166] hover:bg-[#556056] text-white text-xs font-semibold px-3 py-2 rounded-lg"
+                                            >
+                                                Kirim Penolakan
+                                            </button>
+
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedOffer(null);
+                                                    setRejectionReason("");
+                                                }}
+                                                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold px-3 py-2 rounded-lg"
+                                            >
+                                                Batal
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                                 </div>
                             ))}
                         </div>
