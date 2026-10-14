@@ -6,6 +6,8 @@ import api from "../../api/axios";
 export default function VendorDashboard() {
     const { user, logout } = useAuth();
 
+    // Menyimpan foto yang dipilih untuk ditampilkan di pop-up.
+    const [selectedImage, setSelectedImage] = useState(null);
     // Menyimpan daftar paket dari database
     const [packages, setPackages] = useState([]);
     // Menyimpan daftar tawaran pekerjaan dari EO
@@ -362,7 +364,7 @@ export default function VendorDashboard() {
                         </div>
                     )}
                 </div>
-                
+
                 {/* Daftar Paket */}
                 <div className="bg-white rounded-2xl border border-[#E8E2D7] shadow-xs overflow-hidden">
                     {/* Header Daftar */}
@@ -434,42 +436,30 @@ export default function VendorDashboard() {
                                                 ).toLocaleString("id-ID")}
                                             </td>
 
-                                            {/* Foto Paket */}
+                                           {/* Foto Paket */}
                                             <td className="py-4 px-5">
-                                                {item.image_url ||
-                                                item.images?.length > 0 ? (
+                                                {item.image_url || item.images?.length > 0 ? (
                                                     <div className="flex flex-wrap gap-2">
-
                                                         {/* Foto utama */}
                                                         {item.image_url && (
                                                             <img
-                                                                src={
-                                                                    item.image_url
-                                                                }
-                                                                alt={
-                                                                    item.package_name
-                                                                }
-                                                                className="w-16 h-16 object-cover rounded-xl border border-[#E8E2D7] shadow-2xs"
+                                                                src={item.image_url}
+                                                                alt={item.package_name}
+                                                                onClick={() => setSelectedImage(item.image_url)}
+                                                                className="w-16 h-16 object-cover rounded-xl border border-[#E8E2D7] shadow-2xs cursor-pointer hover:opacity-80 transition"
                                                             />
                                                         )}
 
                                                         {/* Foto tambahan */}
-                                                        {item.images?.map(
-                                                            (image) => (
-                                                                <img
-                                                                    key={
-                                                                        image.id
-                                                                    }
-                                                                    src={
-                                                                        image.image_url
-                                                                    }
-                                                                    alt={
-                                                                        item.package_name
-                                                                    }
-                                                                    className="w-16 h-16 object-cover rounded-xl border border-[#E8E2D7] shadow-2xs"
-                                                                />
-                                                            )
-                                                        )}
+                                                        {item.images?.map((image) => (
+                                                            <img
+                                                                key={image.id}
+                                                                src={image.image_url}
+                                                                alt={item.package_name}
+                                                                onClick={() => setSelectedImage(image.image_url)}
+                                                                className="w-16 h-16 object-cover rounded-xl border border-[#E8E2D7] shadow-2xs cursor-pointer hover:opacity-80 transition"
+                                                            />
+                                                        ))}
                                                     </div>
                                                 ) : (
                                                     <span className="text-[#98A29A] text-xs italic">
@@ -515,6 +505,34 @@ export default function VendorDashboard() {
                         </div>
                     )}
                 </div>
+                
+                {/* Pop-up Foto Paket */}
+                {selectedImage && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+                        onClick={() => setSelectedImage(null)}
+                    >
+                        <div
+                            className="relative max-w-4xl max-h-[90vh]"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setSelectedImage(null)}
+                                className="absolute -top-3 -right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xl font-bold text-gray-700 shadow cursor-pointer"
+                                aria-label="Tutup foto"
+                            >
+                                ×
+                            </button>
+
+                            <img
+                                src={selectedImage}
+                                alt="Foto paket jasa"
+                                className="max-h-[85vh] max-w-full rounded-xl object-contain shadow-xl"
+                            />
+                        </div>
+                    </div>
+                )}
         </div>
     );
 }
