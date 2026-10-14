@@ -14,6 +14,12 @@ export default function VendorDashboard() {
     const [selectedOffer, setSelectedOffer] = useState(null);
     // Menyimpan alasan penolakan
     const [rejectionReason, setRejectionReason] = useState("");
+    // Menyimpan daftar pekerjaan aktif vendor
+    const [activeJobs, setActiveJobs] = useState([]);
+    // Menyimpan pekerjaan yang sedang diperbarui progresnya
+    const [selectedJob, setSelectedJob] = useState(null);
+    // Menyimpan catatan progres kesiapan vendor
+    const [progressNote, setProgressNote] = useState("");
     // Mengambil data paket
     const fetchPackages = async () => {
         try {
@@ -31,6 +37,47 @@ export default function VendorDashboard() {
             setJobOffers(response.data.data);
         } catch (error) {
             console.error("Gagal mengambil tawaran pekerjaan:", error);
+        }
+    };
+
+    // Mengambil daftar pekerjaan yang sudah diterima vendor
+    const fetchActiveJobs = async () => {
+        try {
+            const response = await api.get("/vendor/active-jobs");
+            setActiveJobs(response.data.data);
+        } catch (error) {
+            console.error("Gagal mengambil pekerjaan aktif:", error);
+        }
+    };
+
+    // Mengirim pembaruan progres kesiapan vendor
+    const handleProgressUpdate = async (assignmentId) => {
+        if (!progressNote.trim()) {
+            alert("Catatan progres wajib diisi.");
+            return;
+        }
+
+        try {
+            await api.post(
+                `/vendor/active-jobs/${assignmentId}/progress`,
+                {
+                    note: progressNote.trim(),
+                }
+            );
+
+            alert("Progress kesiapan berhasil diperbarui.");
+
+            setSelectedJob(null);
+            setProgressNote("");
+
+            await fetchActiveJobs();
+        } catch (error) {
+            console.error("Gagal memperbarui progres:", error);
+
+            alert(
+                error.response?.data?.message ||
+                "Gagal memperbarui progres kesiapan."
+            );
         }
     };
 
@@ -69,6 +116,7 @@ export default function VendorDashboard() {
     useEffect(() => {
         fetchPackages();
         fetchJobOffers();
+        fetchActiveJobs();
     }, []);
 
     // Menghapus paket
@@ -211,6 +259,110 @@ export default function VendorDashboard() {
                         </div>
                     )}
                 </div>
+                
+                {/* Daftar Pekerjaan Aktif */}
+                <div className="bg-white rounded-2xl border border-[#E8E2D7] shadow-xs overflow-hidden">
+                    <div className="px-6 py-5 border-b border-[#E8E2D7]">
+                        <h2 className="text-lg font-bold text-[#2F3931]">
+                            Pekerjaan Aktif
+                        </h2>
+                        <p className="text-sm text-[#738075] mt-0.5">
+                            Perbarui informasi progres dan kesiapan pekerjaan kepada EO.
+                        </p>
+                    </div>
+
+                    {activeJobs.length === 0 ? (
+                        <div className="p-8 text-center">
+                            <p className="text-sm text-[#738075]">
+                                Belum ada pekerjaan aktif yang diterima.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="p-6">
+                            {activeJobs.map((job) => (
+                                <div
+                                    key={job.id}
+                                    className="border-b border-[#F0ECE1] py-4 last:border-b-0"
+                                >
+                                    <h3 className="font-bold text-[#2F3931]">
+                                        {job.event?.event_name || "Nama acara belum tersedia"}
+                                    </h3>
+
+                                    <p className="text-sm text-[#738075] mt-1">
+                                        Paket: {job.package?.package_name || "Paket tidak tersedia"}
+                                    </p>
+
+                                    <div className="mt-3">
+                                        <h4 className="text-sm font-semibold text-[#2F3931]">
+                                            Riwayat Progres
+                                        </h4>
+
+                                        {job.progress_logs?.length > 0 ? (
+                                            <ul className="mt-2 space-y-2">
+                                                {job.progress_logs.map((log) => (
+                                                    <li
+                                                        key={log.id}
+                                                        className="bg-[#FAF6F0] rounded-lg p-3 text-sm text-[#536055]"
+                                                    >
+                                                        {log.note}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-xs text-[#738075] mt-1">
+                                                Belum ada catatan progres.
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <button
+                                        onClick={() => {
+                                            setSelectedJob(
+                                                selectedJob === job.id ? null : job.id
+                                            );
+                                            setProgressNote("");
+                                        }}
+                                        className="mt-3 bg-[#657166] hover:bg-[#556056] text-white text-xs font-semibold px-3 py-2 rounded-lg"
+                                    >
+                                        Progress Update
+                                    </button>
+
+                                    {selectedJob === job.id && (
+                                        <div className="mt-3 space-y-2">
+                                            <textarea
+                                                value={progressNote}
+                                                onChange={(e) => setProgressNote(e.target.value)}
+                                                placeholder="Tuliskan progres atau kesiapan pekerjaan..."
+                                                className="w-full border border-[#E8E2D7] rounded-lg p-3 text-sm"
+                                                rows={3}
+                                            />
+
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleProgressUpdate(job.id)}
+                                                    className="bg-[#657166] hover:bg-[#556056] text-white text-xs font-semibold px-3 py-2 rounded-lg"
+                                                >
+                                                    Kirim Progres
+                                                </button>
+
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedJob(null);
+                                                        setProgressNote("");
+                                                    }}
+                                                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold px-3 py-2 rounded-lg"
+                                                >
+                                                    Batal
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                
                 {/* Daftar Paket */}
                 <div className="bg-white rounded-2xl border border-[#E8E2D7] shadow-xs overflow-hidden">
                     {/* Header Daftar */}
