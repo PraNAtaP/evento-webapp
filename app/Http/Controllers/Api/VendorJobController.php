@@ -35,4 +35,62 @@ class VendorJobController extends Controller
             'data' => $jobOffers,
         ]);
     }
+
+    /**
+     * Menerima atau menolak tawaran pekerjaan.
+     */
+    public function respond(
+        Request $request,
+        EventVendorAssignment $assignment
+    ): JsonResponse {
+        $vendor = $request->user()->vendor;
+
+        if (! $vendor) {
+            return response()->json([
+                'message' => 'Profil vendor tidak ditemukan.',
+            ], 404);
+        }
+
+        // Memastikan tawaran merupakan milik vendor yang sedang login.
+        if ($assignment->vendor_id !== $vendor->id) {
+            return response()->json([
+                'message' => 'Tawaran pekerjaan tidak ditemukan.',
+            ], 404);
+        }
+
+        // Tawaran yang sudah direspons tidak bisa direspons ulang.
+        if ($assignment->eo_offer_status !== 'pending') {
+            return response()->json([
+                'message' => 'Tawaran pekerjaan sudah direspons.',
+            ], 422);
+        }
+
+        // Memvalidasi respons vendor.
+        $validated = $request->validate([
+            'status' => ['required', 'in:accepted,rejected'],
+            'rejection_reason' => [
+                'required_if:status,rejected',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+        ]);
+
+        // Menyimpan status dan alasan penolakan.
+        $assignment->eo_offer_status = $validated['status'];
+
+        $assignment->rejection_reason =
+            $validated['status'] === 'rejected'
+                ? $validated['rejection_reason']
+                : null;
+
+        $assignment->save();
+
+        return response()->json([
+            'message' => $validated['status'] === 'accepted'
+                ? 'Tawaran pekerjaan berhasil diterima.'
+                : 'Tawaran pekerjaan berhasil ditolak.',
+            'data' => $assignment,
+        ]);
+    }
 }
