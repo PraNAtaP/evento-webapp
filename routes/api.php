@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\VendorPackageController;
 use App\Http\Controllers\Api\VendorJobController;
+use App\Http\Controllers\Api\VendorProgressController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
@@ -64,6 +65,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::patch('/vendor/job-offers/{assignment}/response', [VendorJobController::class, 'respond'])
             ->name('api.vendor.job-offers.respond');
+    });
+
+    // Modul Vendor Progress Update (Agnes)
+    Route::middleware('role:vendor')->group(function () {
+        Route::get('/vendor/active-jobs', [VendorProgressController::class, 'index'])
+            ->name('api.vendor.active-jobs.index');
+
+        Route::post('/vendor/active-jobs/{assignment}/progress', [VendorProgressController::class, 'store'])
+            ->name('api.vendor.active-jobs.progress.store');
     });
 
     // Modul Payment Tracking (Nety)
