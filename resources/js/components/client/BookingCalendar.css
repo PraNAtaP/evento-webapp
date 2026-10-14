@@ -104,6 +104,7 @@
   color: #cbd5e1;
   cursor: not-allowed;
   opacity: 0.6;
+  pointer-events: auto !important;
 }
 
 /* Tanggal yang sudah terisi (booked) - Abu-abu & Disabled */
@@ -115,6 +116,7 @@
   cursor: not-allowed !important;
   opacity: 0.9 !important;
   position: relative;
+  pointer-events: auto !important;
 }
 
 .evento-calendar-wrapper .react-calendar__tile--booked:hover {
@@ -122,3 +124,67 @@
   color: #64748b !important;
 }
 
+/* Tanggal di bawah batas persiapan minimal kategori (below lead time) */
+.evento-calendar-wrapper .react-calendar__tile--below-lead-time,
+.evento-calendar-wrapper .react-calendar__tile--below-lead-time:disabled {
+  background-color: #f8fafc !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed !important;
+  opacity: 0.55 !important;
+  pointer-events: auto !important;
+  transition: all 0.15s ease;
+}
+
+.evento-calendar-wrapper .react-calendar__tile--below-lead-time:hover {
+  background-color: #fef2f2 !important;
+  color: #dc2626 !important;
+  opacity: 0.9 !important;
+}
+
+/* Range Selection Styling */
+.evento-calendar-wrapper .react-calendar__tile--range {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-radius: 0 !important;
+}
+
+.evento-calendar-wrapper .react-calendar__tile--rangeStart {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-top-left-radius: 0.5rem !important;
+  border-bottom-left-radius: 0.5rem !important;
+  font-weight: 700 !important;
+}
+
+.evento-calendar-wrapper .react-calendar__tile--rangeEnd {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-top-right-radius: 0.5rem !important;
+  border-bottom-right-radius: 0.5rem !important;
+  font-weight: 700 !important;
+}
+
+.evento-calendar-wrapper .react-calendar__tile--rangeBothEnds {
+  border-radius: 0.5rem !important;
+}
+
+.evento-calendar-wrapper .react-calendar__tile--hover {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+/* Animasi pulse sorotan kartu emergency */
+@keyframes emergencyPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    border-color: #10b981;
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.2);
+    border-color: #059669;
+  }
+}
+
+.emergency-highlight-active {
+  animation: emergencyPulse 1.2s ease-in-out 3;
+}

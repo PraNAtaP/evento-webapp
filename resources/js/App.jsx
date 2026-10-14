@@ -7,6 +7,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import KanbanPage from "./pages/admin/KanbanPage";
 import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
+import VendorPackageForm from "./pages/vendor/VendorPackageForm";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 
@@ -17,14 +18,26 @@ function RootRedirect() {
 
     if (isLoading) {
         return (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: "100vh",
+                }}
+            >
                 <p>Memuat...</p>
             </div>
         );
     }
 
     if (isAuthenticated && user) {
-        return <Navigate to={getRoleDashboard(user.role)} replace />;
+        return (
+            <Navigate
+                to={getRoleDashboard(user.role)}
+                replace
+            />
+        );
     }
 
     return <Navigate to="/login" replace />;
@@ -37,6 +50,7 @@ export default function App() {
                 <BrowserRouter>
                     <Routes>
                         <Route path="/" element={<RootRedirect />} />
+
                         <Route path="/login" element={<Login />} />
 
                         <Route
@@ -73,11 +87,32 @@ export default function App() {
                             element={<KanbanPage />}
                         />
 
+                        {/* Dashboard Vendor */}
                         <Route
                             path="/vendor/dashboard"
                             element={
                                 <ProtectedRoute allowedRoles={["vendor"]}>
                                     <VendorDashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Form Tambah Paket Vendor */}
+                        <Route
+                            path="/vendor/packages/create"
+                            element={
+                                <ProtectedRoute allowedRoles={["vendor"]}>
+                                    <VendorPackageForm />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Form Edit Paket Vendor */}
+                        <Route
+                            path="/vendor/packages/:id/edit"
+                            element={
+                                <ProtectedRoute allowedRoles={["vendor"]}>
+                                    <VendorPackageForm />
                                 </ProtectedRoute>
                             }
                         />
@@ -102,7 +137,10 @@ export default function App() {
                         />
 
                         {/* Fallback */}
-                        <Route path="*" element={<Navigate to="/" replace />} />
+                        <Route
+                            path="*"
+                            element={<Navigate to="/" replace />}
+                        />
                     </Routes>
                 </BrowserRouter>
             </AuthProvider>

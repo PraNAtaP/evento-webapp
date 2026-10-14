@@ -8,21 +8,7 @@ export default function VendorDashboard() {
     // Menyimpan daftar paket dari database
     const [packages, setPackages] = useState([]);
 
-    // Menyimpan isi form
-    const [form, setForm] = useState({
-        package_name: "",
-        description: "",
-        price: "",
-        image: null,
-    });
-
-    // Menyimpan ID paket yang sedang diedit
-    const [editingId, setEditingId] = useState(null);
-
-    // Menyimpan foto yang sedang dilihat
-    const [selectedImage, setSelectedImage] = useState(null);
-
-    // Mengambil data paket saat halaman dibuka
+    // Mengambil data paket
     const fetchPackages = async () => {
         try {
             const response = await api.get("/vendor/packages");
@@ -32,90 +18,10 @@ export default function VendorDashboard() {
         }
     };
 
+    // Mengambil data saat halaman dibuka
     useEffect(() => {
         fetchPackages();
     }, []);
-
-    // Mengubah isi form
-    const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-    // Simpan atau update paket
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        try {
-            // Membuat FormData agar bisa mengirim data + foto
-            const formData = new FormData();
-
-            formData.append("package_name", form.package_name);
-            formData.append("description", form.description);
-            formData.append("price", form.price);
-
-            // Jika ada foto yang dipilih
-            if (form.image) {
-                formData.append("image", form.image);
-            }
-
-            if (editingId) {
-                // Update paket
-                await api.post(
-                    `/vendor/packages/${editingId}?_method=PUT`,
-                    formData,
-                    {
-                        headers: {
-                            "Content-Type": "multipart/form-data",
-                        },
-                    }
-                );
-
-                alert("Paket berhasil diperbarui");
-            } else {
-                // Tambah paket baru
-                await api.post("/vendor/packages", formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                });
-
-                alert("Paket berhasil ditambahkan");
-            }
-
-            // Kosongkan form
-            setForm({
-                package_name: "",
-                description: "",
-                price: "",
-                image: null,
-            });
-
-            setEditingId(null);
-
-            // Ambil data terbaru
-            fetchPackages();
-        } catch (error) {
-            console.error("Gagal menyimpan paket:", error);
-            console.error(error.response?.data);
-
-            alert("Gagal menyimpan paket");
-        }
-    };
-
-    // Mengisi form dengan data paket yang mau diedit
-    const handleEdit = (item) => {
-        setForm({
-            package_name: item.package_name,
-            description: item.description,
-            price: item.price,
-            image: null,
-        });
-
-        setEditingId(item.id);
-    };
 
     // Menghapus paket
     const handleDelete = async (id) => {
@@ -128,6 +34,7 @@ export default function VendorDashboard() {
 
             alert("Paket berhasil dihapus");
 
+            // Ambil data terbaru setelah dihapus
             fetchPackages();
         } catch (error) {
             console.error("Gagal menghapus paket:", error);
@@ -157,149 +64,17 @@ export default function VendorDashboard() {
                     </p>
                 </div>
 
-                {/* Form Tambah / Edit Paket */}
-                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm mb-5">
-                    <div className="mb-5">
-                        <h2 className="text-lg font-bold text-gray-900">
-                            {editingId
-                                ? "Edit Paket Jasa"
-                                : "Tambah Paket Jasa"}
-                        </h2>
-
-                        <p className="text-sm text-gray-500 mt-1">
-                            Isi informasi paket jasa yang ingin ditawarkan.
-                        </p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-
-                        {/* Nama Paket */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                Nama Paket
-                            </label>
-
-                            <input
-                                type="text"
-                                name="package_name"
-                                value={form.package_name}
-                                onChange={handleChange}
-                                required
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                                placeholder="Contoh: Paket Dekorasi Pernikahan"
-                            />
-                        </div>
-
-                        {/* Deskripsi */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                Deskripsi
-                            </label>
-
-                            <textarea
-                                name="description"
-                                value={form.description}
-                                onChange={handleChange}
-                                required
-                                rows="3"
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
-                                placeholder="Deskripsi paket jasa"
-                            />
-                        </div>
-
-                        {/* Harga */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                Harga
-                            </label>
-
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-                                    Rp
-                                </span>
-
-                                <input
-                                    type="number"
-                                    name="price"
-                                    value={form.price}
-                                    onChange={handleChange}
-                                    required
-                                    min="0"
-                                    className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                                    placeholder="5000000"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Foto Paket */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                Foto Paket
-                            </label>
-
-                            <div className="flex items-center gap-2">
-                                {/* Nama file */}
-                                <div className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-500 h-[42px] flex items-center">
-                                    {form.image
-                                        ? form.image.name
-                                        : "Belum ada foto dipilih"}
-                                </div>
-
-                                {/* Tombol pilih foto */}
-                                <label className="border border-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 cursor-pointer h-[42px] flex items-center">
-                                    Pilih Foto
-
-                                    <input
-                                        type="file"
-                                        name="image"
-                                        accept="image/*"
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                image: e.target.files[0],
-                                            })
-                                        }
-                                        className="hidden"
-                                    />
-                                </label>
-                            </div>
-
-                            <p className="text-xs text-gray-400 mt-1">
-                                Maksimal 2 MB. Format gambar.
-                            </p>
-                        </div>
-
-                        {/* Tombol */}
-                        <div className="flex gap-2 pt-2">
-                            <button
-                                type="submit"
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition"
-                            >
-                                {editingId
-                                    ? "Update Paket"
-                                    : "Tambah Paket"}
-                            </button>
-
-                            {editingId && (
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setEditingId(null);
-
-                                        setForm({
-                                            package_name: "",
-                                            description: "",
-                                            price: "",
-                                            image: null,
-                                        });
-                                    }}
-                                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-lg transition"
-                                >
-                                    Batal
-                                </button>
-                            )}
-                        </div>
-                    </form>
+                {/* Tombol Tambah Paket */}
+                <div className="flex justify-end mb-5">
+                    <button
+                        onClick={() => {
+                            window.location.href =
+                                "/vendor/packages/create";
+                        }}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
+                    >
+                        + Tambah Paket
+                    </button>
                 </div>
 
                 {/* Daftar Paket */}
@@ -356,14 +131,17 @@ export default function VendorDashboard() {
                                             key={item.id}
                                             className="border-b border-gray-100 hover:bg-gray-50"
                                         >
+                                            {/* Nama Paket */}
                                             <td className="py-4 px-5 font-medium text-gray-900">
                                                 {item.package_name}
                                             </td>
 
+                                            {/* Deskripsi */}
                                             <td className="py-4 px-5 text-gray-600">
                                                 {item.description}
                                             </td>
 
+                                            {/* Harga */}
                                             <td className="py-4 px-5 text-gray-700 whitespace-nowrap">
                                                 Rp{" "}
                                                 {Number(
@@ -373,17 +151,41 @@ export default function VendorDashboard() {
 
                                             {/* Foto Paket */}
                                             <td className="py-4 px-5">
-                                                {item.image_url ? (
-                                                    <img
-                                                        src={item.image_url}
-                                                        alt={item.package_name}
-                                                        onClick={() =>
-                                                            setSelectedImage(
-                                                                item.image_url
+                                                {item.image_url ||
+                                                item.images?.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-2">
+
+                                                        {/* Foto utama */}
+                                                        {item.image_url && (
+                                                            <img
+                                                                src={
+                                                                    item.image_url
+                                                                }
+                                                                alt={
+                                                                    item.package_name
+                                                                }
+                                                                className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                                                            />
+                                                        )}
+
+                                                        {/* Foto tambahan */}
+                                                        {item.images?.map(
+                                                            (image) => (
+                                                                <img
+                                                                    key={
+                                                                        image.id
+                                                                    }
+                                                                    src={
+                                                                        image.image_url
+                                                                    }
+                                                                    alt={
+                                                                        item.package_name
+                                                                    }
+                                                                    className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                                                                />
                                                             )
-                                                        }
-                                                        className="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition"
-                                                    />
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <span className="text-gray-400 text-xs">
                                                         Tidak ada foto
@@ -394,15 +196,19 @@ export default function VendorDashboard() {
                                             {/* Aksi */}
                                             <td className="py-4 px-5">
                                                 <div className="flex gap-2">
+
+                                                    {/* Tombol Edit */}
                                                     <button
-                                                        onClick={() =>
-                                                            handleEdit(item)
-                                                        }
+                                                        onClick={() => {
+                                                            window.location.href =
+                                                                `/vendor/packages/${item.id}/edit`;
+                                                        }}
                                                         className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 text-xs font-medium px-3 py-1.5 rounded-md transition"
                                                     >
                                                         Edit
                                                     </button>
 
+                                                    {/* Tombol Hapus */}
                                                     <button
                                                         onClick={() =>
                                                             handleDelete(
@@ -413,6 +219,7 @@ export default function VendorDashboard() {
                                                     >
                                                         Hapus
                                                     </button>
+
                                                 </div>
                                             </td>
                                         </tr>
@@ -423,34 +230,6 @@ export default function VendorDashboard() {
                         </div>
                     )}
                 </div>
-
-                {/* Popup Foto */}
-                {selectedImage && (
-                    <div
-                        className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-                        onClick={() => setSelectedImage(null)}
-                    >
-                        <div
-                            className="relative bg-white rounded-xl p-4 max-w-2xl max-h-[90vh]"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {/* Tombol Close */}
-                            <button
-                                onClick={() => setSelectedImage(null)}
-                                className="absolute -top-3 -right-3 bg-white text-gray-600 hover:text-gray-900 w-8 h-8 rounded-full shadow flex items-center justify-center text-lg font-bold"
-                            >
-                                ×
-                            </button>
-
-                            {/* Foto */}
-                            <img
-                                src={selectedImage}
-                                alt="Foto Paket"
-                                className="max-w-full max-h-[80vh] object-contain rounded-lg"
-                            />
-                        </div>
-                    </div>
-                )}
 
                 {/* Logout */}
                 <button
