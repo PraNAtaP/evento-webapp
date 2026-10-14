@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\EventSummaryController;
 use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\VendorPackageController;
+use App\Http\Controllers\Api\VendorJobController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
@@ -55,6 +56,12 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('api.vendor.packages.update');
     Route::delete('/vendor/packages/{vendorPackage}', [VendorPackageController::class, 'destroy'])
         ->name('api.vendor.packages.destroy');
+
+    // Modul Vendor Job Response (Agnes)
+    Route::middleware('role:vendor')->group(function () {
+        Route::get('/vendor/job-offers', [VendorJobController::class, 'index'])
+            ->name('api.vendor.job-offers.index');
+    });
 
     // Modul Payment Tracking (Nety)
     Route::get('/payments', [PaymentController::class, 'index'])

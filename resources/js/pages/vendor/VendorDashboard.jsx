@@ -8,7 +8,8 @@ export default function VendorDashboard() {
 
     // Menyimpan daftar paket dari database
     const [packages, setPackages] = useState([]);
-
+    // Menyimpan daftar tawaran pekerjaan dari EO
+    const [jobOffers, setJobOffers] = useState([]);
     // Mengambil data paket
     const fetchPackages = async () => {
         try {
@@ -19,9 +20,20 @@ export default function VendorDashboard() {
         }
     };
 
+    // Mengambil daftar tawaran pekerjaan dari EO
+    const fetchJobOffers = async () => {
+        try {
+            const response = await api.get("/vendor/job-offers");
+            setJobOffers(response.data.data);
+        } catch (error) {
+            console.error("Gagal mengambil tawaran pekerjaan:", error);
+        }
+    };
+
     // Mengambil data saat halaman dibuka
     useEffect(() => {
         fetchPackages();
+        fetchJobOffers();
     }, []);
 
     // Menghapus paket
@@ -70,9 +82,43 @@ export default function VendorDashboard() {
                 </Link>
             </div>
 
+                {/* Daftar Tawaran Pekerjaan */}
+                <div className="bg-white rounded-2xl border border-[#E8E2D7] shadow-xs overflow-hidden">
+                    <div className="px-6 py-5 border-b border-[#E8E2D7]">
+                        <h2 className="text-lg font-bold text-[#2F3931]">
+                            Tawaran Pekerjaan dari EO
+                        </h2>
+                        <p className="text-sm text-[#738075] mt-0.5">
+                            Daftar acara dan paket jasa yang ditawarkan kepada Anda.
+                        </p>
+                    </div>
+
+                    {jobOffers.length === 0 ? (
+                        <div className="p-8 text-center">
+                            <p className="text-sm text-[#738075]">
+                                Belum ada tawaran pekerjaan.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="p-6">
+                            {jobOffers.map((offer) => (
+                                <div
+                                    key={offer.id}
+                                    className="border-b border-[#F0ECE1] py-4"
+                                >
+                                    <h3 className="font-bold text-[#2F3931]">
+                                        {offer.event?.event_name || "Nama acara belum tersedia"}
+                                    </h3>
+                                    <p className="text-sm text-[#738075] mt-1">
+                                        Paket: {offer.package?.package_name || "Paket tidak tersedia"}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
                 {/* Daftar Paket */}
                 <div className="bg-white rounded-2xl border border-[#E8E2D7] shadow-xs overflow-hidden">
-
                     {/* Header Daftar */}
                     <div className="px-6 py-5 border-b border-[#E8E2D7]">
                         <h2 className="text-lg font-bold text-[#2F3931]">
