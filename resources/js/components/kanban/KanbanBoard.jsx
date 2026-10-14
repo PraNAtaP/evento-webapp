@@ -4,6 +4,7 @@ import { KANBAN_COLUMNS } from "../../data/kanbanData";
 export default function KanbanBoard({
     columns = KANBAN_COLUMNS,
     cards = [],
+    onMoveCard,
 }) {
     return (
         <div className="w-full">
@@ -12,7 +13,7 @@ export default function KanbanBoard({
                 <div className="flex gap-5 items-start min-w-max">
                     {columns.map((column) => {
                         const columnCards = cards.filter(
-                            (card) => card.status === column.id
+                            (card) => (card.kanban_status ?? card.status) === column.id
                         );
 
                         return (
@@ -20,6 +21,7 @@ export default function KanbanBoard({
                                 key={column.id}
                                 column={column}
                                 cards={columnCards}
+                                onMoveCard={onMoveCard}
                             />
                         );
                     })}

@@ -46,74 +46,111 @@ export default function Login() {
     };
 
     return (
-        <div style={{ maxWidth: "420px", margin: "3rem auto", padding: "2rem", border: "1px solid #ddd", borderRadius: "8px", fontFamily: "sans-serif" }}>
-            <h2>Login EVENTO</h2>
-            <p style={{ color: "#666", fontSize: "0.9rem" }}>Masuk ke akun Customer, EO, atau Vendor</p>
-
-            {error && (
-                <div style={{ padding: "0.75rem", marginBottom: "1rem", backgroundColor: "#fee2e2", color: "#b91c1c", borderRadius: "4px", fontSize: "0.875rem" }}>
-                    {error}
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: "1rem" }}>
-                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "bold", fontSize: "0.875rem" }}>Email:</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        placeholder="contoh: client@evento.test"
-                        style={{ width: "100%", padding: "0.5rem", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: "4px" }}
-                    />
+        <div className="min-h-screen bg-[#FAF6F0] flex flex-col justify-center items-center p-4">
+            <div className="w-full max-w-md">
+                
+                {/* Logo & Brand Header */}
+                <div className="text-center mb-6">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#F3C3B2] border border-[#E8CEB2] shadow-xs mb-3">
+                        <span className="text-[#55271C] font-black text-2xl tracking-tighter">E</span>
+                    </div>
+                    <h1 className="text-2xl font-extrabold text-[#2F3931] tracking-tight">
+                        Login ke <span className="text-[#657166]">EVENTO</span>
+                    </h1>
+                    <p className="text-xs text-[#738075] mt-1">
+                        Platform Manajemen Kalender & Vendor Acara Terintegrasi
+                    </p>
                 </div>
 
-                <div style={{ marginBottom: "1.5rem" }}>
-                    <label style={{ display: "block", marginBottom: "0.25rem", fontWeight: "bold", fontSize: "0.875rem" }}>Password:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        placeholder="••••••••"
-                        style={{ width: "100%", padding: "0.5rem", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: "4px" }}
-                    />
-                </div>
+                {/* Login Card */}
+                <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E2D7] shadow-xs">
+                    {error && (
+                        <div className="p-3 mb-4 bg-[#F3C3B2]/30 border border-[#F3C3B2] text-[#6B3222] rounded-xl text-xs font-medium">
+                            {error}
+                        </div>
+                    )}
 
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    style={{ width: "100%", padding: "0.75rem", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: isSubmitting ? "not-allowed" : "pointer" }}
-                >
-                    {isSubmitting ? "Memproses..." : "Masuk"}
-                </button>
-            </form>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
+                                Email Pengguna
+                            </label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                placeholder="nama@email.com"
+                                className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl px-3.5 py-2.5 text-sm text-[#2F3931] placeholder-[#98A29A] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition"
+                            />
+                        </div>
 
-            <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px dashed #ccc" }}>
-                <p style={{ fontSize: "0.8rem", fontWeight: "bold", marginBottom: "0.5rem", color: "#555" }}>Akun Demo Seeder (Klik untuk isi cepat):</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    <button
-                        type="button"
-                        onClick={() => handleQuickFill("client@evento.test", "password")}
-                        style={{ padding: "0.4rem 0.6rem", textAlign: "left", fontSize: "0.75rem", background: "#f3f4f6", border: "1px solid #e5e7eb", borderRadius: "4px", cursor: "pointer" }}
-                    >
-                        <strong>Customer:</strong> client@evento.test / password
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => handleQuickFill("eo@evento.test", "password")}
-                        style={{ padding: "0.4rem 0.6rem", textAlign: "left", fontSize: "0.75rem", background: "#f3f4f6", border: "1px solid #e5e7eb", borderRadius: "4px", cursor: "pointer" }}
-                    >
-                        <strong>EO (Admin):</strong> eo@evento.test / password
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => handleQuickFill("vendor@evento.test", "password")}
-                        style={{ padding: "0.4rem 0.6rem", textAlign: "left", fontSize: "0.75rem", background: "#f3f4f6", border: "1px solid #e5e7eb", borderRadius: "4px", cursor: "pointer" }}
-                    >
-                        <strong>Vendor:</strong> vendor@evento.test / password
-                    </button>
+                        <div>
+                            <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
+                                Kata Sandi
+                            </label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                placeholder="••••••••"
+                                className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl px-3.5 py-2.5 text-sm text-[#2F3931] placeholder-[#98A29A] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full mt-2 py-3 bg-[#657166] hover:bg-[#556056] text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer border border-[#525C53] disabled:opacity-60"
+                        >
+                            {isSubmitting ? "Memproses Autentikasi..." : "Masuk ke Dashboard"}
+                        </button>
+                    </form>
+
+                    {/* Quick Demo Fill Buttons */}
+                    <div className="mt-6 pt-5 border-t border-[#E8E2D7]">
+                        <p className="text-[11px] font-bold text-[#738075] uppercase tracking-wider mb-2.5 text-center">
+                            Akun Demo Cepat (1-Klik Isi)
+                        </p>
+                        <div className="flex flex-col gap-2">
+                            <button
+                                type="button"
+                                onClick={() => handleQuickFill("client@evento.test", "password")}
+                                className="w-full p-2.5 text-left text-xs bg-[#FDE8D3]/60 hover:bg-[#FDE8D3] border border-[#E8CEB2] text-[#5C3F22] rounded-xl transition cursor-pointer flex items-center justify-between"
+                            >
+                                <span className="font-bold flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-[#E5A872] inline-block"></span>
+                                    Klien / Pelanggan
+                                </span>
+                                <span className="text-[11px] opacity-80 font-mono">client@evento.test</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => handleQuickFill("eo@evento.test", "password")}
+                                className="w-full p-2.5 text-left text-xs bg-[#99CDD8]/30 hover:bg-[#99CDD8]/60 border border-[#85BAC5] text-[#1D4A54] rounded-xl transition cursor-pointer flex items-center justify-between"
+                            >
+                                <span className="font-bold flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-[#5BA0AF] inline-block"></span>
+                                    EO / Event Organizer
+                                </span>
+                                <span className="text-[11px] opacity-80 font-mono">eo@evento.test</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => handleQuickFill("vendor@evento.test", "password")}
+                                className="w-full p-2.5 text-left text-xs bg-[#CFD8C4]/60 hover:bg-[#CFD8C4] border border-[#BAC5AF] text-[#34402A] rounded-xl transition cursor-pointer flex items-center justify-between"
+                            >
+                                <span className="font-bold flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-[#7D9169] inline-block"></span>
+                                    Vendor Jasa
+                                </span>
+                                <span className="text-[11px] opacity-80 font-mono">vendor@evento.test</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

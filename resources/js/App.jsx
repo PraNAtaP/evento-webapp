@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import KanbanPage from "./pages/admin/KanbanPage";
@@ -18,15 +19,9 @@ function RootRedirect() {
 
     if (isLoading) {
         return (
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    minHeight: "100vh",
-                }}
-            >
-                <p>Memuat...</p>
+            <div className="flex flex-col justify-center items-center min-h-screen bg-[#FAF6F0]">
+                <div className="w-8 h-8 border-3 border-[#657166] border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p className="text-xs text-[#738075]">Memuat sesi EVENTO...</p>
             </div>
         );
     }
@@ -53,88 +48,99 @@ export default function App() {
 
                         <Route path="/login" element={<Login />} />
 
+                        {/* Template Layout Terpusat: Sidebar Dinamis & Header */}
                         <Route
-                            path="/admin/dashboard"
                             element={
-                                <ProtectedRoute allowedRoles={["eo"]}>
-                                    <AdminDashboard />
+                                <ProtectedRoute>
+                                    <DashboardLayout />
                                 </ProtectedRoute>
                             }
-                        />
+                        >
+                            {/* Rute Admin (EO) */}
+                            <Route
+                                path="/admin/dashboard"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <AdminDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
 
-                        <Route
-                            path="/admin/kanban"
-                            element={
-                                <ProtectedRoute allowedRoles={["eo"]}>
-                                    <KanbanPage />
-                                </ProtectedRoute>
-                            }
-                        />
+                            <Route
+                                path="/admin/kanban"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <KanbanPage />
+                                    </ProtectedRoute>
+                                }
+                            />
 
-                        {/* Rute Verifikasi Pembayaran untuk EO */}
-                        <Route
-                            path="/admin/payments"
-                            element={
-                                <ProtectedRoute allowedRoles={["eo"]}>
-                                    <PaymentVerificationPage />
-                                </ProtectedRoute>
-                            }
-                        />
+                            {/* Rute Verifikasi Pembayaran untuk EO */}
+                            <Route
+                                path="/admin/payments"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <PaymentVerificationPage />
+                                    </ProtectedRoute>
+                                }
+                            />
 
-                        {/* Rute langsung untuk kemudahan pratinjau kanban */}
-                        <Route
-                            path="/kanban"
-                            element={<KanbanPage />}
-                        />
+                            {/* Rute langsung untuk kemudahan pratinjau kanban */}
+                            <Route
+                                path="/kanban"
+                                element={<KanbanPage />}
+                            />
 
-                        {/* Dashboard Vendor */}
-                        <Route
-                            path="/vendor/dashboard"
-                            element={
-                                <ProtectedRoute allowedRoles={["vendor"]}>
-                                    <VendorDashboard />
-                                </ProtectedRoute>
-                            }
-                        />
+                            {/* Rute Vendor */}
+                            <Route
+                                path="/vendor/dashboard"
+                                element={
+                                    <ProtectedRoute allowedRoles={["vendor"]}>
+                                        <VendorDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
 
-                        {/* Form Tambah Paket Vendor */}
-                        <Route
-                            path="/vendor/packages/create"
-                            element={
-                                <ProtectedRoute allowedRoles={["vendor"]}>
-                                    <VendorPackageForm />
-                                </ProtectedRoute>
-                            }
-                        />
+                            {/* Form Tambah Paket Vendor */}
+                            <Route
+                                path="/vendor/packages/create"
+                                element={
+                                    <ProtectedRoute allowedRoles={["vendor"]}>
+                                        <VendorPackageForm />
+                                    </ProtectedRoute>
+                                }
+                            />
 
-                        {/* Form Edit Paket Vendor */}
-                        <Route
-                            path="/vendor/packages/:id/edit"
-                            element={
-                                <ProtectedRoute allowedRoles={["vendor"]}>
-                                    <VendorPackageForm />
-                                </ProtectedRoute>
-                            }
-                        />
+                            {/* Form Edit Paket Vendor */}
+                            <Route
+                                path="/vendor/packages/:id/edit"
+                                element={
+                                    <ProtectedRoute allowedRoles={["vendor"]}>
+                                        <VendorPackageForm />
+                                    </ProtectedRoute>
+                                }
+                            />
 
-                        <Route
-                            path="/client/dashboard"
-                            element={
-                                <ProtectedRoute allowedRoles={["client"]}>
-                                    <ClientDashboard />
-                                </ProtectedRoute>
-                            }
-                        />
+                            {/* Rute Client */}
+                            <Route
+                                path="/client/dashboard"
+                                element={
+                                    <ProtectedRoute allowedRoles={["client"]}>
+                                        <ClientDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
 
-                        {/* Rute Payment Tracking untuk Client */}
-                        <Route
-                            path="/client/payments"
-                            element={
-                                <ProtectedRoute allowedRoles={["client"]}>
-                                    <PaymentTrackingPage />
-                                </ProtectedRoute>
-                            }
-                        />
+                            {/* Rute Payment Tracking untuk Client */}
+                            <Route
+                                path="/client/payments"
+                                element={
+                                    <ProtectedRoute allowedRoles={["client"]}>
+                                        <PaymentTrackingPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                        </Route>
 
                         {/* Fallback */}
                         <Route

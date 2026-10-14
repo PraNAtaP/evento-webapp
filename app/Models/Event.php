@@ -3,29 +3,54 @@
 namespace App\Models;
 
 use Database\Factories\EventFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable([
-    'client_id',
-    'event_name',
-    'category',
-    'guest_count',
-    'budget',
-    'has_own_venue',
-    'venue',
-    'event_date',
-    'is_multi_day',
-    'end_date',
-    'kanban_status',
-])]
 class Event extends Model
 {
     /** @use HasFactory<EventFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'client_id',
+        'event_name',
+        'category',
+        'guest_count',
+        'estimated_budget',
+        'agreed_price',
+        'dp_percentage',
+        'budget',
+        'has_own_venue',
+        'venue',
+        'lat',
+        'lng',
+        'event_date',
+        'is_multi_day',
+        'end_date',
+        'kanban_status',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'budget',
+        'status',
+        'quotation_total',
+        'paid_amount',
+        'paid_percentage',
+        'payment_badge',
+    ];
 
     /**
      * Aturan batas minimal hari pemesanan (Lead Time) per kategori:
@@ -52,7 +77,109 @@ class Event extends Model
             'is_multi_day' => 'boolean',
             'has_own_venue' => 'boolean',
             'guest_count' => 'integer',
-            'budget' => 'decimal:2',
+            'estimated_budget' => 'decimal:2',
+            'agreed_price' => 'decimal:2',
+            'dp_percentage' => 'decimal:2',
+            'lat' => 'float',
+            'lng' => 'float',
+        ];
+    }
+
+    /**
+     * Alias atribut status untuk kompatibilitas ke kanban_status.
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->kanban_status,
+            set: fn ($value) => ['kanban_status' => $value]
+        );
+    }
+
+    /**
+     * Alias atribut budget untuk kompatibilitas ke estimated_budget.
+     */
+    protected function budget(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->estimated_budget,
+            set: fn ($value) => ['estimated_budget' => $value]
+        );
+    }
+
+    /**
+     * Accessor: Total penawaran dari vendor assignments aktif (tidak rejected).
+     */
+    public function getQuotationTotalAttribute(): float
+    {
+        return (float) $this->vendorAssignments()
+            ->where('eo_offer_status', '!=', 'rejected')
+            ->sum('locked_price');
+    }
+
+    /**
+     * Accessor: Total nominal pembayaran yang berstatus 'paid'.
+     */
+    public function getPaidAmountAttribute(): float
+    {
+        return (float) $this->payments()
+            ->where('status', 'paid')
+            ->sum('nominal');
+    }
+
+    /**
+     * Accessor: Persentase pembayaran terhadap agreed_price.
+     */
+    public function getPaidPercentageAttribute(): int
+    {
+        $agreed = (float) ($this->agreed_price ?? 0);
+
+        if ($agreed <= 0) {
+            return 0;
+        }
+
+        return (int) round(($this->paid_amount / $agreed) * 100);
+    }
+
+    /**
+     * Accessor: Label dan styling badge pembayaran.
+     *
+     * @return array{label: string, percentage: int, badge_class: string}
+     */
+    public function getPaymentBadgeAttribute(): array
+    {
+        $percentage = $this->paid_percentage;
+        $paid = $this->paid_amount;
+        $agreed = (float) ($this->agreed_price ?? 0);
+
+        if ($paid <= 0) {
+            return [
+                'label' => 'Belum Bayar',
+                'percentage' => 0,
+                'badge_class' => 'bg-rose-50 text-rose-700 border-rose-200',
+            ];
+        }
+
+        if ($percentage >= 100 || ($agreed > 0 && $paid >= $agreed)) {
+            return [
+                'label' => 'Lunas (100%)',
+                'percentage' => 100,
+                'badge_class' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            ];
+        }
+
+        if ($percentage <= 50) {
+            return [
+                'label' => "DP Lunas ({$percentage}%)",
+                'percentage' => $percentage,
+                'badge_class' => 'bg-blue-50 text-blue-700 border-blue-200',
+            ];
+        }
+
+        return [
+            'label' => "Termin ({$percentage}%)",
+            'percentage' => $percentage,
+            'badge_class' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
         ];
     }
 

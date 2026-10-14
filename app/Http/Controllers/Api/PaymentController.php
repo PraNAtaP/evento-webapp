@@ -56,7 +56,7 @@ class PaymentController extends Controller
         }
 
         $path = $request->file('payment_proof')
-                        ->store('payment-proofs', 'public');
+            ->store('payment-proofs', 'public');
 
         $payment->update([
             'payment_proof_url' => $path,
@@ -89,6 +89,13 @@ class PaymentController extends Controller
                 'verified_at' => now(),
                 'rejection_note' => null,
             ]);
+
+            // Jika pembayaran DP diverifikasi dan acara sedang awaiting_dp, otomatis transisi ke on_progress
+            if ($payment->payment_type === 'dp' && $payment->event->kanban_status === 'awaiting_dp') {
+                $payment->event->update([
+                    'kanban_status' => 'on_progress',
+                ]);
+            }
 
             $message = 'Pembayaran berhasil diverifikasi sebagai LUNAS.';
         } else {

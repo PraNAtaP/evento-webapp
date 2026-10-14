@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { checkRangeOverlap, formatDateToDMY, formatDateToYMD } from "./BookingCalendar";
+import LocationPicker from "../location/LocationPicker";
 
 /**
  * Komponen Form Pemesanan Acara untuk Klien.
@@ -16,6 +17,7 @@ import { checkRangeOverlap, formatDateToDMY, formatDateToYMD } from "./BookingCa
  * @param {function():void} [props.onBookingSuccess] - Callback saat booking berhasil dibuat
  * @param {string} [props.category] - Kategori terpilih (wedding, seminar, birthday)
  * @param {function(string):void} [props.onCategoryChange] - Callback saat kategori berubah
+ * @param {{has_own_venue?: boolean, venue?: string|null, lat?: number|string|null, lng?: number|string|null}} [props.initialEvent] - Data awal (mis. saat edit) untuk venue & titik lokasi
  */
 export default function BookingForm({
     selectedDate,
@@ -26,13 +28,19 @@ export default function BookingForm({
     onBookingSuccess,
     category: propCategory,
     onCategoryChange,
+    initialEvent,
 }) {
     const [eventName, setEventName] = useState("");
     const [internalCategory, setInternalCategory] = useState("wedding");
     const [guestCount, setGuestCount] = useState("");
     const [budget, setBudget] = useState("");
-    const [hasOwnVenue, setHasOwnVenue] = useState(false);
-    const [venue, setVenue] = useState("");
+    const [hasOwnVenue, setHasOwnVenue] = useState(Boolean(initialEvent?.has_own_venue));
+    const [venue, setVenue] = useState(initialEvent?.venue ?? "");
+    const [location, setLocation] = useState(() =>
+        initialEvent?.lat != null && initialEvent?.lng != null
+            ? { lat: Number(initialEvent.lat), lng: Number(initialEvent.lng) }
+            : null
+    );
 
     const [internalIsMultiDay, setInternalIsMultiDay] = useState(false);
     const [customEndDate, setCustomEndDate] = useState("");
@@ -70,6 +78,14 @@ export default function BookingForm({
         }
         if (!checked) {
             setCustomEndDate("");
+        }
+    };
+
+    // Reset titik lokasi saat checkbox venue sendiri di-uncheck
+    const handleOwnVenueToggle = (checked) => {
+        setHasOwnVenue(checked);
+        if (!checked) {
+            setLocation(null);
         }
     };
 
@@ -170,6 +186,9 @@ export default function BookingForm({
         if (hasOwnVenue && !venue.trim()) {
             errors.venue = ["Nama gedung atau alamat lokasi acara wajib diisi jika sudah memiliki lokasi sendiri."];
         }
+        if (hasOwnVenue && !location) {
+            errors.lat = ["Pilih titik lokasi venue di peta."];
+        }
 
         if (!formattedStartDate) {
             setErrorMessage("Silakan pilih tanggal acara terlebih dahulu pada kalender.");
@@ -202,6 +221,8 @@ export default function BookingForm({
                 budget: parseFloat(budget),
                 has_own_venue: Boolean(hasOwnVenue),
                 venue: hasOwnVenue ? venue.trim() : null,
+                lat: hasOwnVenue && location ? location.lat : null,
+                lng: hasOwnVenue && location ? location.lng : null,
                 event_date: formattedStartDate,
                 is_multi_day: Boolean(isMultiDay),
                 end_date: isMultiDay && effectiveEndDateStr ? effectiveEndDateStr : null,
@@ -219,6 +240,7 @@ export default function BookingForm({
             setBudget("");
             setHasOwnVenue(false);
             setVenue("");
+            setLocation(null);
             setCustomEndDate("");
 
             if (onBookingSuccess) {
@@ -246,15 +268,15 @@ export default function BookingForm({
     };
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col gap-5">
+        <div className="bg-white rounded-2xl border border-[#E8E2D7] p-6 shadow-xs flex flex-col gap-5">
             <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-[#738075] uppercase tracking-wider">
                     Formulir Pemesanan
                 </span>
-                <h3 className="text-lg font-bold text-slate-900 mt-0.5">
-                    Buat Jadwal Acara Baru
+                <h3 className="text-lg font-bold text-[#2F3931] mt-0.5">
+                    Ajukan Acara Baru
                 </h3>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-[#738075] mt-1">
                     Lengkapi detail acara dan pastikan rentang tanggal tidak bertabrakan dengan jadwal yang sudah ada.
                 </p>
             </div>
@@ -543,7 +565,7 @@ export default function BookingForm({
                             id="hasOwnVenue"
                             type="checkbox"
                             checked={hasOwnVenue}
-                            onChange={(e) => setHasOwnVenue(e.target.checked)}
+                            onChange={(e) => handleOwnVenueToggle(e.target.checked)}
                             disabled={isSubmitting}
                             className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
                         />
@@ -579,22 +601,41 @@ export default function BookingForm({
                                 {fieldErrors.venue[0]}
                             </p>
                         )}
+
+                        {/* Titik Lokasi Venue (Map Picker) */}
+                        <div className="mt-4">
+                            <span className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Titik Lokasi Venue <span className="text-rose-500">*</span>
+                            </span>
+                            <LocationPicker
+                                value={location}
+                                onChange={setLocation}
+                                disabled={isSubmitting}
+                                hasError={Boolean(fieldErrors.lat || fieldErrors.lng)}
+                                searchQuery={venue}
+                            />
+                            {(fieldErrors.lat || fieldErrors.lng) && (
+                                <p className="text-[11px] text-rose-600 mt-1">
+                                    {(fieldErrors.lat || fieldErrors.lng)[0]}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 )}
 
-                {/* Tombol Submit */}
+                {/* Tombol Submit (Warna Pastel Peach #F3C3B2 Sesuai Mockup 1) */}
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="mt-2 w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                    className="mt-2 w-full px-4 py-3 bg-[#F3C3B2] hover:bg-[#EAAFA0] disabled:bg-[#F3C3B2]/50 text-[#2F3931] font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed border border-[#E8CEB2]"
                 >
                     {isSubmitting ? (
                         <>
-                            <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            <span className="w-3.5 h-3.5 border-2 border-[#2F3931] border-t-transparent rounded-full animate-spin"></span>
                             <span>Memproses Booking...</span>
                         </>
                     ) : (
-                        <span>Ajukan Booking Acara</span>
+                        <span>Ajukan Acara</span>
                     )}
                 </button>
             </form>
