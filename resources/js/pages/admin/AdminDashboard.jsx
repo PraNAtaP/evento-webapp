@@ -203,7 +203,63 @@ export default function AdminDashboard() {
                             Disarankan menyiapkan tenda cadangan untuk area outdoor.
                         </p>
                     </div>
+{/* Kartu Verifikasi Pembayaran */}
+<Link
+    to="/admin/payments"
+    className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
+>
+    <div className="absolute right-0 top-0 translate-x-4 -translate-y-4 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
 
+    <div>
+        <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center mb-4">
+            <svg
+                width="24"
+                height="24"
+                style={{ minWidth: 24, minHeight: 24 }}
+                className="w-6 h-6 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+            >
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+            </svg>
+        </div>
+        <span className="text-xs uppercase font-bold tracking-wider text-emerald-200">
+            Pembayaran
+        </span>
+        <h2 className="text-xl font-bold mt-1 text-white">
+            Verifikasi Pembayaran
+        </h2>
+        <p className="text-xs text-emerald-100 mt-2 leading-relaxed">
+            Periksa bukti transfer dari klien dan tandai status Lunas atau Tolak untuk setiap tagihan DP & pelunasan.
+        </p>
+    </div>
+
+    <div className="mt-6 flex items-center gap-2 text-xs font-bold text-white group-hover:translate-x-1 transition-transform">
+        <span>Buka Verifikasi</span>
+        <svg
+            width="16"
+            height="16"
+            style={{ minWidth: 16, minHeight: 16 }}
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2.5"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+            />
+        </svg>
+    </div>
+</Link>
                     {/* Tabel Performa Vendor */}
                     <div className="bg-white rounded-2xl p-5 border border-[#E8E2D7] shadow-xs">
                         <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#E8E2D7]">

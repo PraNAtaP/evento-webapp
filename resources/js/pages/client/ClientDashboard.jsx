@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
@@ -205,8 +206,42 @@ export default function ClientDashboard() {
                         </div>
                     </div>
 
-                    {/* Kolom Kanan: Form Input Booking */}
+                    {/* Kolom Kanan: Tombol Pembayaran + Form Booking */}
                     <div className="lg:col-span-5 flex flex-col gap-6">
+                        {/* Tombol navigasi ke Payment Tracking */}
+                        <Link
+                            to="/client/payments"
+                            className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl p-5 shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-between group"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p className="text-xs uppercase font-bold tracking-wider text-emerald-200">
+                                        Pembayaran
+                                    </p>
+                                    <p className="font-bold text-white">Rincian Pembayaran</p>
+                                </div>
+                            </div>
+                            <span className="text-xs font-bold text-white group-hover:translate-x-1 transition-transform">
+                                Buka &rarr;
+                            </span>
+                        </Link>
+
                         <BookingForm
                             selectedDate={selectedDate}
                             onDateChange={setSelectedDate}
@@ -222,4 +257,3 @@ export default function ClientDashboard() {
         </div>
     );
 }
-

@@ -1,9 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../../api/axios';
-import PaymentCard from '../../components/payment/PaymentCard';
+    import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+    import { useNavigate } from 'react-router-dom';
+    import api from '../../api/axios';
+    import PaymentCard from '../../components/payment/PaymentCard';
 
 export default function PaymentVerificationPage() {
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['payments'],
@@ -103,6 +105,28 @@ export default function PaymentVerificationPage() {
                     ))}
                 </div>
             )}
+
+        {/* Tombol Kembali di bawah */}
+        <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-blue-600 mt-6 transition-colors cursor-pointer"
+        >
+            <svg
+            width="16"
+            height="16"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2"
+            >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+            </svg>
+            Kembali
+        </button>
         </div>
     );
 }
