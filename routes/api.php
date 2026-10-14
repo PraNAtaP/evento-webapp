@@ -61,6 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:vendor')->group(function () {
         Route::get('/vendor/job-offers', [VendorJobController::class, 'index'])
             ->name('api.vendor.job-offers.index');
+
+        Route::patch('/vendor/job-offers/{assignment}/response', [VendorJobController::class, 'respond'])
+            ->name('api.vendor.job-offers.respond');
     });
 
     // Modul Payment Tracking (Nety)
