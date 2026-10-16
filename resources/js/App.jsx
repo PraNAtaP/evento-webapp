@@ -11,6 +11,7 @@ import VendorDashboard from "./pages/vendor/VendorDashboard";
 import VendorPackageForm from "./pages/vendor/VendorPackageForm";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
+import OfferReviewPage from "./pages/client/OfferReviewPage";
 
 const queryClient = new QueryClient();
 
@@ -140,7 +141,17 @@ export default function App() {
                                     </ProtectedRoute>
                                 }
                             />
-                        </Route>
+    
+<Route
+    path="/client/offers"
+    element={
+        <ProtectedRoute allowedRoles={["client"]}>
+            <OfferReviewPage />
+        </ProtectedRoute>
+    }
+/>
+                            </Route>
+                            
 
                         {/* Fallback */}
                         <Route
