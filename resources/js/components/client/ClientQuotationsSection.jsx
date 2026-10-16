@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 import { formatEventDate, formatRupiah } from "../../data/kanbanData";
@@ -144,57 +145,16 @@ export default function ClientQuotationsSection() {
                                 </div>
                             </div>
 
-                            {/* Rincian Paket Vendor yang Diajukan */}
-                            {evt.vendor_assignments?.length > 0 && (
-                                <div className="bg-white rounded-lg p-3 border border-slate-200/80">
-                                    <h4 className="text-[11px] font-bold text-slate-700 mb-2 uppercase tracking-wider">
-                                        Rincian Layanan Vendor:
-                                    </h4>
-                                    <div className="flex flex-col gap-2">
-                                        {evt.vendor_assignments.map((asg) => (
-                                            <div
-                                                key={asg.id}
-                                                className="flex items-center justify-between text-xs py-1 border-b border-slate-100 last:border-b-0"
-                                            >
-                                                <div>
-                                                    <span className="font-semibold text-slate-800">
-                                                        {asg.vendor?.business_name || "Vendor"}
-                                                    </span>
-                                                    <span className="text-slate-400 mx-1.5">•</span>
-                                                    <span className="text-slate-600">
-                                                        {asg.package?.package_name || "Paket Layanan"}
-                                                    </span>
-                                                </div>
-                                                <span className="font-bold text-slate-700">
-                                                    {formatRupiah(Number(asg.locked_price))}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <p className="text-[11px] text-slate-500 mt-2.5 pt-2 border-t border-slate-100">
-                                        * Estimasi DP yang harus dibayarkan setelah persetujuan: <strong>{dpPercent}% ({formatRupiah(dpEstimate)})</strong>.
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Tombol Aksi Persetujuan & Permintaan Revisi */}
-                            <div className="flex items-center justify-end gap-3 pt-1">
-                                <button
-                                    onClick={() => setSelectedEventForRevision(evt)}
-                                    disabled={isSubmitting}
-                                    className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 rounded-xl border border-slate-300 transition-colors cursor-pointer"
-                                >
-                                    Minta Revisi
-                                </button>
-
-                                <button
-                                    onClick={() => handleApprove(evt.id)}
-                                    disabled={isSubmitting}
-                                    className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition-colors cursor-pointer"
-                                >
-                                    Setujui Penawaran
-                                </button>
-                            </div>
+{/* Tombol Navigasi ke Halaman Detail */}
+<div className="flex items-center justify-end pt-1">
+    <Link
+        to="/client/offers"
+        className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+    >
+        <span>Lihat Detail & Review</span>
+        <span>→</span>
+    </Link>
+</div>
                         </div>
                     );
                 })}
