@@ -1,7 +1,7 @@
 import { useState } from "react";
 import KanbanCard from "./KanbanCard";
 
-export default function KanbanColumn({ column, cards = [], onMoveCard }) {
+export default function KanbanColumn({ column, cards = [], onMoveCard, onSelectCard }) {
     const [isDragOver, setIsDragOver] = useState(false);
 
     const handleDragOver = (e) => {
@@ -72,7 +72,9 @@ export default function KanbanColumn({ column, cards = [], onMoveCard }) {
             {/* List Kartu */}
             <div className="flex flex-col gap-3 overflow-y-auto max-h-[calc(100vh-270px)] pr-0.5">
                 {cards.length > 0 ? (
-                    cards.map((card) => <KanbanCard key={card.id} card={card} />)
+                    cards.map((card) => (
+                        <KanbanCard key={card.id} card={card} onSelectCard={onSelectCard} />
+                    ))
                 ) : (
                     <div className="py-8 px-4 text-center border-2 border-dashed border-slate-200 rounded-xl bg-white/40">
                         <svg

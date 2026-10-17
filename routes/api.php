@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ClientEventController;
+use App\Http\Controllers\Api\EventInspectorController;
 use App\Http\Controllers\Api\EventSummaryController;
 use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
@@ -33,6 +34,10 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.admin.kanban.index');
         Route::patch('/admin/kanban/{event}/move', [KanbanController::class, 'move'])
             ->name('api.admin.kanban.move');
+
+        // Board Inspector (read-only detail event)
+        Route::get('/events/{event}', [EventInspectorController::class, 'show'])
+            ->name('api.events.show');
     });
 
     // Booking Acara (Modul Klien - Dian)
