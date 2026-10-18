@@ -5,6 +5,7 @@ export default function KanbanBoard({
     columns = KANBAN_COLUMNS,
     cards = [],
     onMoveCard,
+    onSelectCard,
 }) {
     return (
         <div className="w-full">
@@ -22,6 +23,7 @@ export default function KanbanBoard({
                                 column={column}
                                 cards={columnCards}
                                 onMoveCard={onMoveCard}
+                                onSelectCard={onSelectCard}
                             />
                         );
                     })}

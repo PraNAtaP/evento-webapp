@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import KanbanBoard from "../../components/kanban/KanbanBoard";
+import BoardInspector from "../../components/kanban/BoardInspector";
 import {
     DUMMY_KANBAN_EVENTS,
     EVENT_CATEGORIES,
@@ -16,6 +17,7 @@ export default function KanbanPage() {
     const [actionError, setActionError] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
+    const [selectedEventId, setSelectedEventId] = useState(null);
 
     const fetchEvents = async () => {
         if (isExplicitDummy) return;
@@ -257,9 +259,16 @@ export default function KanbanPage() {
                     <KanbanBoard
                         cards={filteredEvents}
                         onMoveCard={handleMoveCard}
+                        onSelectCard={(card) => setSelectedEventId(card.id)}
                     />
                 </div>
             )}
+
+            {/* Board Inspector (read-only detail event) */}
+            <BoardInspector
+                eventId={selectedEventId}
+                onClose={() => setSelectedEventId(null)}
+            />
 
             {/* Modal Input Persentase DP saat kirim penawaran ke klien */}
             {dpModalData && (
