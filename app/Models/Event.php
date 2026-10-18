@@ -11,6 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Event extends Model
 {
+    /**
+     * Status kanban saat daftar vendor boleh ditambah/dihapus.
+     */
+    public const VENDOR_MANAGEABLE_STATUS = 'drafting_quotation';
+
     /** @use HasFactory<EventFactory> */
     use HasFactory;
 
@@ -209,6 +214,63 @@ class Event extends Model
     public function vendorAssignments(): HasMany
     {
         return $this->hasMany(EventVendorAssignment::class);
+    }
+
+    /**
+     * Apakah daftar vendor event ini boleh ditambah/dihapus (hanya saat Penyusunan Penawaran).
+     */
+    public function canManageVendors(): bool
+    {
+        return $this->kanban_status === self::VENDOR_MANAGEABLE_STATUS;
+    }
+
+    /**
+     * Apakah section Vendor ditampilkan (tidak untuk kolom Request).
+     */
+    public function showsVendorSection(): bool
+    {
+        return $this->kanban_status !== 'request';
+    }
+
+    /**
+     * Daftar alasan mengapa penawaran belum dapat dikirim ke klien (hanya dihitung saat Penyusunan Penawaran).
+     * Memakai bahasa Indonesia sehari-hari tanpa istilah teknis accepted/pending.
+     *
+     * @return array<int, string>
+     */
+    public function quotationBlockers(): array
+    {
+        if ($this->kanban_status !== self::VENDOR_MANAGEABLE_STATUS) {
+            return [];
+        }
+
+        $assignments = $this->relationLoaded('vendorAssignments')
+            ? $this->vendorAssignments
+            : $this->vendorAssignments()->get();
+
+        $blockers = [];
+
+        $hasAccepted = $assignments->contains(fn ($a) => $a->eo_offer_status === 'accepted');
+        if (! $hasAccepted) {
+            $blockers[] = 'Belum ada vendor yang menerima tawaran.';
+        }
+
+        $pendingCount = $assignments->filter(fn ($a) => $a->eo_offer_status === 'pending')->count();
+        if ($pendingCount > 0) {
+            $blockers[] = $pendingCount === 1
+                ? '1 vendor belum merespons tawaran.'
+                : "{$pendingCount} vendor belum merespons tawaran.";
+        }
+
+        return $blockers;
+    }
+
+    /**
+     * Apakah penawaran untuk event ini sudah memenuhi syarat untuk dikirim ke klien.
+     */
+    public function canSendQuotation(): bool
+    {
+        return $this->kanban_status === self::VENDOR_MANAGEABLE_STATUS && empty($this->quotationBlockers());
     }
 
     /**

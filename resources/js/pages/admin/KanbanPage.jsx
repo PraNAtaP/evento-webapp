@@ -137,6 +137,15 @@ export default function KanbanPage() {
         return matchesCategory && matchesSearch;
     });
 
+    const handleEventUpdated = (updatedEvent) => {
+        if (!updatedEvent) return;
+        setEvents((prevEvents) =>
+            prevEvents.map((evt) =>
+                String(evt.id) === String(updatedEvent.id) ? updatedEvent : evt
+            )
+        );
+    };
+
     return (
         <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">
             {/* Header Title */}
@@ -268,6 +277,7 @@ export default function KanbanPage() {
             <BoardInspector
                 eventId={selectedEventId}
                 onClose={() => setSelectedEventId(null)}
+                onQuotationSent={handleEventUpdated}
             />
 
             {/* Modal Input Persentase DP saat kirim penawaran ke klien */}

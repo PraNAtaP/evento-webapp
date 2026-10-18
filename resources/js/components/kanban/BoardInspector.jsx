@@ -12,6 +12,7 @@ import {
 } from "../../utils/formatters";
 import InspectorField from "./InspectorField";
 import InspectorSection from "./InspectorSection";
+import InspectorVendorSection from "./InspectorVendorSection";
 
 const TITLE_ID = "board-inspector-title";
 const FOCUSABLE_SELECTOR =
@@ -32,12 +33,38 @@ function SkeletonBlock() {
     );
 }
 
-function InspectorPanel({ eventId, onClose }) {
+function InspectorPanel({ eventId, onClose, onQuotationSent }) {
     const panelRef = useRef(null);
     const [status, setStatus] = useState("loading");
     const [event, setEvent] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
     const [retryKey, setRetryKey] = useState(0);
+    const [refreshError, setRefreshError] = useState("");
+    // true selama pemilih vendor / dialog kirim penawaran terbuka: Esc/Tab ditangani modal itu
+    const pickerOpenRef = useRef(false);
+    const eventIdRef = useRef(eventId);
+    eventIdRef.current = eventId;
+
+    const handlePickerToggle = useCallback((open) => {
+        pickerOpenRef.current = open;
+    }, []);
+
+    // Ambil ulang data tanpa menampilkan skeleton (dipakai setelah tambah/hapus vendor)
+    const refreshEvent = useCallback(async () => {
+        try {
+            const response = await api.get(`/events/${eventId}`);
+            if (eventIdRef.current !== eventId) return false;
+
+            setEvent(response.data.data);
+            setRefreshError("");
+            return true;
+        } catch {
+            if (eventIdRef.current === eventId) {
+                setRefreshError("Perubahan tersimpan, tetapi data gagal dimuat ulang.");
+            }
+            return false;
+        }
+    }, [eventId]);
 
     // Simpan fokus sebelumnya, kembalikan saat panel ditutup
     useEffect(() => {
@@ -59,6 +86,7 @@ function InspectorPanel({ eventId, onClose }) {
         const controller = new AbortController();
         setStatus("loading");
         setErrorMessage("");
+        setRefreshError("");
 
         api.get(`/events/${eventId}`, { signal: controller.signal })
             .then((response) => {
@@ -80,12 +108,19 @@ function InspectorPanel({ eventId, onClose }) {
         return () => controller.abort();
     }, [eventId, retryKey]);
 
+    const onCloseRef = useRef(onClose);
+    onCloseRef.current = onClose;
+
     // Esc menutup panel; Tab/Shift+Tab berputar di dalam panel (focus trap)
     const handleKeyDown = useCallback(
         (e) => {
+            // Modal pemilih vendor menangani Esc/Tab sendiri, atau event sudah ditangani
+            if (pickerOpenRef.current || e.defaultPrevented) return;
+
             if (e.key === "Escape") {
+                e.preventDefault();
                 e.stopPropagation();
-                onClose?.();
+                onCloseRef.current?.();
                 return;
             }
 
@@ -110,7 +145,7 @@ function InspectorPanel({ eventId, onClose }) {
                 first.focus();
             }
         },
-        [onClose]
+        []
     );
 
     useEffect(() => {
@@ -198,6 +233,30 @@ function InspectorPanel({ eventId, onClose }) {
                     <InspectorField label="Jumlah Tamu">{formatNumber(event.guest_count)}</InspectorField>
                     <InspectorField label="Estimasi Biaya">{formatRupiah(event.estimated_budget)}</InspectorField>
                 </InspectorSection>
+
+                {refreshError && (
+                    <div
+                        role="alert"
+                        className="mt-4 flex items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"
+                    >
+                        <span>{refreshError}</span>
+                        <button
+                            type="button"
+                            onClick={refreshEvent}
+                            className="shrink-0 font-semibold text-amber-900 underline"
+                        >
+                            Muat ulang
+                        </button>
+                    </div>
+                )}
+
+                <InspectorVendorSection
+                    key={event.id}
+                    event={event}
+                    onChanged={refreshEvent}
+                    onPickerToggle={handlePickerToggle}
+                    onQuotationSent={onQuotationSent}
+                />
             </div>
         );
     };
@@ -242,8 +301,8 @@ function InspectorPanel({ eventId, onClose }) {
     );
 }
 
-export default function BoardInspector({ eventId, onClose }) {
+export default function BoardInspector({ eventId, onClose, onQuotationSent }) {
     if (eventId === null || eventId === undefined) return null;
 
-    return <InspectorPanel eventId={eventId} onClose={onClose} />;
+    return <InspectorPanel eventId={eventId} onClose={onClose} onQuotationSent={onQuotationSent} />;
 }

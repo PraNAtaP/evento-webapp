@@ -16,7 +16,11 @@ class EventInspectorController extends Controller
      */
     public function show(Event $event): EventInspectorResource
     {
-        $event->load('client:id,name');
+        $event->load([
+            'client:id,name',
+            'vendorAssignments' => fn ($query) => $query->orderBy('id'),
+            'vendorAssignments.vendor:id,business_name,category',
+        ]);
 
         return new EventInspectorResource($event);
     }
