@@ -17,13 +17,27 @@ export default function ClientDashboard() {
     const queryClient = useQueryClient();
     const [events, setEvents] = useState([]);
 
+    // Ambil daftar kategori aktif dari database
+    const { data: dbCategories = [] } = useQuery({
+        queryKey: ["event-categories"],
+        queryFn: async () => {
+            const res = await api.get("/event-categories");
+            return res.data?.data || [];
+        },
+    });
+
     // Hitung tanggal minimal yang diizinkan sesuai H-min kategori
     const getMinDateForCategory = (cat) => {
-        const minDays = {
-            wedding: 60,
-            seminar: 30,
-            birthday: 14,
-        }[cat] || 1;
+        const found = dbCategories.find(
+            (c) => c.slug === cat || c.name.toLowerCase() === cat.toLowerCase()
+        );
+        const minDays = found
+            ? found.min_booking_days
+            : {
+                  wedding: 60,
+                  seminar: 30,
+                  birthday: 14,
+              }[cat] || 1;
 
         const date = new Date();
         date.setHours(0, 0, 0, 0);
@@ -203,7 +217,14 @@ export default function ClientDashboard() {
                             </div>
                         </div>
                         <div className="pt-2 border-t border-[#E8E2D7] text-[11px] text-[#738075] font-medium">
-                            * Batas persiapan: {category === "wedding" ? "Wedding (Minimal H-60)" : category === "seminar" ? "Seminar (Minimal H-30)" : "Birthday (Minimal H-14)"}.
+                            {(() => {
+                                const found = dbCategories.find(
+                                    (c) => c.slug === category || c.name.toLowerCase() === category.toLowerCase()
+                                );
+                                const name = found ? found.name : category.charAt(0).toUpperCase() + category.slice(1);
+                                const days = found ? found.min_booking_days : ({ wedding: 60, seminar: 30, birthday: 14 }[category] || 1);
+                                return `* Batas persiapan: ${name} (Minimal H-${days}).`;
+                            })()}
                         </div>
                     </div>
 

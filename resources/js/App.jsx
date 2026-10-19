@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import EventCategoryPage from "./pages/admin/EventCategoryPage";
 import KanbanPage from "./pages/admin/KanbanPage";
 import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
@@ -72,6 +73,16 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["eo"]}>
                                         <KanbanPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Rute Master Kategori Acara untuk EO */}
+                            <Route
+                                path="/admin/categories"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <EventCategoryPage />
                                     </ProtectedRoute>
                                 }
                             />

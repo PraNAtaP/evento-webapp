@@ -34,10 +34,26 @@ export default function BookingForm({
 }) {
     const [eventName, setEventName] = useState("");
     const [internalCategory, setInternalCategory] = useState("wedding");
+    const [dbCategories, setDbCategories] = useState([]);
     const [guestCount, setGuestCount] = useState("");
     const [budget, setBudget] = useState("");
     const [hasOwnVenue, setHasOwnVenue] = useState(Boolean(initialEvent?.has_own_venue));
     const [venue, setVenue] = useState(initialEvent?.venue ?? "");
+
+    // Ambil daftar kategori dinamis dari database (dengan fallback)
+    useEffect(() => {
+        let isMounted = true;
+        api.get("/event-categories")
+            .then((res) => {
+                if (isMounted && res.data?.data?.length > 0) {
+                    setDbCategories(res.data.data);
+                }
+            })
+            .catch(() => {});
+        return () => {
+            isMounted = false;
+        };
+    }, []);
     const [location, setLocation] = useState(() =>
         initialEvent?.lat != null && initialEvent?.lng != null
             ? { lat: Number(initialEvent.lat), lng: Number(initialEvent.lng) }
@@ -350,9 +366,19 @@ export default function BookingForm({
                             fieldErrors.category ? "border-rose-400 ring-1 ring-rose-200" : "border-slate-300"
                         } rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer`}
                     >
-                        <option value="wedding">Wedding / Pernikahan (Batas Minimal H-60)</option>
-                        <option value="seminar">Seminar / Konferensi (Batas Minimal H-30)</option>
-                        <option value="birthday">Birthday / Ulang Tahun (Batas Minimal H-14)</option>
+                        {dbCategories.length > 0 ? (
+                            dbCategories.map((cat) => (
+                                <option key={cat.id} value={cat.slug}>
+                                    {cat.name} (Batas Minimal H-{cat.min_booking_days})
+                                </option>
+                            ))
+                        ) : (
+                            <>
+                                <option value="wedding">Wedding / Pernikahan (Batas Minimal H-60)</option>
+                                <option value="seminar">Seminar / Konferensi (Batas Minimal H-30)</option>
+                                <option value="birthday">Birthday / Ulang Tahun (Batas Minimal H-14)</option>
+                            </>
+                        )}
                     </select>
                     {fieldErrors.category && (
                         <p className="text-[11px] text-rose-600 mt-1">
