@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Event;
+use App\Models\EventCategory;
 use Carbon\Carbon;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
@@ -55,6 +56,15 @@ class StoreBookingRequest extends FormRequest
                 'is_multi_day' => filter_var($this->input('is_multi_day'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $this->input('is_multi_day'),
             ]);
         }
+
+        if ($this->has('category') && is_string($this->input('category'))) {
+            $cat = EventCategory::where('slug', $this->input('category'))
+                ->orWhere('name', $this->input('category'))
+                ->first();
+            if ($cat) {
+                $this->merge(['category' => $cat->slug]);
+            }
+        }
     }
 
     /**
@@ -66,7 +76,7 @@ class StoreBookingRequest extends FormRequest
     {
         return [
             'event_name' => ['required', 'string', 'max:150'],
-            'category' => ['required', 'string', 'in:wedding,seminar,birthday'],
+            'category' => ['required', 'string', 'max:100'],
             'guest_count' => ['required', 'integer', 'min:1'],
             'budget' => ['required', 'numeric', 'min:0'],
             'has_own_venue' => ['required', 'boolean'],
@@ -95,22 +105,52 @@ class StoreBookingRequest extends FormRequest
             $isMultiDay = (bool) $this->input('is_multi_day', false);
             $endDateInput = $isMultiDay ? $this->input('end_date') : $eventDateInput;
 
-            // 1. Validasi Batas Minimal Pemesanan (H-min Dinamis)
-            if ($category && $eventDateInput && in_array($category, array_keys(Event::CATEGORY_MIN_DAYS))) {
-                try {
-                    $minDays = Event::CATEGORY_MIN_DAYS[$category];
-                    $minDate = Carbon::today()->addDays($minDays);
-                    $chosenDate = Carbon::parse($eventDateInput)->startOfDay();
+            // 1. Validasi Kategori dan Batas Minimal Pemesanan (H-min Dinamis dari Database)
+            if ($category) {
+                $categoryModel = EventCategory::query()
+                    ->where('slug', $category)
+                    ->orWhere('name', $category)
+                    ->first();
 
-                    if ($chosenDate->lt($minDate)) {
-                        $categoryLabel = ucfirst($category);
-                        $validator->errors()->add(
-                            'event_date',
-                            "Pemesanan kategori {$categoryLabel} minimal H-{$minDays} ({$minDays} hari sebelum acara)."
-                        );
+                $isValidCategory = false;
+                $minDays = 0;
+                $categoryLabel = ucfirst($category);
+
+                if ($categoryModel) {
+                    if (! $categoryModel->is_active) {
+                        $validator->errors()->add('category', 'Kategori acara yang dipilih sedang tidak aktif.');
+
+                        return;
                     }
-                } catch (\Exception $e) {
-                    // Ignore date parsing error, handled by date_format rule
+                    $isValidCategory = true;
+                    $minDays = (int) $categoryModel->min_booking_days;
+                    $categoryLabel = $categoryModel->name;
+                } elseif (array_key_exists(strtolower((string) $category), Event::CATEGORY_MIN_DAYS)) {
+                    $isValidCategory = true;
+                    $minDays = Event::CATEGORY_MIN_DAYS[strtolower((string) $category)];
+                    $categoryLabel = ucfirst($category);
+                }
+
+                if (! $isValidCategory) {
+                    $validator->errors()->add('category', 'Kategori acara harus salah satu dari kategori yang tersedia.');
+
+                    return;
+                }
+
+                if ($minDays > 0 && $eventDateInput) {
+                    try {
+                        $minDate = Carbon::today()->addDays($minDays);
+                        $chosenDate = Carbon::parse($eventDateInput)->startOfDay();
+
+                        if ($chosenDate->lt($minDate)) {
+                            $validator->errors()->add(
+                                'event_date',
+                                "Pemesanan kategori {$categoryLabel} minimal H-{$minDays} ({$minDays} hari sebelum acara)."
+                            );
+                        }
+                    } catch (\Exception $e) {
+                        // Ignore date parsing error, handled by date_format rule
+                    }
                 }
             }
 

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ClientEventController;
+use App\Http\Controllers\Api\EventCategoryController;
 use App\Http\Controllers\Api\EventInspectorController;
 use App\Http\Controllers\Api\EventSummaryController;
 use App\Http\Controllers\Api\KanbanController;
@@ -19,6 +20,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me'])->name('api.me');
     Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
 
+    // Kategori Acara Aktif (dapat dibaca oleh Klien dan EO)
+    Route::get('/event-categories', [EventCategoryController::class, 'index'])
+        ->name('api.event-categories.index');
+
     // Widget Musim (perkiraan musim Open-Meteo)
     Route::post('/musim', SeasonController::class)
         ->middleware('throttle:30,1')
@@ -28,12 +33,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/event-summary', [EventSummaryController::class, 'index'])
         ->name('api.admin.event-summary');
 
-    // Modul Kanban Acara (EO)
+    // Modul Master & Operasional EO
     Route::middleware('role:eo')->group(function () {
         Route::get('/admin/kanban', [KanbanController::class, 'index'])
             ->name('api.admin.kanban.index');
         Route::patch('/admin/kanban/{event}/move', [KanbanController::class, 'move'])
             ->name('api.admin.kanban.move');
+
+        // Master Data Kategori Acara (EO CRUD)
+        Route::get('/admin/event-categories', [EventCategoryController::class, 'adminIndex'])
+            ->name('api.admin.event-categories.index');
+        Route::post('/admin/event-categories', [EventCategoryController::class, 'store'])
+            ->name('api.admin.event-categories.store');
+        Route::get('/admin/event-categories/{eventCategory}', [EventCategoryController::class, 'show'])
+            ->name('api.admin.event-categories.show');
+        Route::put('/admin/event-categories/{eventCategory}', [EventCategoryController::class, 'update'])
+            ->name('api.admin.event-categories.update');
+        Route::delete('/admin/event-categories/{eventCategory}', [EventCategoryController::class, 'destroy'])
+            ->name('api.admin.event-categories.destroy');
 
         // Board Inspector (read-only detail event)
         Route::get('/events/{event}', [EventInspectorController::class, 'show'])

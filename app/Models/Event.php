@@ -185,10 +185,24 @@ class Event extends Model
 
     /**
      * Helper untuk mendapatkan batas minimal hari booking berdasarkan kategori.
+     * Mengambil dari tabel event_categories jika tersedia di database, atau fallback ke konstanta CATEGORY_MIN_DAYS.
      */
     public static function getMinBookingDays(?string $category): int
     {
-        return self::CATEGORY_MIN_DAYS[$category] ?? 0;
+        if (! $category) {
+            return 0;
+        }
+
+        $categoryModel = EventCategory::query()
+            ->where('slug', $category)
+            ->orWhere('name', $category)
+            ->first();
+
+        if ($categoryModel !== null) {
+            return (int) $categoryModel->min_booking_days;
+        }
+
+        return self::CATEGORY_MIN_DAYS[strtolower($category)] ?? 0;
     }
 
     /**
