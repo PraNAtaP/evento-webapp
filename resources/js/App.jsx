@@ -10,6 +10,7 @@ import KanbanPage from "./pages/admin/KanbanPage";
 import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import VendorPackageForm from "./pages/vendor/VendorPackageForm";
+import VendorJobOffers from "./pages/vendor/VendorJobOffers";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 import OfferReviewPage from "./pages/client/OfferReviewPage";
@@ -113,6 +114,16 @@ export default function App() {
                                 }
                             />
 
+                            {/* Halaman Tawaran Pekerjaan dan Pekerjaan Aktif */}
+                            <Route
+                                path="/vendor/job-offers"
+                                element={
+                                    <ProtectedRoute allowedRoles={["vendor"]}>
+                                        <VendorJobOffers />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                             {/* Form Tambah Paket Vendor */}
                             <Route
                                 path="/vendor/packages/create"
@@ -152,23 +163,23 @@ export default function App() {
                                     </ProtectedRoute>
                                 }
                             />
-    
-<Route
-    path="/client/offers"
-    element={
-        <ProtectedRoute allowedRoles={["client"]}>
-            <OfferReviewPage />
-        </ProtectedRoute>
-    }
-/>
-                            </Route>
-                            
 
-                        {/* Fallback */}
-                        <Route
-                            path="*"
-                            element={<Navigate to="/" replace />}
-                        />
+                            {/* Rute Review Tawaran untuk Client */} 
+                            <Route
+                                path="/client/offers"
+                                element={
+                                    <ProtectedRoute allowedRoles={["client"]}>
+                                        <OfferReviewPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            </Route>
+
+                            {/* Fallback */}
+                            <Route
+                                path="*"
+                                element={<Navigate to="/" replace />}
+                            />
                     </Routes>
                 </BrowserRouter>
             </AuthProvider>

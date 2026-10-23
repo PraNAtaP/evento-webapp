@@ -18,8 +18,12 @@ const ROUTE_TITLES = {
         subtitle: "Tinjau dan konfirmasi bukti transfer pembayaran DP dan pelunasan",
     },
     "/vendor/dashboard": {
-        title: "Katalog Penawaran Vendor",
-        subtitle: "Kelola paket penawaran jasa dan portofolio vendor Anda",
+        title: "Kelola Paket Jasa",
+        subtitle: "Kelola paket jasa, harga, foto, dan deskripsi yang ditawarkan",
+    },
+    "/vendor/job-offers": {
+        title: "Tawaran Pekerjaan",
+        subtitle: "Kelola tawaran dari EO dan pantau progres pekerjaan aktif",
     },
     "/vendor/packages/create": {
         title: "Tambah Paket Baru",
