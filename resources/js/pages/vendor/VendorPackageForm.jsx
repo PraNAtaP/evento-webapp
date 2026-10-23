@@ -23,6 +23,9 @@ export default function VendorPackageForm() {
     // Menyimpan foto yang sedang dilihat
     const [selectedImage, setSelectedImage] = useState(null);
 
+    // Status saat paket sedang disimpan
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     // Mengambil data paket berdasarkan id saat mode edit
     useEffect(() => {
         if (!isEdit) {
@@ -103,6 +106,11 @@ export default function VendorPackageForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Mencegah submit berulang
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+
         try {
             // Membuat FormData agar bisa mengirim data + foto
             const formData = new FormData();
@@ -177,6 +185,8 @@ export default function VendorPackageForm() {
                     "Gagal menyimpan paket. Silakan coba lagi."
                 );
             }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -185,8 +195,8 @@ export default function VendorPackageForm() {
             <div className="max-w-4xl mx-auto">
 
                 <div className="bg-white rounded-2xl p-6 md:p-8 border border-[#E8E2D7] shadow-xs">
-                
-                {/* Tombol Kembali */}
+
+                    {/* Tombol Kembali */}
                     <div className="mb-6">
                         <button
                             type="button"
@@ -218,7 +228,7 @@ export default function VendorPackageForm() {
                     {/* Header Form */}
                     <div className="mb-6">
                         <span className="inline-block text-[11px] font-bold text-[#33422A] bg-[#CFD8C4] px-3 py-0.5 rounded-full border border-[#B6C2AA] mb-1.5">
-                            KATALOG VENDOR
+                            Kelola Paket Jasa
                         </span>
                         <h1 className="text-xl font-extrabold text-[#2F3931] tracking-tight">
                             {isEdit
@@ -406,11 +416,18 @@ export default function VendorPackageForm() {
                         <div className="pt-3">
                             <button
                                 type="submit"
-                                className="bg-[#F3C3B2] hover:bg-[#ebb7a5] text-[#55271C] text-xs font-bold px-6 py-2.5 rounded-xl border border-[#E5B5A4] transition shadow-xs cursor-pointer"
+                                disabled={isSubmitting}
+                                className={`bg-[#F3C3B2] text-[#55271C] text-xs font-bold px-6 py-2.5 rounded-xl border border-[#E5B5A4] transition shadow-xs ${
+                                    isSubmitting
+                                        ? "opacity-70 cursor-not-allowed"
+                                        : "hover:bg-[#ebb7a5] cursor-pointer"
+                                }`}
                             >
-                                {isEdit
-                                    ? "Update Paket"
-                                    : "Tambah Paket"}
+                                {isSubmitting
+                                    ? "Menyimpan..."
+                                    : isEdit
+                                        ? "Update Paket"
+                                        : "Tambah Paket"}
                             </button>
                         </div>
                     </form>
