@@ -21,9 +21,12 @@ export default function VendorRegister() {
         category: "Catering & Jamuan",
         contact_number: "",
         address: "",
+        social_media: "",
+        agreement: false,
         description: "",
     });
 
+    const [showTermsModal, setShowTermsModal] = useState(false);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -40,8 +43,11 @@ export default function VendorRegister() {
     ];
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === "checkbox" ? checked : value,
+        }));
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: null }));
         }
@@ -58,6 +64,8 @@ export default function VendorRegister() {
             category: "Dekorasi & Florist",
             contact_number: `081234567${randomNum}`,
             address: `Jl. Melati Indah No. ${randomNum}, Kebayoran Baru, Jakarta Selatan`,
+            social_media: `@pesonakreasi${randomNum}`,
+            agreement: true,
             description: "Spesialis tata panggung pelaminan minimalis, pergola kaca, dan dekorasi tematik pernikahan.",
         });
         setErrors({});
@@ -72,6 +80,11 @@ export default function VendorRegister() {
             return;
         }
 
+        if (!formData.agreement) {
+            setErrors({ agreement: ["Anda wajib mencentang persetujuan Syarat & Ketentuan Kemitraan Vendor EVENTO."] });
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -83,6 +96,8 @@ export default function VendorRegister() {
                 category: formData.category,
                 contact_number: formData.contact_number,
                 address: formData.address,
+                social_media: formData.social_media,
+                agreement: formData.agreement,
                 description: formData.description,
             });
 
@@ -364,6 +379,30 @@ export default function VendorRegister() {
 
                                 <div>
                                     <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
+                                        Media Sosial Bisnis / Portofolio (Instagram / TikTok / Web) <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-3.5 top-2.5 text-[#738075] text-xs">📸</span>
+                                        <input
+                                            type="text"
+                                            name="social_media"
+                                            value={formData.social_media}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="cth: @pesonakreasi.decor atau instagram.com/pesonakreasi"
+                                            className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-[#2F3931] placeholder-[#98A29A] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition"
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-[#738075] mt-1">
+                                        Digunakan oleh tim kurator EO EVENTO untuk meninjau portofolio karya & kredibilitas usaha Anda.
+                                    </p>
+                                    {errors.social_media && (
+                                        <p className="text-[11px] text-red-600 mt-1">{errors.social_media[0]}</p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
                                         Alamat Lengkap Kantor / Studio <span className="text-red-500">*</span>
                                     </label>
                                     <textarea
@@ -396,11 +435,40 @@ export default function VendorRegister() {
                             </div>
                         </div>
 
+                        {/* Syarat & Ketentuan Kemitraan */}
+                        <div className="p-4 bg-[#FAF6F0]/80 rounded-2xl border border-[#E8E2D7] space-y-2">
+                            <div className="flex items-start gap-2.5">
+                                <input
+                                    type="checkbox"
+                                    id="agreement"
+                                    name="agreement"
+                                    checked={formData.agreement}
+                                    onChange={handleChange}
+                                    required
+                                    className="mt-0.5 w-4 h-4 text-[#657166] rounded border-[#BAC5AF] focus:ring-[#99CDD8] cursor-pointer"
+                                />
+                                <label htmlFor="agreement" className="text-xs text-[#2F3931] cursor-pointer leading-relaxed">
+                                    Saya menyetujui seluruh{" "}
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowTermsModal(true)}
+                                        className="font-bold text-[#657166] underline hover:text-[#2F3931] cursor-pointer"
+                                    >
+                                        Syarat & Ketentuan Kemitraan Vendor EVENTO
+                                    </button>{" "}
+                                    termasuk standar mutu layanan, kepatuhan jadwal acara, dan sistem pembayaran escrow. <span className="text-red-500">*</span>
+                                </label>
+                            </div>
+                            {errors.agreement && (
+                                <p className="text-[11px] text-red-600 pl-6">{errors.agreement[0]}</p>
+                            )}
+                        </div>
+
                         {/* Catatan Alur Verifikasi */}
                         <div className="p-3.5 bg-[#FAF6F0] rounded-2xl border border-[#E8E2D7] flex items-start gap-2.5 text-[11px] text-[#738075]">
                             <span className="text-base shrink-0">ℹ️</span>
                             <span>
-                                Setelah formulir dikirim, tim Event Organizer (EO) EVENTO akan memverifikasi data usaha Anda. Anda dapat langsung login dan memantau status persetujuan dari dasbor.
+                                Setelah formulir dikirim, tim Event Organizer (EO) EVENTO akan memverifikasi data usaha dan media sosial Anda. Notifikasi aktivasi akun akan dikirimkan ke email terdaftar via SMTP saat disetujui.
                             </span>
                         </div>
 
@@ -432,6 +500,65 @@ export default function VendorRegister() {
                         </div>
 
                     </form>
+                </div>
+            )}
+
+            {/* Modal Syarat & Ketentuan */}
+            {showTermsModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
+                    <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 border border-[#E8E2D7] shadow-xl max-h-[85vh] flex flex-col">
+                        <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D7]">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xl">📜</span>
+                                <h3 className="text-sm font-extrabold text-[#2F3931]">
+                                    Syarat & Ketentuan Kemitraan Vendor
+                                </h3>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowTermsModal(false)}
+                                className="w-7 h-7 rounded-full bg-[#FAF6F0] hover:bg-[#E8E2D7] text-[#738075] text-xs flex items-center justify-center cursor-pointer transition"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="overflow-y-auto py-4 space-y-3.5 text-xs text-[#556056] leading-relaxed pr-1">
+                            <div>
+                                <h4 className="font-bold text-[#2F3931] mb-1">1. Integritas & Standar Mutu Layanan</h4>
+                                <p>Vendor wajib menyediakan perlengkapan, konsumsi, atau jasa profesional sesuai dengan spesifikasi dan foto yang ditampilkan pada paket penawaran yang disetujui klien dan EO.</p>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-[#2F3931] mb-1">2. Kepatuhan Jadwal & Rundown Acara</h4>
+                                <p>Vendor berkomitmen hadir dan menyelesaikan proses *loading* atau persiapan minimal 2 jam sebelum acara dimulai sesuai timeline yang diatur oleh Event Organizer (EO).</p>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-[#2F3931] mb-1">3. Transaksi & Rekening Bersama (Escrow)</h4>
+                                <p>Demi keamanan kedua pihak, seluruh transaksi dilakukan melalui sistem pembayaran terproteksi EVENTO. Dana pembayaran akan diteruskan kepada vendor secara bertahap setelah penyelesaian pekerjaan diverifikasi oleh EO.</p>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-[#2F3931] mb-1">4. Verifikasi & Kurasi Media Sosial</h4>
+                                <p>Tim kurator EO berhak memeriksa portofolio akun media sosial vendor dan melakukan seleksi kualifikasi sebelum menyetujui akun vendor untuk aktif di platform EVENTO.</p>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-[#2F3931] mb-1">5. Notifikasi & Komunikasi Resmi</h4>
+                                <p>Pemberitahuan resmi terkait persetujuan akun, penugasan acara, dan pencairan pembayaran akan dikirimkan melalui sistem aplikasi serta email resmi yang terdaftar via SMTP EVENTO.</p>
+                            </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-[#E8E2D7] flex items-center justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setFormData((prev) => ({ ...prev, agreement: true }));
+                                    setShowTermsModal(false);
+                                }}
+                                className="w-full py-2.5 bg-[#657166] hover:bg-[#556056] text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                            >
+                                Saya Mengerti & Setujui Ketentuan Ini
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

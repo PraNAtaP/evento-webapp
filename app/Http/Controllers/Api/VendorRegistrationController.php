@@ -25,6 +25,8 @@ class VendorRegistrationController extends Controller
             'category' => ['required', 'string', 'max:50'],
             'contact_number' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string'],
+            'social_media' => ['required', 'string', 'max:255'],
+            'agreement' => ['accepted'],
             'description' => ['nullable', 'string'],
             'image_url' => ['nullable', 'string', 'max:255'],
         ], [
@@ -34,6 +36,8 @@ class VendorRegistrationController extends Controller
             'category.required' => 'Kategori layanan vendor wajib dipilih.',
             'contact_number.required' => 'Nomor kontak / WhatsApp vendor wajib diisi.',
             'address.required' => 'Alamat lengkap vendor wajib diisi.',
+            'social_media.required' => 'Media sosial (Instagram / TikTok / Website) wajib diisi untuk verifikasi kurator EO.',
+            'agreement.accepted' => 'Anda wajib menyetujui syarat & ketentuan kemitraan vendor EVENTO.',
         ]);
 
         $result = DB::transaction(function () use ($validated) {
@@ -50,6 +54,8 @@ class VendorRegistrationController extends Controller
                 'category' => $validated['category'],
                 'contact_number' => $validated['contact_number'],
                 'address' => $validated['address'],
+                'social_media' => $validated['social_media'],
+                'agreement_accepted_at' => now(),
                 'description' => $validated['description'] ?? null,
                 'image_url' => $validated['image_url'] ?? null,
                 'status' => Vendor::STATUS_PENDING,
@@ -78,6 +84,8 @@ class VendorRegistrationController extends Controller
                     'category' => $result['vendor']->category,
                     'contact_number' => $result['vendor']->contact_number,
                     'address' => $result['vendor']->address,
+                    'social_media' => $result['vendor']->social_media,
+                    'agreement_accepted_at' => $result['vendor']->agreement_accepted_at,
                     'description' => $result['vendor']->description,
                     'status' => $result['vendor']->status,
                     'rejection_reason' => $result['vendor']->rejection_reason,

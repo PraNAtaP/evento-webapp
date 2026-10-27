@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\VendorApprovedMail;
 use App\Models\Vendor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class AdminVendorController extends Controller
 {
@@ -32,6 +35,7 @@ class AdminVendorController extends Controller
                     ->orWhere('category', $operator, "%{$search}%")
                     ->orWhere('contact_number', $operator, "%{$search}%")
                     ->orWhere('address', $operator, "%{$search}%")
+                    ->orWhere('social_media', $operator, "%{$search}%")
                     ->orWhereHas('user', function ($userQuery) use ($search, $operator) {
                         $userQuery->where('name', $operator, "%{$search}%")
                             ->orWhere('email', $operator, "%{$search}%");
@@ -68,7 +72,7 @@ class AdminVendorController extends Controller
     }
 
     /**
-     * Approve a vendor's registration.
+     * Approve a vendor's registration and send notification email to vendor.
      */
     public function approve(Request $request, Vendor $vendor): JsonResponse
     {
@@ -81,9 +85,29 @@ class AdminVendorController extends Controller
 
         $vendor->load(['user:id,name,email', 'approver:id,name,email']);
 
+        $emailSent = false;
+        $emailErrorMessage = null;
+
+        // Send email notification to vendor via SMTP
+        if ($vendor->user && $vendor->user->email) {
+            try {
+                Mail::to($vendor->user->email)->send(new VendorApprovedMail($vendor));
+                $emailSent = true;
+            } catch (\Throwable $e) {
+                $emailErrorMessage = $e->getMessage();
+                Log::warning("Gagal mengirim email konfirmasi persetujuan vendor via SMTP ke {$vendor->user->email}: ".$emailErrorMessage);
+            }
+        }
+
+        $message = $emailSent
+            ? "Pendaftaran vendor '{$vendor->business_name}' berhasil disetujui. Notifikasi email telah terkirim ke {$vendor->user->email}."
+            : "Pendaftaran vendor '{$vendor->business_name}' berhasil disetujui, namun email notifikasi gagal terkirim (SMTP bermasalah: periksa konfigurasi .env).";
+
         return response()->json([
-            'message' => "Pendaftaran vendor '{$vendor->business_name}' berhasil disetujui.",
+            'message' => $message,
             'data' => $vendor,
+            'email_sent' => $emailSent,
+            'email_error' => $emailErrorMessage,
         ]);
     }
 

@@ -54,7 +54,8 @@ export default function VendorRegistrationPage() {
         onSuccess: (data) => {
             queryClient.invalidateQueries(["admin-vendors"]);
             setVendorToApprove(null);
-            showToast(data.message || "Vendor berhasil disetujui!", "success");
+            const toastType = data.email_sent === false ? "error" : "success";
+            showToast(data.message || "Vendor berhasil disetujui!", toastType);
         },
         onError: (err) => {
             showToast(err.response?.data?.message || "Gagal menyetujui vendor.", "error");
@@ -95,6 +96,16 @@ export default function VendorRegistrationPage() {
         }
         if (!vendorToReject) return;
         rejectMutation.mutate({ vendorId: vendorToReject.id, reason: rejectionReason });
+    };
+
+    const getSocialMediaUrl = (handle) => {
+        if (!handle) return null;
+        const clean = handle.trim();
+        if (clean.startsWith("http://") || clean.startsWith("https://")) {
+            return clean;
+        }
+        const username = clean.replace(/^@/, "");
+        return `https://instagram.com/${username}`;
     };
 
     const getStatusBadge = (status) => {
@@ -352,7 +363,21 @@ export default function VendorRegistrationPage() {
                                                     {vendor.contact_number}
                                                 </a>
                                             </div>
-                                            <p className="text-[11px] text-[#738075] truncate mt-0.5" title={vendor.address}>
+                                            {vendor.social_media && (
+                                                <div className="flex items-center gap-1 mt-1">
+                                                    <a
+                                                        href={getSocialMediaUrl(vendor.social_media)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-[11px] font-semibold text-[#1F4B54] bg-[#99CDD8]/25 hover:bg-[#99CDD8]/50 px-2 py-0.5 rounded-md border border-[#85BAC5] transition inline-flex items-center gap-1 truncate max-w-[190px]"
+                                                        title="Buka Media Sosial / Portofolio Vendor untuk Verifikasi"
+                                                    >
+                                                        <span>📸 {vendor.social_media}</span>
+                                                        <span className="text-[10px]">↗</span>
+                                                    </a>
+                                                </div>
+                                            )}
+                                            <p className="text-[11px] text-[#738075] truncate mt-1" title={vendor.address}>
                                                 📍 {vendor.address}
                                             </p>
                                         </td>
@@ -489,10 +514,45 @@ export default function VendorRegistrationPage() {
                             </div>
 
                             <div className="p-3 bg-[#FAF6F0]/60 rounded-xl border border-[#E8E2D7]">
+                                <span className="text-[#738075] text-[10px] uppercase font-bold">Media Sosial / Portofolio Usaha</span>
+                                <div className="mt-1 flex items-center justify-between">
+                                    <span className="font-bold text-[#2F3931] text-xs">
+                                        {selectedVendorForDetail.social_media || "Belum dicantumkan"}
+                                    </span>
+                                    {selectedVendorForDetail.social_media && (
+                                        <a
+                                            href={getSocialMediaUrl(selectedVendorForDetail.social_media)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs bg-[#1F4B54] hover:bg-[#15343A] text-white px-3 py-1 rounded-lg font-bold transition flex items-center gap-1 shadow-2xs"
+                                        >
+                                            <span>Buka Profil Portofolio</span>
+                                            <span>↗</span>
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="p-3 bg-[#FAF6F0]/60 rounded-xl border border-[#E8E2D7]">
                                 <span className="text-[#738075] text-[10px] uppercase font-bold">Alamat Kantor / Studio</span>
                                 <div className="font-medium text-[#2F3931] mt-0.5 leading-relaxed">
                                     {selectedVendorForDetail.address}
                                 </div>
+                            </div>
+
+                            {/* Status Persetujuan Syarat & Ketentuan */}
+                            <div className="p-3 bg-emerald-50/70 rounded-xl border border-emerald-200/80 flex items-center justify-between">
+                                <div>
+                                    <span className="text-[10px] uppercase font-bold text-emerald-800">Syarat & Ketentuan Kemitraan</span>
+                                    <div className="text-xs font-bold text-emerald-900 mt-0.5 flex items-center gap-1.5">
+                                        <span>✓ Disetujui saat pendaftaran</span>
+                                    </div>
+                                </div>
+                                {selectedVendorForDetail.agreement_accepted_at && (
+                                    <span className="text-[10px] text-emerald-700 font-mono">
+                                        {new Date(selectedVendorForDetail.agreement_accepted_at).toLocaleDateString("id-ID")}
+                                    </span>
+                                )}
                             </div>
 
                             {selectedVendorForDetail.description && (
@@ -563,6 +623,16 @@ export default function VendorRegistrationPage() {
                         <p className="text-xs text-[#738075] mt-2 leading-relaxed">
                             Apakah Anda yakin ingin menyetujui <strong>{vendorToApprove.business_name}</strong>? Vendor ini akan langsung dapat mempublikasikan paket penawaran dan menerima penugasan acara dari EO.
                         </p>
+
+                        <div className="mt-3 p-3 bg-[#FAF6F0] rounded-xl border border-[#E8E2D7] text-left text-xs text-[#556056] space-y-1">
+                            <div className="flex items-center gap-1.5 font-bold text-[#2F3931]">
+                                <span>📧</span>
+                                <span>Notifikasi Email Otomatis (SMTP)</span>
+                            </div>
+                            <p className="text-[11px] leading-relaxed">
+                                Sistem akan otomatis mengirimkan email persetujuan resmi ke akun vendor di <strong>{vendorToApprove.user?.email}</strong>.
+                            </p>
+                        </div>
 
                         <div className="mt-6 flex items-center justify-center gap-3">
                             <button

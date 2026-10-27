@@ -13,10 +13,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'category',
     'contact_number',
     'address',
+    'social_media',
     'description',
     'image_url',
     'status',
     'rejection_reason',
+    'agreement_accepted_at',
     'approved_at',
     'approved_by',
 ])]
@@ -37,6 +39,7 @@ class Vendor extends Model
     {
         return [
             'approved_at' => 'datetime',
+            'agreement_accepted_at' => 'datetime',
         ];
     }
 
