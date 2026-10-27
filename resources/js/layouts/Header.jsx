@@ -17,6 +17,14 @@ const ROUTE_TITLES = {
         title: "Verifikasi Pembayaran",
         subtitle: "Tinjau dan konfirmasi bukti transfer pembayaran DP dan pelunasan",
     },
+    "/admin/vendors": {
+        title: "Pendaftaran & Review Vendor",
+        subtitle: "Tinjau, setujui, atau tolak permohonan pendaftaran mitra vendor baru",
+    },
+    "/admin/categories": {
+        title: "Master Kategori Acara",
+        subtitle: "Kelola daftar kategori acara, batas minimal pemesanan, dan status aktif",
+    },
     "/vendor/dashboard": {
         title: "Kelola Paket Jasa",
         subtitle: "Kelola paket jasa, harga, foto, dan deskripsi yang ditawarkan",

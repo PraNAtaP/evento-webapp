@@ -4,8 +4,10 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
+import VendorRegister from "./pages/auth/VendorRegister";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import EventCategoryPage from "./pages/admin/EventCategoryPage";
+import VendorRegistrationPage from "./pages/admin/VendorRegistrationPage";
 import KanbanPage from "./pages/admin/KanbanPage";
 import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
@@ -50,6 +52,8 @@ export default function App() {
                         <Route path="/" element={<RootRedirect />} />
 
                         <Route path="/login" element={<Login />} />
+                        <Route path="/register/vendor" element={<VendorRegister />} />
+                        <Route path="/vendor/register" element={<VendorRegister />} />
 
                         {/* Template Layout Terpusat: Sidebar Dinamis & Header */}
                         <Route
@@ -84,6 +88,16 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["eo"]}>
                                         <EventCategoryPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Rute Pendaftaran & Review Vendor untuk EO */}
+                            <Route
+                                path="/admin/vendors"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <VendorRegistrationPage />
                                     </ProtectedRoute>
                                 }
                             />

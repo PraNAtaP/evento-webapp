@@ -31,7 +31,7 @@ const ROLE_MENUS = {
         },
         {
             title: "Pendaftar vendor",
-            path: "/admin/payments",
+            path: "/admin/vendors",
             badge: null,
             icon: (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ClientEventController;
@@ -11,10 +12,12 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\VendorJobController;
 use App\Http\Controllers\Api\VendorPackageController;
 use App\Http\Controllers\Api\VendorProgressController;
+use App\Http\Controllers\Api\VendorRegistrationController;
 use App\Http\Controllers\SeasonController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
+Route::post('/register/vendor', [VendorRegistrationController::class, 'register'])->name('api.register.vendor');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me'])->name('api.me');
@@ -51,6 +54,16 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.admin.event-categories.update');
         Route::delete('/admin/event-categories/{eventCategory}', [EventCategoryController::class, 'destroy'])
             ->name('api.admin.event-categories.destroy');
+
+        // Manajemen & Review Pendaftaran Vendor (EO)
+        Route::get('/admin/vendors', [AdminVendorController::class, 'index'])
+            ->name('api.admin.vendors.index');
+        Route::get('/admin/vendors/{vendor}', [AdminVendorController::class, 'show'])
+            ->name('api.admin.vendors.show');
+        Route::patch('/admin/vendors/{vendor}/approve', [AdminVendorController::class, 'approve'])
+            ->name('api.admin.vendors.approve');
+        Route::patch('/admin/vendors/{vendor}/reject', [AdminVendorController::class, 'reject'])
+            ->name('api.admin.vendors.reject');
 
         // Board Inspector (read-only detail event)
         Route::get('/events/{event}', [EventInspectorController::class, 'show'])
