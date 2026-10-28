@@ -25,6 +25,10 @@ const ROUTE_TITLES = {
         title: "Master Kategori Acara",
         subtitle: "Kelola daftar kategori acara, batas minimal pemesanan, dan status aktif",
     },
+    "/admin/admins": {
+        title: "Kelola Akun Admin",
+        subtitle: "Daftar, buat akun baru, dan kelola kredensial tim admin EO",
+    },
     "/vendor/dashboard": {
         title: "Kelola Paket Jasa",
         subtitle: "Kelola paket jasa, harga, foto, dan deskripsi yang ditawarkan",

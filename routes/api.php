@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdminAccountController;
 use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
@@ -54,6 +55,18 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.admin.event-categories.update');
         Route::delete('/admin/event-categories/{eventCategory}', [EventCategoryController::class, 'destroy'])
             ->name('api.admin.event-categories.destroy');
+
+        // Manajemen Akun Admin EO (CRUD)
+        Route::get('/admin/admins', [AdminAccountController::class, 'index'])
+            ->name('api.admin.admins.index');
+        Route::post('/admin/admins', [AdminAccountController::class, 'store'])
+            ->name('api.admin.admins.store');
+        Route::get('/admin/admins/{user}', [AdminAccountController::class, 'show'])
+            ->name('api.admin.admins.show');
+        Route::put('/admin/admins/{user}', [AdminAccountController::class, 'update'])
+            ->name('api.admin.admins.update');
+        Route::delete('/admin/admins/{user}', [AdminAccountController::class, 'destroy'])
+            ->name('api.admin.admins.destroy');
 
         // Manajemen & Review Pendaftaran Vendor (EO)
         Route::get('/admin/vendors', [AdminVendorController::class, 'index'])

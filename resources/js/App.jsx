@@ -7,6 +7,7 @@ import Login from "./pages/auth/Login";
 import VendorRegister from "./pages/auth/VendorRegister";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import EventCategoryPage from "./pages/admin/EventCategoryPage";
+import AdminAccountPage from "./pages/admin/AdminAccountPage";
 import VendorRegistrationPage from "./pages/admin/VendorRegistrationPage";
 import KanbanPage from "./pages/admin/KanbanPage";
 import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
@@ -108,6 +109,16 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["eo"]}>
                                         <PaymentVerificationPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Rute Kelola Akun Admin untuk EO */}
+                            <Route
+                                path="/admin/admins"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <AdminAccountPage />
                                     </ProtectedRoute>
                                 }
                             />
