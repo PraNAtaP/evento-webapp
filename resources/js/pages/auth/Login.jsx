@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
@@ -150,6 +150,16 @@ export default function Login() {
                                 <span className="text-[11px] opacity-80 font-mono">vendor@evento.test</span>
                             </button>
                         </div>
+                    </div>
+
+                    {/* Link ke Pendaftaran Vendor */}
+                    <div className="mt-4 pt-4 border-t border-[#E8E2D7] text-center">
+                        <p className="text-xs text-[#738075]">
+                            Penyedia jasa / perlengkapan acara?{" "}
+                            <Link to="/register/vendor" className="font-bold text-[#657166] hover:underline">
+                                Daftar Sebagai Mitra Vendor →
+                            </Link>
+                        </p>
                     </div>
                 </div>
             </div>

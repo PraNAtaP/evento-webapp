@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 
 export default function VendorDashboard() {
+    const { user } = useAuth();
     const [selectedImage, setSelectedImage] = useState(null);
     const [packages, setPackages] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -91,7 +93,50 @@ export default function VendorDashboard() {
 
     return (
         <div className="max-w-5xl mx-auto flex flex-col gap-6">
-            {/* Header */}
+            {/* Status Pendaftaran Banner jika belum Disetujui */}
+            {user?.vendor?.status === "pending" && (
+                <div className="bg-[#FDE8D3]/70 border border-[#E8CEB2] rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#FDE8D3] border border-[#E8CEB2] text-[#63482B] flex items-center justify-center font-bold text-xl shrink-0">
+                            ⏳
+                        </div>
+                        <div>
+                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2]">
+                                Status Akun: Menunggu Verifikasi EO
+                            </div>
+                            <h3 className="text-sm font-bold text-[#2F3931] mt-1">
+                                Profil Bisnis Vendor Anda Sedang Ditinjau
+                            </h3>
+                            <p className="text-xs text-[#738075] mt-0.5">
+                                Tim Event Organizer sedang memverifikasi profil dan kontak usaha Anda. Setelah disetujui, paket Anda akan langsung tampil di sistem matchmaking EO dan klien.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {user?.vendor?.status === "rejected" && (
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-bold text-xl shrink-0">
+                            ✕
+                        </div>
+                        <div>
+                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">
+                                Status Akun: Belum Disetujui
+                            </div>
+                            <h3 className="text-sm font-bold text-red-900 mt-1">
+                                Pendaftaran Vendor Belum Disetujui oleh EO
+                            </h3>
+                            <p className="text-xs text-red-700 mt-0.5">
+                                <strong>Catatan Tim EO:</strong> {user?.vendor?.rejection_reason || "Mohon perbarui informasi profil usaha Anda dan hubungi tim EVENTO."}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Header Ringkasan & Tombol Aksi */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl p-6 border border-[#E8E2D7] shadow-xs">
                 <div>
                     <span className="inline-block text-[11px] font-bold text-[#33422A] bg-[#CFD8C4] px-3 py-0.5 rounded-full border border-[#B6C2AA] mb-1.5">
