@@ -45,6 +45,10 @@ const ROUTE_TITLES = {
         title: "Pelacakan Pembayaran & DP",
         subtitle: "Pantau tagihan DP 50%, pelunasan, dan unggah bukti transfer",
     },
+    "/client/offers": {
+        title: "Review Penawaran Vendor",
+        subtitle: "Tinjau rincian biaya penawaran vendor dan ajukan revisi atau persetujuan",
+    },
 };
 
 export default function Header({ onToggleSidebar }) {
