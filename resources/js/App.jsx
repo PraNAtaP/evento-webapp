@@ -5,10 +5,12 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import EventCategoryPage from "./pages/admin/EventCategoryPage";
 import KanbanPage from "./pages/admin/KanbanPage";
 import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import VendorPackageForm from "./pages/vendor/VendorPackageForm";
+import VendorJobOffers from "./pages/vendor/VendorJobOffers";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 import OfferReviewPage from "./pages/client/OfferReviewPage";
@@ -76,6 +78,16 @@ export default function App() {
                                 }
                             />
 
+                            {/* Rute Master Kategori Acara untuk EO */}
+                            <Route
+                                path="/admin/categories"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <EventCategoryPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                             {/* Rute Verifikasi Pembayaran untuk EO */}
                             <Route
                                 path="/admin/payments"
@@ -98,6 +110,16 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["vendor"]}>
                                         <VendorDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Halaman Tawaran Pekerjaan dan Pekerjaan Aktif */}
+                            <Route
+                                path="/vendor/job-offers"
+                                element={
+                                    <ProtectedRoute allowedRoles={["vendor"]}>
+                                        <VendorJobOffers />
                                     </ProtectedRoute>
                                 }
                             />
@@ -141,23 +163,23 @@ export default function App() {
                                     </ProtectedRoute>
                                 }
                             />
-    
-<Route
-    path="/client/offers"
-    element={
-        <ProtectedRoute allowedRoles={["client"]}>
-            <OfferReviewPage />
-        </ProtectedRoute>
-    }
-/>
-                            </Route>
-                            
 
-                        {/* Fallback */}
-                        <Route
-                            path="*"
-                            element={<Navigate to="/" replace />}
-                        />
+                            {/* Rute Review Tawaran untuk Client */} 
+                            <Route
+                                path="/client/offers"
+                                element={
+                                    <ProtectedRoute allowedRoles={["client"]}>
+                                        <OfferReviewPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            </Route>
+
+                            {/* Fallback */}
+                            <Route
+                                path="*"
+                                element={<Navigate to="/" replace />}
+                            />
                     </Routes>
                 </BrowserRouter>
             </AuthProvider>
