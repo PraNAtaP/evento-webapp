@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminAccountController;
+use App\Http\Controllers\Api\AdminEventOrderController;
 use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
@@ -43,6 +44,14 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.admin.kanban.index');
         Route::patch('/admin/kanban/{event}/move', [KanbanController::class, 'move'])
             ->name('api.admin.kanban.move');
+
+        // Pesanan Acara Masuk (Terima / Tolak Request Klien)
+        Route::get('/admin/orders', [AdminEventOrderController::class, 'index'])
+            ->name('api.admin.orders.index');
+        Route::patch('/admin/orders/{event}/accept', [AdminEventOrderController::class, 'accept'])
+            ->name('api.admin.orders.accept');
+        Route::patch('/admin/orders/{event}/reject', [AdminEventOrderController::class, 'reject'])
+            ->name('api.admin.orders.reject');
 
         // Master Data Kategori Acara (EO CRUD)
         Route::get('/admin/event-categories', [EventCategoryController::class, 'adminIndex'])

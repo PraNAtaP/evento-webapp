@@ -36,6 +36,7 @@ class Event extends Model
         'is_multi_day',
         'end_date',
         'kanban_status',
+        'rejection_reason',
     ];
 
     /**

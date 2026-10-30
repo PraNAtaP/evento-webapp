@@ -47,7 +47,7 @@ export default function PaymentCard({ payment, role, onUpload, onVerify }) {
                 <div className="mt-4 pt-3 border-t border-[#F0ECE1]">
                     <button
                         onClick={() => onUpload(payment)}
-                        className="bg-[#F3C3B2] hover:bg-[#ebb7a5] text-[#55271C] font-bold px-4 py-2 rounded-xl text-xs border border-[#E5B5A4] transition shadow-xs cursor-pointer"
+                        className="bg-[#657166] hover:bg-[#556056] text-white font-bold px-4 py-2 rounded-xl text-xs border border-[#525C53] transition shadow-xs cursor-pointer"
                     >
                         Unggah Bukti Transfer
                     </button>

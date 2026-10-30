@@ -8,6 +8,8 @@ export default function EventCategoryPage() {
     // State pencarian & filter
     const [searchTerm, setSearchTerm] = useState("");
     const [filterStatus, setFilterStatus] = useState("all"); // 'all', 'active', 'inactive'
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     // State Modal Tambah/Edit
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -199,6 +201,13 @@ export default function EventCategoryPage() {
         if (filterStatus === "inactive") return matchesSearch && !cat.is_active;
         return matchesSearch;
     });
+
+    // Pagination: Potong data jika melebihi itemsPerPage (10)
+    const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+    const paginatedCategories = filteredCategories.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     // Statistik Cepat
     const totalCategories = categories.length;
@@ -408,7 +417,7 @@ export default function EventCategoryPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#E8E2D7] text-[#2F3931]">
-                                {filteredCategories.map((cat) => (
+                                {paginatedCategories.map((cat) => (
                                     <tr key={cat.id} className="hover:bg-[#FAF6F0]/50 transition-colors">
                                         <td className="py-3.5 px-4">
                                             <div className="flex items-center gap-2.5">
@@ -488,6 +497,53 @@ export default function EventCategoryPage() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                )}
+
+                {/* Kontrol Pagination (Hanya muncul jika total data > 10) */}
+                {filteredCategories.length > itemsPerPage && (
+                    <div className="p-4 border-t border-[#E8E2D7] bg-[#FAF6F0]/40 flex items-center justify-between text-xs text-[#738075]">
+                        <span>
+                            Menampilkan <strong>{(currentPage - 1) * itemsPerPage + 1}</strong> - <strong>{Math.min(currentPage * itemsPerPage, filteredCategories.length)}</strong> dari <strong>{filteredCategories.length}</strong> kategori
+                        </span>
+
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                type="button"
+                                disabled={currentPage <= 1}
+                                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                                className="px-3 py-1.5 bg-white border border-[#E8E2D7] rounded-xl font-bold disabled:opacity-40 cursor-pointer hover:bg-[#FAF6F0] transition"
+                            >
+                                Sebelumnya
+                            </button>
+
+                            {Array.from({ length: totalPages }).map((_, idx) => {
+                                const pageNumber = idx + 1;
+                                return (
+                                    <button
+                                        key={pageNumber}
+                                        type="button"
+                                        onClick={() => setCurrentPage(pageNumber)}
+                                        className={`w-7 h-7 rounded-lg font-bold text-xs transition cursor-pointer ${
+                                            currentPage === pageNumber
+                                                ? "bg-[#657166] text-white"
+                                                : "bg-white border border-[#E8E2D7] text-[#2F3931] hover:bg-[#FAF6F0]"
+                                        }`}
+                                    >
+                                        {pageNumber}
+                                    </button>
+                                );
+                            })}
+
+                            <button
+                                type="button"
+                                disabled={currentPage >= totalPages}
+                                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                                className="px-3 py-1.5 bg-white border border-[#E8E2D7] rounded-xl font-bold disabled:opacity-40 cursor-pointer hover:bg-[#FAF6F0] transition"
+                            >
+                                Selanjutnya
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

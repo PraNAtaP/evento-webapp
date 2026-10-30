@@ -6,6 +6,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
 import VendorRegister from "./pages/auth/VendorRegister";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import EventOrdersPage from "./pages/admin/EventOrdersPage";
 import EventCategoryPage from "./pages/admin/EventCategoryPage";
 import AdminAccountPage from "./pages/admin/AdminAccountPage";
 import VendorRegistrationPage from "./pages/admin/VendorRegistrationPage";
@@ -15,6 +16,7 @@ import VendorDashboard from "./pages/vendor/VendorDashboard";
 import VendorPackageForm from "./pages/vendor/VendorPackageForm";
 import VendorJobOffers from "./pages/vendor/VendorJobOffers";
 import ClientDashboard from "./pages/client/ClientDashboard";
+import ClientBookedEventsPage from "./pages/client/ClientBookedEventsPage";
 import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 import OfferReviewPage from "./pages/client/OfferReviewPage";
 
@@ -65,6 +67,15 @@ export default function App() {
                             }
                         >
                             {/* Rute Admin (EO) */}
+                            <Route
+                                path="/admin/orders"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <EventOrdersPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                             <Route
                                 path="/admin/dashboard"
                                 element={
@@ -175,6 +186,16 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["client"]}>
                                         <ClientDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Rute Acara yang Dibooking (Progress & Pembayaran per Acara) */}
+                            <Route
+                                path="/client/booked-events"
+                                element={
+                                    <ProtectedRoute allowedRoles={["client"]}>
+                                        <ClientBookedEventsPage />
                                     </ProtectedRoute>
                                 }
                             />
