@@ -203,26 +203,47 @@ export default function ClientBookedEventsPage() {
                                 );
                             })}
 
-                            {/* Pagination jika > 10 acara */}
-                            {totalPages > 1 && (
-                                <div className="p-3 bg-white rounded-2xl border border-[#E8E2D7] flex items-center justify-between text-xs text-[#738075] mt-1">
-                                    <span>Hal {page} dari {totalPages}</span>
+                            {/* Pagination (Hanya muncul jika total acara > 10) */}
+                            {events.length > perPage && (
+                                <div className="p-3 bg-white rounded-2xl border border-[#E8E2D7] flex items-center justify-between text-xs text-[#738075] mt-1 shadow-2xs">
+                                    <span>
+                                        Hal <strong>{page}</strong> dari <strong>{totalPages}</strong> ({events.length} acara)
+                                    </span>
                                     <div className="flex items-center gap-1.5">
                                         <button
                                             type="button"
                                             disabled={page <= 1}
                                             onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                                            className="px-2.5 py-1 bg-[#FAF6F0] border border-[#E8E2D7] rounded-lg disabled:opacity-40 font-bold"
+                                            className="px-2.5 py-1 bg-[#FAF6F0] hover:bg-[#E8E2D7]/50 border border-[#E8E2D7] rounded-lg disabled:opacity-40 font-bold transition cursor-pointer"
                                         >
-                                            Prev
+                                            Sebelumnya
                                         </button>
+
+                                        {Array.from({ length: totalPages }).map((_, idx) => {
+                                            const pageNum = idx + 1;
+                                            return (
+                                                <button
+                                                    key={pageNum}
+                                                    type="button"
+                                                    onClick={() => setPage(pageNum)}
+                                                    className={`w-6 h-6 rounded-md font-bold text-xs transition cursor-pointer ${
+                                                        page === pageNum
+                                                            ? "bg-[#657166] text-white"
+                                                            : "bg-white border border-[#E8E2D7] text-[#2F3931] hover:bg-[#FAF6F0]"
+                                                    }`}
+                                                >
+                                                    {pageNum}
+                                                </button>
+                                            );
+                                        })}
+
                                         <button
                                             type="button"
                                             disabled={page >= totalPages}
-                                            onClick={() => setPage((p) => p + 1)}
-                                            className="px-2.5 py-1 bg-[#FAF6F0] border border-[#E8E2D7] rounded-lg disabled:opacity-40 font-bold"
+                                            onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                                            className="px-2.5 py-1 bg-[#FAF6F0] hover:bg-[#E8E2D7]/50 border border-[#E8E2D7] rounded-lg disabled:opacity-40 font-bold transition cursor-pointer"
                                         >
-                                            Next
+                                            Selanjutnya
                                         </button>
                                     </div>
                                 </div>
