@@ -50,6 +50,10 @@ const ROUTE_TITLES = {
         title: "Smart Calendar Booking",
         subtitle: "Pilih tanggal acara. Tanggal yang sudah terisi otomatis nonaktif.",
     },
+    "/client/booked-events": {
+        title: "Acara yang Dibooking",
+        subtitle: "Pantau progress tahapan persiapan dan rincian pembayaran untuk setiap acara Anda",
+    },
     "/client/payments": {
         title: "Pelacakan Pembayaran & DP",
         subtitle: "Pantau tagihan DP 50%, pelunasan, dan unggah bukti transfer",

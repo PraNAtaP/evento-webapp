@@ -16,6 +16,7 @@ import VendorDashboard from "./pages/vendor/VendorDashboard";
 import VendorPackageForm from "./pages/vendor/VendorPackageForm";
 import VendorJobOffers from "./pages/vendor/VendorJobOffers";
 import ClientDashboard from "./pages/client/ClientDashboard";
+import ClientBookedEventsPage from "./pages/client/ClientBookedEventsPage";
 import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 import OfferReviewPage from "./pages/client/OfferReviewPage";
 
@@ -185,6 +186,16 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["client"]}>
                                         <ClientDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Rute Acara yang Dibooking (Progress & Pembayaran per Acara) */}
+                            <Route
+                                path="/client/booked-events"
+                                element={
+                                    <ProtectedRoute allowedRoles={["client"]}>
+                                        <ClientBookedEventsPage />
                                     </ProtectedRoute>
                                 }
                             />

@@ -292,18 +292,6 @@ export default function ClientDashboard() {
                         </p>
                     </div>
 
-                    {/* PROGRESS TIMELINE DI BAWAH WIDGET MUSIM */}
-                    {events.length > 0 && (
-                        <div className="flex flex-col gap-3">
-                            <h3 className="text-sm font-bold text-[#2F3931] uppercase tracking-wider">
-                                Progress Acara
-                            </h3>
-                            {events.map((evt) => (
-                                <ProgressTimeline key={evt.id} event={evt} />
-                            ))}
-                        </div>
-                    )}
-
                     {/* Kartu Edukasi & Kontak EO */}
                     <div
                         ref={emergencyCardRef}
