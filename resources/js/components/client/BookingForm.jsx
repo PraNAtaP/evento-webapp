@@ -656,15 +656,15 @@ export default function BookingForm({
                     </div>
                 )}
 
-                {/* Tombol Submit (Warna Pastel Peach #F3C3B2 Sesuai Mockup 1) */}
+                {/* Tombol Submit (Primary Action: Sage Forest Green #657166) */}
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="mt-2 w-full px-4 py-3 bg-[#F3C3B2] hover:bg-[#EAAFA0] disabled:bg-[#F3C3B2]/50 text-[#2F3931] font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed border border-[#E8CEB2]"
+                    className="mt-2 w-full px-4 py-3 bg-[#657166] hover:bg-[#556056] disabled:bg-[#657166]/50 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed border border-[#525C53]"
                 >
                     {isSubmitting ? (
                         <>
-                            <span className="w-3.5 h-3.5 border-2 border-[#2F3931] border-t-transparent rounded-full animate-spin"></span>
+                            <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                             <span>Memproses Booking...</span>
                         </>
                     ) : (
