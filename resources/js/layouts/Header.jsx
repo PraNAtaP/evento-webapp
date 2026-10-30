@@ -5,6 +5,10 @@ import { useAuth } from "../context/AuthContext";
  * Mapping rute ke judul halaman dan subjudul ramah pengguna
  */
 const ROUTE_TITLES = {
+    "/admin/orders": {
+        title: "Pesanan Acara Masuk",
+        subtitle: "Tinjau dan proses persetujuan atau penolakan booking baru dari klien",
+    },
     "/admin/dashboard": {
         title: "Dashboard Analitik",
         subtitle: "Ringkasan pendapatan, margin, dan jumlah acara",

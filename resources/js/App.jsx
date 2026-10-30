@@ -6,6 +6,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
 import VendorRegister from "./pages/auth/VendorRegister";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import EventOrdersPage from "./pages/admin/EventOrdersPage";
 import EventCategoryPage from "./pages/admin/EventCategoryPage";
 import AdminAccountPage from "./pages/admin/AdminAccountPage";
 import VendorRegistrationPage from "./pages/admin/VendorRegistrationPage";
@@ -65,6 +66,15 @@ export default function App() {
                             }
                         >
                             {/* Rute Admin (EO) */}
+                            <Route
+                                path="/admin/orders"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <EventOrdersPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                             <Route
                                 path="/admin/dashboard"
                                 element={
