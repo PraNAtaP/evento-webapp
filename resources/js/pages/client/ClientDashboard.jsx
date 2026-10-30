@@ -343,36 +343,8 @@ export default function ClientDashboard() {
                     </div>
                 </div>
 
-                {/* Kolom Kanan: Tombol Pembayaran + Form Booking */}
+                {/* Kolom Kanan: Form Booking */}
                 <div className="lg:col-span-5 flex flex-col gap-6">
-                    <Link
-                        to="/client/payments"
-                        className="bg-white hover:bg-[#FAF6F0] rounded-2xl border border-[#E8E2D7] hover:border-[#CFD8C4] p-4 sm:p-5 shadow-xs transition-all duration-200 flex items-center justify-between group"
-                    >
-                        <div className="flex items-center gap-3.5">
-                            <div className="w-10 h-10 rounded-xl bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2] flex items-center justify-center shrink-0 group-hover:bg-[#F3C3B2] transition-colors">
-                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <span className="inline-block text-[10px] font-bold text-[#63482B] uppercase tracking-wider bg-[#FDE8D3] px-2 py-0.5 rounded-full border border-[#E8CEB2] mb-0.5">
-                                    Pembayaran
-                                </span>
-                                <p className="text-sm sm:text-base font-bold text-[#2F3931] group-hover:text-[#424C43] transition-colors leading-tight">
-                                    Rincian Pembayaran
-                                </p>
-                                <p className="text-[11px] text-[#738075] mt-0.5">
-                                    Pantau tagihan DP 50% dan pelunasan
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#DAEBE3] text-[#424C43] text-xs font-bold group-hover:bg-[#CFD8C4] group-hover:translate-x-0.5 transition-all shrink-0">
-                            <span>Buka</span>
-                            <span className="text-sm leading-none">&rarr;</span>
-                        </div>
-                    </Link>
-
                     <BookingForm
                         selectedDate={selectedDate}
                         onDateChange={setSelectedDate}
