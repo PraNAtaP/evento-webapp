@@ -7,6 +7,7 @@ use App\Models\EventVendorAssignment;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Models\VendorPackage;
+use App\Services\KanbanTransitionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -135,6 +136,34 @@ class ClientQuotationTest extends TestCase
         $this->assertEquals('drafting_quotation', $event->kanban_status);
         $this->assertNull($event->agreed_price);
         $this->assertEquals('pending', $assignment->client_approval);
+        $this->assertSame('Tolong sesuaikan durasi pemotretan jadi 1 hari', $event->revision_note);
+        $this->assertNotNull($event->revision_requested_at);
+    }
+
+    public function test_resending_quotation_clears_revision_note(): void
+    {
+        $event = Event::factory()->create([
+            'client_id' => $this->client1->id,
+            'kanban_status' => 'drafting_quotation',
+            'revision_note' => 'Mohon revisi dekorasi',
+            'revision_requested_at' => now(),
+        ]);
+
+        EventVendorAssignment::create([
+            'event_id' => $event->id,
+            'vendor_id' => $this->vendor->id,
+            'package_id' => $this->package->id,
+            'eo_offer_status' => 'accepted',
+            'client_approval' => 'pending',
+            'locked_price' => 30000000,
+        ]);
+
+        app(KanbanTransitionService::class)->transition($event, 'client_review');
+
+        $event->refresh();
+        $this->assertEquals('client_review', $event->kanban_status);
+        $this->assertNull($event->revision_note);
+        $this->assertNull($event->revision_requested_at);
     }
 
     public function test_client_cannot_approve_other_clients_event(): void

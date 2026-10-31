@@ -188,6 +188,13 @@ export default function ClientBookedEventsPage() {
                                             </p>
                                         )}
 
+                                        {evt.kanban_status === "drafting_quotation" && evt.revision_note && (
+                                            <div className="mb-2.5 rounded-lg border border-[#E8CEB2] bg-[#FDE8D3] px-2.5 py-2 text-[#5A3A1D]">
+                                                <p className="text-[10px] font-bold uppercase tracking-wider">Revisi Anda sedang diproses EO</p>
+                                                <p className="text-[11px] leading-snug mt-0.5 break-words">{evt.revision_note}</p>
+                                            </div>
+                                        )}
+
                                         <div className="pt-2.5 border-t border-[#E8E2D7]/70 flex items-center justify-between text-xs">
                                             <span className="text-[11px] text-[#738075]">Estimasi Biaya:</span>
                                             <span className="font-extrabold text-[#1D4A54]">

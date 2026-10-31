@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { checkRangeOverlap, formatDateToDMY, formatDateToYMD } from "./BookingCalendar";
 import LocationPicker from "../location/LocationPicker";
+import WeatherIcon from "./WeatherIcon";
 
 /**
  * Komponen Form Pemesanan Acara untuk Klien.
@@ -64,6 +65,59 @@ export default function BookingForm({
     useEffect(() => {
         onLocationChange?.(location);
     }, [location, onLocationChange]);
+
+    const [seasonState, setSeasonState] = useState({ status: "idle", data: null, message: "", isRangeError: false });
+
+    const seasonStartDate = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate;
+    const seasonDateKey = seasonStartDate instanceof Date && !Number.isNaN(seasonStartDate.getTime())
+        ? [
+            seasonStartDate.getFullYear(),
+            String(seasonStartDate.getMonth() + 1).padStart(2, "0"),
+            String(seasonStartDate.getDate()).padStart(2, "0"),
+        ].join("-")
+        : null;
+    const seasonLat = location?.lat ?? null;
+    const seasonLng = location?.lng ?? null;
+
+    // Ambil perkiraan musim (debounce 500 ms, request lama dibatalkan saat input berubah)
+    useEffect(() => {
+        if (seasonLat === null || seasonLng === null || !seasonDateKey) {
+            setSeasonState({ status: "idle", data: null, message: "", isRangeError: false });
+            return undefined;
+        }
+
+        const controller = new AbortController();
+        const timer = setTimeout(async () => {
+            setSeasonState((prev) => ({ ...prev, status: "loading" }));
+            try {
+                const response = await api.post(
+                    "/musim",
+                    { latitude: seasonLat, longitude: seasonLng, tanggal: seasonDateKey },
+                    { signal: controller.signal }
+                );
+                setSeasonState({ status: "success", data: response.data, message: "", isRangeError: false });
+            } catch (error) {
+                if (error?.name === "CanceledError" || error?.name === "AbortError" || error?.code === "ERR_CANCELED") {
+                    return;
+                }
+                const validationErrors = error?.response?.data?.errors;
+                const firstValidationError = validationErrors ? Object.values(validationErrors).flat()[0] : null;
+                const isRangeError = error?.response?.status === 422 && !validationErrors;
+                const serverMessage = error?.response?.data?.message;
+                setSeasonState({
+                    status: "error",
+                    data: null,
+                    isRangeError,
+                    message: firstValidationError || serverMessage || "Perkiraan musim belum bisa dimuat.",
+                });
+            }
+        }, 500);
+
+        return () => {
+            clearTimeout(timer);
+            controller.abort();
+        };
+    }, [seasonLat, seasonLng, seasonDateKey]);
 
     const [internalIsMultiDay, setInternalIsMultiDay] = useState(false);
     const [customEndDate, setCustomEndDate] = useState("");
@@ -652,6 +706,72 @@ export default function BookingForm({
                                     {(fieldErrors.lat || fieldErrors.lng)[0]}
                                 </p>
                             )}
+                        </div>
+
+                        {/* Widget Musim */}
+                        <div className="mt-4 bg-white rounded-2xl border border-[#E8E2D7] p-4 shadow-xs text-[#2F3931]">
+                            <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                            <div className="mb-1">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-[#424C43]">
+                                    Widget Musim
+                                </h4>
+                            </div>
+                            {seasonState.status === "idle" && (
+                                <p className="text-[11px] text-[#556056] mt-0.5 leading-relaxed">
+                                    Pilih tanggal dan titik lokasi untuk melihat perkiraan musim.
+                                </p>
+                            )}
+                            {seasonState.status === "loading" && (
+                                <p className="text-[11px] text-[#556056] mt-0.5 leading-relaxed animate-pulse">
+                                    Memuat perkiraan musim...
+                                </p>
+                            )}
+                            {seasonState.status === "success" && seasonState.data && (
+                                <>
+                                    <p className="text-xs font-extrabold text-[#2F3931]">
+                                        {seasonState.data.musim}
+                                    </p>
+                                    <p className="text-[11px] text-[#556056] mt-0.5 leading-relaxed">
+                                        {seasonState.data.saran}
+                                    </p>
+                                    {Array.isArray(seasonState.data.tips) && seasonState.data.tips.length > 0 && (
+                                        <ul className="mt-1.5 flex flex-col gap-0.5">
+                                            {seasonState.data.tips.slice(0, 3).map((tip) => (
+                                                <li key={tip} className="flex items-start gap-1.5 text-[11px] text-[#556056] leading-relaxed">
+                                                    <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-[#657166] shrink-0"></span>
+                                                    <span>{tip}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                    <p className="text-[11px] text-[#738075] mt-1.5 font-medium">
+                                        ~{Math.round(seasonState.data.hujan_mm_bulan)} mm/bulan &middot; {seasonState.data.suhu_min}&ndash;{seasonState.data.suhu_max}&deg;C
+                                    </p>
+                                </>
+                            )}
+                            {seasonState.status === "error" && (
+                                <>
+                                    <p className="text-[11px] text-[#556056] mt-0.5 leading-relaxed">
+                                        {seasonState.message}
+                                    </p>
+                                    {seasonState.isRangeError && (
+                                        <p className="text-[11px] text-[#556056] mt-1 leading-relaxed">
+                                            Umumnya Oktober sampai Maret adalah musim hujan. Pertimbangkan opsi indoor atau tenda untuk acara Anda.
+                                        </p>
+                                    )}
+                                </>
+                            )}
+                            </div>
+                            {seasonState.status === "success" && seasonState.data && (
+                                <div className="shrink-0 text-[#657166]">
+                                    <WeatherIcon kategori={seasonState.data.kategori} />
+                                </div>
+                            )}
+                            </div>
+                            <p className="text-[10px] text-[#738075] mt-2 leading-snug">
+                                Perkiraan kecenderungan, bukan prediksi cuaca harian. Data: Open-Meteo.com
+                            </p>
                         </div>
                     </div>
                 )}
