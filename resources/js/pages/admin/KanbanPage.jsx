@@ -18,6 +18,25 @@ export default function KanbanPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [selectedEventId, setSelectedEventId] = useState(null);
+    const [dbCategories, setDbCategories] = useState([]);
+
+    // Filter kategori mengikuti kategori acara yang dibuat EO (fallback ke daftar bawaan)
+    useEffect(() => {
+        let isMounted = true;
+        api.get("/event-categories")
+            .then((res) => {
+                if (isMounted) setDbCategories(res.data?.data || []);
+            })
+            .catch(() => {});
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const categoryFilters =
+        dbCategories.length > 0
+            ? [{ value: "all", label: "Semua" }, ...dbCategories.map((c) => ({ value: c.slug, label: c.name }))]
+            : EVENT_CATEGORIES;
 
     const fetchEvents = async () => {
         if (isExplicitDummy) return;
@@ -137,6 +156,15 @@ export default function KanbanPage() {
         return matchesCategory && matchesSearch;
     });
 
+    const handleEventUpdated = (updatedEvent) => {
+        if (!updatedEvent) return;
+        setEvents((prevEvents) =>
+            prevEvents.map((evt) =>
+                String(evt.id) === String(updatedEvent.id) ? updatedEvent : evt
+            )
+        );
+    };
+
     return (
         <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">
             {/* Header Title */}
@@ -204,20 +232,20 @@ export default function KanbanPage() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Cari nama acara, nama klien, atau lokasi..."
-                        className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                        className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#657166]/20 focus:border-[#657166] transition-colors"
                     />
                 </div>
 
                 {/* Kategori Acara */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-                    {EVENT_CATEGORIES.map((cat) => (
+                    {categoryFilters.map((cat) => (
                         <button
                             key={cat.value}
                             onClick={() => setSelectedCategory(cat.value)}
-                            className={`px-2.5 py-1 text-xs font-medium rounded-lg whitespace-nowrap transition-colors ${
+                            className={`px-2.5 py-1 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer border ${
                                 selectedCategory === cat.value
-                                    ? "bg-blue-600 text-white shadow-xs"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                    ? "bg-[#657166] border-[#525C53] text-white shadow-xs"
+                                    : "bg-[#FAF6F0] border-[#E8E2D7] text-[#2F3931] hover:bg-[#E8E2D7]/60"
                             }`}
                         >
                             {cat.label}
@@ -268,6 +296,7 @@ export default function KanbanPage() {
             <BoardInspector
                 eventId={selectedEventId}
                 onClose={() => setSelectedEventId(null)}
+                onQuotationSent={handleEventUpdated}
             />
 
             {/* Modal Input Persentase DP saat kirim penawaran ke klien */}

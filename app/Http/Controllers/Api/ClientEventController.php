@@ -29,6 +29,16 @@ class ClientEventController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        // Vendor Masking: Lindungi identitas vendor agar klien tidak melihat nama bisnis asli
+        $events->each(function ($event) {
+            $event->vendorAssignments->each(function ($assignment) {
+                if ($assignment->vendor) {
+                    $categoryName = ucfirst($assignment->vendor->category ?? 'Layanan');
+                    $assignment->vendor->business_name = "Mitra {$categoryName} EO";
+                }
+            });
+        });
+
         return response()->json([
             'events' => $events,
         ]);
@@ -50,6 +60,14 @@ class ClientEventController extends Controller
             'vendorAssignments.vendor:id,business_name,category',
             'payments',
         ]);
+
+        // Vendor Masking: Lindungi identitas vendor agar klien tidak melihat nama bisnis asli
+        $event->vendorAssignments->each(function ($assignment) {
+            if ($assignment->vendor) {
+                $categoryName = ucfirst($assignment->vendor->category ?? 'Layanan');
+                $assignment->vendor->business_name = "Mitra {$categoryName} EO";
+            }
+        });
 
         return response()->json([
             'event' => $event,

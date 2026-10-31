@@ -14,6 +14,9 @@ class BoardInspectorTest extends TestCase
     use RefreshDatabase;
 
     /**
+     * 15 key awal + 4 key Tahap 2 + 3 key Tahap 3 (can_send_quotation, send_quotation_blockers, dp_percentage).
+     * Penambahan ini disengaja: resource inspector diperluas untuk Tahap 3.
+     *
      * @var list<string>
      */
     private const ALLOWED_KEYS = [
@@ -32,6 +35,13 @@ class BoardInspectorTest extends TestCase
         'estimated_budget',
         'created_at',
         'updated_at',
+        'show_vendor_section',
+        'can_manage_vendors',
+        'can_send_quotation',
+        'send_quotation_blockers',
+        'dp_percentage',
+        'vendors',
+        'vendors_total',
     ];
 
     public function test_eo_can_view_event_inspector_with_only_allowed_fields(): void
@@ -73,7 +83,7 @@ class BoardInspectorTest extends TestCase
             ->assertOk()
             ->json('data');
 
-        foreach (['adm4', 'location_name', 'agreed_price', 'dp_percentage', 'kanban_status', 'status', 'budget', 'client_id'] as $forbidden) {
+        foreach (['adm4', 'location_name', 'agreed_price', 'kanban_status', 'status', 'budget', 'client_id'] as $forbidden) {
             $this->assertArrayNotHasKey($forbidden, $data);
         }
     }

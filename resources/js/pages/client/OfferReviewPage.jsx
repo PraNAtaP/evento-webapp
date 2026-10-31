@@ -28,14 +28,27 @@
     const reviewEvents = data?.filter((e) => e.kanban_status === 'client_review') || [];
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
-        <h1 className="text-2xl font-semibold mb-6">Review Penawaran Vendor</h1>
+        <div className="max-w-4xl mx-auto p-4 sm:p-6 flex flex-col gap-6">
+        <div>
+            <h1 className="text-2xl font-bold text-[#2F3931] tracking-tight">
+                Review Penawaran Paket Acara
+            </h1>
+            <p className="text-xs text-[#738075] mt-1">
+                Tinjau rincian penawaran yang telah disusun dan dikurasi oleh tim Event Organizer.
+            </p>
+        </div>
 
         {reviewEvents.length === 0 ? (
-            <div className="bg-slate-50 border border-slate-200 rounded-md p-6 text-center">
-            <p className="text-slate-500">
-                Tidak ada penawaran yang menunggu review Anda saat ini.
-            </p>
+            <div className="bg-white border border-[#E8E2D7] rounded-2xl p-8 text-center shadow-xs">
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#FAF6F0] text-[#657166] flex items-center justify-center font-bold text-xl mb-3 border border-[#E8E2D7]">
+                    📋
+                </div>
+                <h3 className="text-sm font-bold text-[#2F3931]">
+                    Tidak Ada Penawaran Menunggu Review
+                </h3>
+                <p className="text-xs text-[#738075] mt-1">
+                    Semua penawaran acara Anda saat ini sudah diproses atau belum diterbitkan oleh EO.
+                </p>
             </div>
         ) : (
             reviewEvents.map((event) => (
@@ -58,7 +71,7 @@
 
         <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-blue-600 mt-6 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#738075] hover:text-[#2F3931] transition-colors cursor-pointer self-start"
         >
             <svg
             width="16"

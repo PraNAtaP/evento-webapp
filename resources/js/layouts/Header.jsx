@@ -47,8 +47,12 @@ const ROUTE_TITLES = {
         subtitle: "Publikasikan paket penawaran baru beserta rincian harga dan foto",
     },
     "/client/dashboard": {
-        title: "Smart Calendar Booking",
-        subtitle: "Pilih tanggal acara. Tanggal yang sudah terisi otomatis nonaktif.",
+        title: "Dashboard Klien",
+        subtitle: "Pantau penawaran acara Anda dan akses cepat ke pengajuan acara baru",
+    },
+    "/client/booking": {
+        title: "Pengajuan Acara Baru",
+        subtitle: "Pilih tanggal acara di kalender pintar dan lengkapi detail rencana Anda",
     },
     "/client/booked-events": {
         title: "Acara yang Dibooking",
