@@ -25,6 +25,8 @@ class VendorFactory extends Factory
             'contact_number' => fake()->numerify('08##########'),
             'address' => fake()->address(),
             'image_url' => null,
+            'status' => Vendor::STATUS_APPROVED,
+            'is_active' => true,
         ];
     }
 

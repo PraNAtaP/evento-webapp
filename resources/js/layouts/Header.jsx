@@ -46,6 +46,10 @@ const ROUTE_TITLES = {
         title: "Tambah Paket Baru",
         subtitle: "Publikasikan paket penawaran baru beserta rincian harga dan foto",
     },
+    "/vendors": {
+        title: "Katalog Vendor",
+        subtitle: "Jelajahi mitra vendor resmi dan paket layanan acara terbaik",
+    },
     "/client/dashboard": {
         title: "Dashboard Klien",
         subtitle: "Pantau penawaran acara Anda dan akses cepat ke pengajuan acara baru",
@@ -93,7 +97,12 @@ export default function Header({ onToggleSidebar }) {
     // Deteksi judul berdasarkan pathname
     const currentMeta =
         ROUTE_TITLES[location.pathname] ||
-        (location.pathname.startsWith("/vendor/packages/") && location.pathname.endsWith("/edit")
+        (location.pathname.startsWith("/vendors/")
+            ? {
+                  title: "Detail Vendor",
+                  subtitle: "Informasi profil dan daftar paket layanan yang disediakan",
+              }
+            : location.pathname.startsWith("/vendor/packages/") && location.pathname.endsWith("/edit")
             ? {
                   title: "Edit Paket Jasa",
                   subtitle: "Perbarui informasi nama paket, harga, atau foto",

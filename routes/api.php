@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\EventVendorController;
 use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\VendorCatalogController;
+use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\VendorJobController;
 use App\Http\Controllers\Api\VendorPackageController;
 use App\Http\Controllers\Api\VendorProgressController;
@@ -39,6 +40,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard Analitik EO
     Route::get('/admin/event-summary', [EventSummaryController::class, 'index'])
         ->name('api.admin.event-summary');
+
+    // Katalog Vendor & Paket (dapat diakses seluruh pengguna terautentikasi)
+    Route::get('/vendors', [VendorController::class, 'index'])
+        ->name('api.vendors.index');
+    Route::get('/vendors/{slug}', [VendorController::class, 'show'])
+        ->name('api.vendors.show');
 
     // Modul Master & Operasional EO
     Route::middleware('role:eo')->group(function () {

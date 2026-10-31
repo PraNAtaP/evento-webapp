@@ -40,6 +40,8 @@ class BoardInspectorTest extends TestCase
         'can_send_quotation',
         'send_quotation_blockers',
         'dp_percentage',
+        'revision_note',
+        'revision_requested_at',
         'vendors',
         'vendors_total',
     ];
