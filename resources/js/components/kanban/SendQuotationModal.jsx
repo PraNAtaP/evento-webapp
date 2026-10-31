@@ -108,19 +108,19 @@ export default function SendQuotationModal({ event, onClose, onSent }) {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={TITLE_ID}
-                className="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-y-auto"
+                className="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#E8E2D7] flex flex-col max-h-[90vh] overflow-y-auto"
             >
-                <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
+                <div className="flex items-start justify-between gap-3 pb-3 border-b border-[#E8E2D7]">
                     <div>
                         <h2
                             id={TITLE_ID}
                             ref={headingRef}
                             tabIndex={-1}
-                            className="text-base font-bold text-slate-900 focus:outline-none"
+                            className="text-base font-bold text-[#2F3931] focus:outline-none"
                         >
                             Kirim Penawaran ke Klien
                         </h2>
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-xs text-[#738075] mt-0.5">
                             {orDash(event.event_name)} &bull; Klien: {orDash(event.client_name)}
                         </p>
                     </div>
@@ -129,7 +129,7 @@ export default function SendQuotationModal({ event, onClose, onSent }) {
                         onClick={onClose}
                         disabled={submitting}
                         aria-label="Tutup dialog"
-                        className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors disabled:opacity-50"
+                        className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-[#738075] hover:text-[#2F3931] hover:bg-[#FAF6F0] transition-colors disabled:opacity-50"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -140,19 +140,19 @@ export default function SendQuotationModal({ event, onClose, onSent }) {
                 <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                     {/* Ringkasan Vendor yang Dihitung */}
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-[#738075] mb-2">
                             Ringkasan Vendor ({activeVendors.length})
                         </p>
-                        <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-1 text-xs">
+                        <ul className="divide-y divide-[#E8E2D7] rounded-xl border border-[#E8E2D7] bg-[#FAF6F0]/60 px-3 py-1 text-xs">
                             {activeVendors.map((row) => (
                                 <li key={row.id} className="py-2 flex items-center justify-between gap-2">
                                     <div className="min-w-0">
-                                        <p className="font-semibold text-slate-900 truncate">{row.business_name}</p>
-                                        <p className="text-[11px] text-slate-500 truncate">
+                                        <p className="font-semibold text-[#2F3931] truncate">{row.business_name}</p>
+                                        <p className="text-[11px] text-[#738075] truncate">
                                             {formatVendorCategory(row.category)} &bull; {orDash(row.package_name)}
                                         </p>
                                     </div>
-                                    <span className="shrink-0 font-semibold text-slate-900">
+                                    <span className="shrink-0 font-semibold text-[#2F3931]">
                                         {formatRupiah(row.price)}
                                     </span>
                                 </li>
@@ -161,9 +161,9 @@ export default function SendQuotationModal({ event, onClose, onSent }) {
                     </div>
 
                     {/* Total Harga Penawaran */}
-                    <div className="flex items-baseline justify-between border-t border-slate-100 pt-2 px-1">
-                        <span className="text-xs font-medium text-slate-600">Total Nilai Penawaran</span>
-                        <span className="text-base font-extrabold text-blue-600">{formatRupiah(total)}</span>
+                    <div className="flex items-baseline justify-between border-t border-[#E8E2D7] pt-2 px-1">
+                        <span className="text-xs font-medium text-[#738075]">Total Nilai Penawaran</span>
+                        <span className="text-base font-extrabold text-[#657166]">{formatRupiah(total)}</span>
                     </div>
 
                     {/* Catatan Venue Jika Klien Belum Punya Venue */}
@@ -176,10 +176,10 @@ export default function SendQuotationModal({ event, onClose, onSent }) {
                     {/* Input Persentase DP */}
                     <div>
                         <div className="flex items-center justify-between mb-1">
-                            <label htmlFor="send-quotation-dp" className="block text-xs font-semibold text-slate-700">
+                            <label htmlFor="send-quotation-dp" className="block text-xs font-semibold text-[#2F3931]">
                                 Ketentuan DP (%)
                             </label>
-                            <span className="text-[11px] text-slate-400">Batas: 10% - 100%</span>
+                            <span className="text-[11px] text-[#738075]">Batas: 10% - 100%</span>
                         </div>
                         <input
                             id="send-quotation-dp"
@@ -190,30 +190,30 @@ export default function SendQuotationModal({ event, onClose, onSent }) {
                             value={dpPercentage}
                             onChange={(e) => setDpPercentage(e.target.value)}
                             disabled={submitting}
-                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 disabled:bg-slate-100"
+                            className="w-full px-3 py-2 text-sm border border-[#E8E2D7] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#657166]/20 focus:border-[#657166] disabled:bg-[#FAF6F0]"
                         />
 
                         {/* Simulasi Nilai DP & Pelunasan */}
                         {isDpValid && (
-                            <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-100 text-xs">
-                                <div className="p-2 bg-slate-50 rounded-xl">
-                                    <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+                            <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-[#E8E2D7] text-xs">
+                                <div className="p-2 bg-[#FAF6F0] rounded-xl">
+                                    <span className="text-[10px] text-[#738075] uppercase tracking-wider block">
                                         Nominal DP
                                     </span>
-                                    <span className="font-bold text-blue-600">{formatRupiah(dpAmount)}</span>
+                                    <span className="font-bold text-[#657166]">{formatRupiah(dpAmount)}</span>
                                 </div>
-                                <div className="p-2 bg-slate-50 rounded-xl">
-                                    <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+                                <div className="p-2 bg-[#FAF6F0] rounded-xl">
+                                    <span className="text-[10px] text-[#738075] uppercase tracking-wider block">
                                         Sisa Pelunasan
                                     </span>
-                                    <span className="font-bold text-slate-700">{formatRupiah(pelunasanAmount)}</span>
+                                    <span className="font-bold text-[#2F3931]">{formatRupiah(pelunasanAmount)}</span>
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {/* Peringatan Read-only */}
-                    <div className="rounded-xl bg-slate-50 p-3 text-[11px] text-slate-500 border border-slate-200">
+                    <div className="rounded-xl bg-[#FAF6F0] p-3 text-[11px] text-[#738075] border border-[#E8E2D7]">
                         Setelah penawaran dikirim, status acara akan berpindah ke <strong>Review klien</strong> dan daftar
                         vendor menjadi <strong>read-only</strong>.
                     </div>
@@ -234,14 +234,14 @@ export default function SendQuotationModal({ event, onClose, onSent }) {
                             type="button"
                             onClick={onClose}
                             disabled={submitting}
-                            className="px-4 py-2 border border-slate-200 text-slate-600 font-semibold text-xs rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
+                            className="px-4 py-2 border border-[#E8E2D7] text-[#738075] font-semibold text-xs rounded-xl hover:bg-[#FAF6F0] transition-colors disabled:opacity-50"
                         >
                             Batal
                         </button>
                         <button
                             type="submit"
                             disabled={submitting || !isDpValid}
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors disabled:opacity-50"
+                            className="px-4 py-2 bg-[#657166] hover:bg-[#556056] text-white font-bold text-xs rounded-xl shadow-xs transition-colors disabled:opacity-50"
                         >
                             {submitting ? "Mengirim..." : "Kirim Penawaran"}
                         </button>

@@ -16,6 +16,7 @@ import VendorDashboard from "./pages/vendor/VendorDashboard";
 import VendorPackageForm from "./pages/vendor/VendorPackageForm";
 import VendorJobOffers from "./pages/vendor/VendorJobOffers";
 import ClientDashboard from "./pages/client/ClientDashboard";
+import ClientBookingPage from "./pages/client/ClientBookingPage";
 import ClientBookedEventsPage from "./pages/client/ClientBookedEventsPage";
 import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 import OfferReviewPage from "./pages/client/OfferReviewPage";
@@ -186,6 +187,16 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["client"]}>
                                         <ClientDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Rute Form Pengajuan Acara Baru */}
+                            <Route
+                                path="/client/booking"
+                                element={
+                                    <ProtectedRoute allowedRoles={["client"]}>
+                                        <ClientBookingPage />
                                     </ProtectedRoute>
                                 }
                             />

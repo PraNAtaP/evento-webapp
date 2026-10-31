@@ -42,12 +42,12 @@ export default function KanbanCard({ card, onSelectCard }) {
             onDragStart={handleDragStart}
             onDragEnd={() => setIsDragging(false)}
             onClick={() => onSelectCard?.(card)}
-            className={`bg-white rounded-xl p-4 shadow-xs border border-slate-200/80 hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col gap-2.5 cursor-grab active:cursor-grabbing group ${
+            className={`bg-white rounded-xl p-4 shadow-xs border border-slate-200/80 hover:shadow-md hover:border-[#B6C2AA] transition-all duration-200 flex flex-col gap-2.5 cursor-grab active:cursor-grabbing group ${
                 isDragging ? "opacity-50" : ""
             }`}
         >
             {/* Judul Acara */}
-            <h4 className="text-sm font-bold text-slate-800 leading-snug group-hover:text-blue-600 transition-colors">
+            <h4 className="text-sm font-bold text-slate-800 leading-snug group-hover:text-[#657166] transition-colors">
                 {eventName}
             </h4>
 
@@ -153,8 +153,7 @@ export default function KanbanCard({ card, onSelectCard }) {
 
                 {kanbanStatus === "drafting_quotation" && card.revision_note && (
                     <div
-                        className="rounded-lg border px-2.5 py-2 flex flex-col gap-1"
-                        style={{ backgroundColor: "#fde8d3", borderColor: "#ebd1b7", color: "#5a3a1d" }}
+                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 flex flex-col gap-1 text-black"
                     >
                         <span className="text-[10px] font-bold uppercase tracking-wider">Revisi diminta</span>
                         <p className="text-[11px] leading-snug line-clamp-2">{card.revision_note}</p>

@@ -19,14 +19,14 @@ function VendorRow({ row, canManage, isConfirming, isRemoving, error, onAskRemov
     const negotiated = isNegotiatedPrice(row.price, row.package_price);
 
     return (
-        <li className="rounded-xl border border-slate-200 bg-white p-3">
+        <li className="rounded-xl border border-[#E8E2D7] bg-white p-3">
             <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#738075]">
                         {formatVendorCategory(row.category)}
                     </p>
-                    <p className="text-sm font-bold text-slate-900 break-words">{orDash(row.business_name)}</p>
-                    <p className="text-xs text-slate-600 break-words">{orDash(row.package_name)}</p>
+                    <p className="text-sm font-bold text-[#2F3931] break-words">{orDash(row.business_name)}</p>
+                    <p className="text-xs text-[#738075] break-words">{orDash(row.package_name)}</p>
                 </div>
                 {statusMeta && (
                     <span
@@ -39,18 +39,18 @@ function VendorRow({ row, canManage, isConfirming, isRemoving, error, onAskRemov
 
             <div className="mt-2 flex flex-wrap items-baseline gap-x-2">
                 <span
-                    className={`text-sm font-semibold ${isRejected ? "text-slate-400 line-through" : "text-slate-900"}`}
+                    className={`text-sm font-semibold ${isRejected ? "text-[#738075] line-through" : "text-[#2F3931]"}`}
                 >
                     {formatRupiah(row.price)}
                 </span>
                 {negotiated && (
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[11px] text-[#738075]">
                         <span className="line-through">{formatRupiah(row.package_price)}</span> harga paket
                     </span>
                 )}
             </div>
 
-            {row.notes && <p className="mt-1 text-xs text-slate-500 break-words">Catatan: {row.notes}</p>}
+            {row.notes && <p className="mt-1 text-xs text-[#738075] break-words">Catatan: {row.notes}</p>}
             {isRejected && (
                 <p className="mt-1 text-xs text-rose-600 break-words">
                     Alasan ditolak: {orDash(row.rejection_reason)}
@@ -67,7 +67,7 @@ function VendorRow({ row, canManage, isConfirming, isRemoving, error, onAskRemov
                 <div className="mt-2 flex items-center justify-end gap-2">
                     {isConfirming ? (
                         <>
-                            <span className="mr-auto text-xs text-slate-600">
+                            <span className="mr-auto text-xs text-[#738075]">
                                 {row.offer_status === "accepted"
                                     ? "Vendor sudah menerima tawaran ini. Hapus?"
                                     : "Hapus vendor ini dari acara?"}
@@ -76,7 +76,7 @@ function VendorRow({ row, canManage, isConfirming, isRemoving, error, onAskRemov
                                 type="button"
                                 onClick={onCancelRemove}
                                 disabled={isRemoving}
-                                className="px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+                                className="px-2.5 py-1 text-xs font-semibold text-[#738075] hover:bg-[#FAF6F0] rounded-lg transition-colors disabled:opacity-50"
                             >
                                 Batal
                             </button>
@@ -191,11 +191,11 @@ export default function InspectorVendorSection({ event, onChanged, onPickerToggl
     };
 
     return (
-        <section className="py-4 border-b border-slate-100 last:border-b-0" aria-labelledby="inspector-vendor-title">
+        <section className="py-4 border-b border-[#E8E2D7] last:border-b-0" aria-labelledby="inspector-vendor-title">
             <div className="mb-3 flex items-center justify-between gap-2">
                 <h3
                     id="inspector-vendor-title"
-                    className="text-[11px] font-semibold uppercase tracking-wider text-slate-400"
+                    className="text-[11px] font-semibold uppercase tracking-wider text-[#738075]"
                 >
                     Vendor
                 </h3>
@@ -204,7 +204,7 @@ export default function InspectorVendorSection({ event, onChanged, onPickerToggl
                         ref={addButtonRef}
                         type="button"
                         onClick={handleOpenPicker}
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors"
+                        className="px-3 py-1.5 bg-[#657166] hover:bg-[#556056] text-white font-semibold text-xs rounded-xl shadow-xs transition-colors"
                     >
                         + Tambah vendor
                     </button>
@@ -218,13 +218,13 @@ export default function InspectorVendorSection({ event, onChanged, onPickerToggl
             )}
 
             {canManage && (
-                <p className="mb-3 text-[11px] text-slate-400">
+                <p className="mb-3 text-[11px] text-[#738075]">
                     Vendor yang ditambahkan langsung menerima tawaran di dashboard-nya.
                 </p>
             )}
 
             {vendors.length === 0 ? (
-                <p className="text-sm text-slate-500">Belum ada vendor</p>
+                <p className="text-sm text-[#738075]">Belum ada vendor</p>
             ) : (
                 <ul className="space-y-2">
                     {vendors.map((row) => (
@@ -246,26 +246,26 @@ export default function InspectorVendorSection({ event, onChanged, onPickerToggl
                 </ul>
             )}
 
-            <div className="mt-3 flex items-baseline justify-between gap-2 border-t border-slate-100 pt-3">
+            <div className="mt-3 flex items-baseline justify-between gap-2 border-t border-[#E8E2D7] pt-3">
                 <div>
-                    <span className="text-xs text-slate-500">Total</span>
+                    <span className="text-xs text-[#738075]">Total</span>
                     {hasRejected && (
-                        <span className="ml-1 text-[10px] text-slate-400">(tanpa vendor yang menolak)</span>
+                        <span className="ml-1 text-[10px] text-[#738075]">(tanpa vendor yang menolak)</span>
                     )}
                 </div>
-                <span className="text-sm font-bold text-slate-900">{formatRupiah(event.vendors_total)}</span>
+                <span className="text-sm font-bold text-[#2F3931]">{formatRupiah(event.vendors_total)}</span>
             </div>
 
             {canManage && (
-                <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
+                <div className="mt-4 pt-3 border-t border-[#E8E2D7] flex flex-col gap-2">
                     <button
                         type="button"
                         disabled={!event.can_send_quotation}
                         onClick={handleOpenSendModal}
                         className={`w-full py-2.5 px-4 font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 ${
                             event.can_send_quotation
-                                ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+                                ? "bg-[#657166] hover:bg-[#556056] text-white"
+                                : "bg-[#FAF6F0] text-[#738075] cursor-not-allowed border border-[#E8E2D7]"
                         }`}
                     >
                         Kirim penawaran ke klien
