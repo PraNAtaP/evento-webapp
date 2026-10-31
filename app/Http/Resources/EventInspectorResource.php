@@ -32,6 +32,8 @@ class EventInspectorResource extends JsonResource
             'lng' => $this->lng !== null ? (float) $this->lng : null,
             'guest_count' => $this->guest_count,
             'estimated_budget' => $this->estimated_budget !== null ? (float) $this->estimated_budget : null,
+            'revision_note' => $this->revision_note,
+            'revision_requested_at' => $this->revision_requested_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
             'show_vendor_section' => $this->showsVendorSection(),

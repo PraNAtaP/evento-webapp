@@ -206,17 +206,15 @@ export default function AdminDashboard() {
 {/* Kartu Verifikasi Pembayaran */}
 <Link
     to="/admin/payments"
-    className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
+    className="bg-white hover:bg-[#FAF6F0] rounded-2xl p-6 border border-[#E8E2D7] hover:border-[#CFD8C4] shadow-xs transition-all duration-300 flex flex-col justify-between group relative"
 >
-    <div className="absolute right-0 top-0 translate-x-4 -translate-y-4 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
-
     <div>
-        <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center mb-4">
+        <div className="w-12 h-12 rounded-xl bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2] flex items-center justify-center mb-4 group-hover:bg-[#F3C3B2] transition-colors">
             <svg
                 width="24"
                 height="24"
                 style={{ minWidth: 24, minHeight: 24 }}
-                className="w-6 h-6 text-white"
+                className="w-6 h-6 text-[#63482B]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -229,35 +227,37 @@ export default function AdminDashboard() {
                 />
             </svg>
         </div>
-        <span className="text-xs uppercase font-bold tracking-wider text-emerald-200">
+        <span className="inline-block text-[10px] uppercase font-bold tracking-wider text-[#63482B] bg-[#FDE8D3] px-2.5 py-0.5 rounded-full border border-[#E8CEB2] mb-1.5">
             Pembayaran
         </span>
-        <h2 className="text-xl font-bold mt-1 text-white">
+        <h2 className="text-xl font-bold mt-1 text-[#2F3931] group-hover:text-[#424C43] transition-colors">
             Verifikasi Pembayaran
         </h2>
-        <p className="text-xs text-emerald-100 mt-2 leading-relaxed">
+        <p className="text-xs text-[#738075] mt-2 leading-relaxed">
             Periksa bukti transfer dari klien dan tandai status Lunas atau Tolak untuk setiap tagihan DP & pelunasan.
         </p>
     </div>
 
-    <div className="mt-6 flex items-center gap-2 text-xs font-bold text-white group-hover:translate-x-1 transition-transform">
-        <span>Buka Verifikasi</span>
-        <svg
-            width="16"
-            height="16"
-            style={{ minWidth: 16, minHeight: 16 }}
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2.5"
-        >
-            <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-            />
-        </svg>
+    <div className="mt-6 flex items-center gap-2 text-xs font-bold text-[#424C43] group-hover:translate-x-1 transition-transform">
+        <span className="px-3.5 py-1.5 rounded-full bg-[#DAEBE3] text-[#424C43] group-hover:bg-[#CFD8C4] transition-colors flex items-center gap-1.5">
+            <span>Buka Verifikasi</span>
+            <svg
+                width="16"
+                height="16"
+                style={{ minWidth: 16, minHeight: 16 }}
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2.5"
+            >
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+            </svg>
+        </span>
     </div>
 </Link>
                     {/* Tabel Performa Vendor */}

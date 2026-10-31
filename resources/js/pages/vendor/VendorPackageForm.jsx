@@ -417,10 +417,10 @@ export default function VendorPackageForm() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className={`bg-[#F3C3B2] text-[#55271C] text-xs font-bold px-6 py-2.5 rounded-xl border border-[#E5B5A4] transition shadow-xs ${
+                                className={`bg-[#657166] text-white text-xs font-bold px-6 py-2.5 rounded-xl border border-[#525C53] transition shadow-xs ${
                                     isSubmitting
                                         ? "opacity-70 cursor-not-allowed"
-                                        : "hover:bg-[#ebb7a5] cursor-pointer"
+                                        : "hover:bg-[#556056] cursor-pointer"
                                 }`}
                             >
                                 {isSubmitting

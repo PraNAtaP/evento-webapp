@@ -92,6 +92,7 @@ class SeasonalForecastService
      *     hujan_mm_bulan: float,
      *     suhu_max: float,
      *     suhu_min: float,
+     *     kategori: string,
      *     ikon: string,
      *     musim: string,
      *     saran: string,
@@ -153,7 +154,8 @@ class SeasonalForecastService
         }
 
         $monthlyRain = round($precipitation * 30, 1);
-        $category = self::CATEGORIES[$this->classify($monthlyRain)];
+        $categoryKey = $this->classify($monthlyRain);
+        $category = self::CATEGORIES[$categoryKey];
         $tempMax = round($tempMax, 1);
 
         return [
@@ -164,6 +166,7 @@ class SeasonalForecastService
             'hujan_mm_bulan' => $monthlyRain,
             'suhu_max' => $tempMax,
             'suhu_min' => round($tempMin, 1),
+            'kategori' => $categoryKey,
             'ikon' => $category['ikon'],
             'musim' => $category['musim'],
             'saran' => $category['saran'],

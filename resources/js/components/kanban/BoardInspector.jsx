@@ -185,6 +185,20 @@ function InspectorPanel({ eventId, onClose, onQuotationSent }) {
 
         return (
             <div>
+                {event.revision_note && (
+                    <div className="mt-4 rounded-xl border border-[#ebd1b7] bg-[#fde8d3] px-4 py-3 text-[#5a3a1d]">
+                        <p className="text-[11px] font-bold uppercase tracking-wider">Catatan Revisi Klien</p>
+                        <p className="text-xs mt-1 leading-relaxed whitespace-pre-line break-words">
+                            {event.revision_note}
+                        </p>
+                        {event.revision_requested_at && (
+                            <p className="text-[10px] mt-1.5 opacity-70">
+                                Diminta pada {formatDateTime(event.revision_requested_at)}
+                            </p>
+                        )}
+                    </div>
+                )}
+
                 <InspectorSection title="Umum">
                     <InspectorField label="ID">{orDash(event.id)}</InspectorField>
                     <InspectorField label="Nama Event">{orDash(event.event_name)}</InspectorField>
