@@ -8,14 +8,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'vendor_id',
     'package_name',
+    'slug',
     'description',
     'price',
     'image_url',
     'image_public_id',
+    'is_active',
 ])]
 class VendorPackage extends Model
 {
@@ -31,7 +34,32 @@ class VendorPackage extends Model
     {
         return [
             'price' => 'decimal:2',
+            'is_active' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (VendorPackage $package) {
+            if (empty($package->slug) && ! empty($package->package_name)) {
+                $base = Str::slug($package->package_name) ?: 'package';
+                $slug = $base;
+                $counter = 1;
+                while (static::where('vendor_id', $package->vendor_id)->where('slug', $slug)->exists()) {
+                    $slug = "{$base}-{$counter}";
+                    $counter++;
+                }
+                $package->slug = $slug;
+            }
+        });
+    }
+
+    /**
+     * Scope paket yang aktif.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 
     /**

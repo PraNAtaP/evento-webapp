@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'user_id',
     'business_name',
+    'slug',
     'category',
     'contact_number',
     'address',
@@ -19,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'description',
     'image_url',
     'status',
+    'is_active',
     'rejection_reason',
     'agreement_accepted_at',
     'approved_at',
@@ -26,6 +29,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Vendor extends Model
 {
+    /** @use HasFactory<VendorFactory> */
+    use HasFactory;
+
     public const STATUS_PENDING = 'pending';
 
     public const STATUS_APPROVED = 'approved';
@@ -40,9 +46,34 @@ class Vendor extends Model
     protected function casts(): array
     {
         return [
+            'is_active' => 'boolean',
             'approved_at' => 'datetime',
             'agreement_accepted_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Vendor $vendor) {
+            if (empty($vendor->slug) && ! empty($vendor->business_name)) {
+                $base = Str::slug($vendor->business_name) ?: 'vendor';
+                $slug = $base;
+                $counter = 1;
+                while (static::where('slug', $slug)->exists()) {
+                    $slug = "{$base}-{$counter}";
+                    $counter++;
+                }
+                $vendor->slug = $slug;
+            }
+        });
+    }
+
+    /**
+     * Scope untuk vendor yang aktif dan sudah di-approve.
+     */
+    public function scopeCatalogActive($query)
+    {
+        return $query->where('is_active', true)->where('status', self::STATUS_APPROVED);
     }
 
     public function isPending(): bool

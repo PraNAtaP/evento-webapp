@@ -31,7 +31,7 @@ const ROLE_MENUS = {
         },
         {
             title: "Katalog vendor",
-            path: "/vendor/dashboard",
+            path: "/vendors",
             badge: null,
             icon: (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -135,6 +135,16 @@ const ROLE_MENUS = {
             icon: (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            ),
+        },
+        {
+            title: "Katalog vendor",
+            path: "/vendors",
+            badge: null,
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
             ),
         },
@@ -246,7 +256,10 @@ export default function Sidebar({ isOpen, onClose }) {
                 {/* Navigation Menus (Pill button seperti pada mockup) */}
                 <div className="flex-1 overflow-y-auto py-5 px-3.5 space-y-1.5">
                     {menus.map((menu) => {
-                        const isActive = location.pathname === menu.path;
+                        const isActive =
+                            menu.path === "/vendors"
+                                ? location.pathname === "/vendors" || location.pathname.startsWith("/vendors/")
+                                : location.pathname === menu.path;
 
                         return (
                             <Link
