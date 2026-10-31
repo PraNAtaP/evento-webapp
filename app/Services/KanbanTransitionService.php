@@ -124,6 +124,8 @@ class KanbanTransitionService
         }
 
         $event->kanban_status = 'client_review';
+        $event->revision_note = null;
+        $event->revision_requested_at = null;
         $event->save();
     }
 
@@ -199,6 +201,8 @@ class KanbanTransitionService
         $event->update([
             'kanban_status' => 'drafting_quotation',
             'agreed_price' => null,
+            'revision_note' => $revisionNote,
+            'revision_requested_at' => now(),
         ]);
     }
 
