@@ -151,6 +151,16 @@ export default function KanbanCard({ card, onSelectCard }) {
                     </div>
                 )}
 
+                {kanbanStatus === "drafting_quotation" && card.revision_note && (
+                    <div
+                        className="rounded-lg border px-2.5 py-2 flex flex-col gap-1"
+                        style={{ backgroundColor: "#fde8d3", borderColor: "#ebd1b7", color: "#5a3a1d" }}
+                    >
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Revisi diminta</span>
+                        <p className="text-[11px] leading-snug line-clamp-2">{card.revision_note}</p>
+                    </div>
+                )}
+
                 {kanbanStatus === "client_review" && (
                     <div className="flex items-center justify-between text-xs">
                         <span style={{ color: "#5a3a1d" }} className="text-[11px] font-bold">Total Penawaran:</span>

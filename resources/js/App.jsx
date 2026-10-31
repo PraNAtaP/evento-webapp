@@ -4,13 +4,19 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
+import VendorRegister from "./pages/auth/VendorRegister";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import EventOrdersPage from "./pages/admin/EventOrdersPage";
 import EventCategoryPage from "./pages/admin/EventCategoryPage";
+import AdminAccountPage from "./pages/admin/AdminAccountPage";
+import VendorRegistrationPage from "./pages/admin/VendorRegistrationPage";
 import KanbanPage from "./pages/admin/KanbanPage";
 import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import VendorPackageForm from "./pages/vendor/VendorPackageForm";
+import VendorJobOffers from "./pages/vendor/VendorJobOffers";
 import ClientDashboard from "./pages/client/ClientDashboard";
+import ClientBookedEventsPage from "./pages/client/ClientBookedEventsPage";
 import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 import OfferReviewPage from "./pages/client/OfferReviewPage";
 
@@ -49,6 +55,8 @@ export default function App() {
                         <Route path="/" element={<RootRedirect />} />
 
                         <Route path="/login" element={<Login />} />
+                        <Route path="/register/vendor" element={<VendorRegister />} />
+                        <Route path="/vendor/register" element={<VendorRegister />} />
 
                         {/* Template Layout Terpusat: Sidebar Dinamis & Header */}
                         <Route
@@ -59,6 +67,15 @@ export default function App() {
                             }
                         >
                             {/* Rute Admin (EO) */}
+                            <Route
+                                path="/admin/orders"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <EventOrdersPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                             <Route
                                 path="/admin/dashboard"
                                 element={
@@ -87,12 +104,32 @@ export default function App() {
                                 }
                             />
 
+                            {/* Rute Pendaftaran & Review Vendor untuk EO */}
+                            <Route
+                                path="/admin/vendors"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <VendorRegistrationPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                             {/* Rute Verifikasi Pembayaran untuk EO */}
                             <Route
                                 path="/admin/payments"
                                 element={
                                     <ProtectedRoute allowedRoles={["eo"]}>
                                         <PaymentVerificationPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Rute Kelola Akun Admin untuk EO */}
+                            <Route
+                                path="/admin/admins"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <AdminAccountPage />
                                     </ProtectedRoute>
                                 }
                             />
@@ -109,6 +146,16 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["vendor"]}>
                                         <VendorDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Halaman Tawaran Pekerjaan dan Pekerjaan Aktif */}
+                            <Route
+                                path="/vendor/job-offers"
+                                element={
+                                    <ProtectedRoute allowedRoles={["vendor"]}>
+                                        <VendorJobOffers />
                                     </ProtectedRoute>
                                 }
                             />
@@ -143,6 +190,16 @@ export default function App() {
                                 }
                             />
 
+                            {/* Rute Acara yang Dibooking (Progress & Pembayaran per Acara) */}
+                            <Route
+                                path="/client/booked-events"
+                                element={
+                                    <ProtectedRoute allowedRoles={["client"]}>
+                                        <ClientBookedEventsPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                             {/* Rute Payment Tracking untuk Client */}
                             <Route
                                 path="/client/payments"
@@ -152,23 +209,23 @@ export default function App() {
                                     </ProtectedRoute>
                                 }
                             />
-    
-<Route
-    path="/client/offers"
-    element={
-        <ProtectedRoute allowedRoles={["client"]}>
-            <OfferReviewPage />
-        </ProtectedRoute>
-    }
-/>
-                            </Route>
-                            
 
-                        {/* Fallback */}
-                        <Route
-                            path="*"
-                            element={<Navigate to="/" replace />}
-                        />
+                            {/* Rute Review Tawaran untuk Client */} 
+                            <Route
+                                path="/client/offers"
+                                element={
+                                    <ProtectedRoute allowedRoles={["client"]}>
+                                        <OfferReviewPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            </Route>
+
+                            {/* Fallback */}
+                            <Route
+                                path="*"
+                                element={<Navigate to="/" replace />}
+                            />
                     </Routes>
                 </BrowserRouter>
             </AuthProvider>

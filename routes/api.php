@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\AdminAccountController;
+use App\Http\Controllers\Api\AdminEventOrderController;
+use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ClientEventController;
@@ -11,10 +14,12 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\VendorJobController;
 use App\Http\Controllers\Api\VendorPackageController;
 use App\Http\Controllers\Api\VendorProgressController;
+use App\Http\Controllers\Api\VendorRegistrationController;
 use App\Http\Controllers\SeasonController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
+Route::post('/register/vendor', [VendorRegistrationController::class, 'register'])->name('api.register.vendor');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me'])->name('api.me');
@@ -40,6 +45,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/admin/kanban/{event}/move', [KanbanController::class, 'move'])
             ->name('api.admin.kanban.move');
 
+        // Pesanan Acara Masuk (Terima / Tolak Request Klien)
+        Route::get('/admin/orders', [AdminEventOrderController::class, 'index'])
+            ->name('api.admin.orders.index');
+        Route::patch('/admin/orders/{event}/accept', [AdminEventOrderController::class, 'accept'])
+            ->name('api.admin.orders.accept');
+        Route::patch('/admin/orders/{event}/reject', [AdminEventOrderController::class, 'reject'])
+            ->name('api.admin.orders.reject');
+
         // Master Data Kategori Acara (EO CRUD)
         Route::get('/admin/event-categories', [EventCategoryController::class, 'adminIndex'])
             ->name('api.admin.event-categories.index');
@@ -51,6 +64,28 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.admin.event-categories.update');
         Route::delete('/admin/event-categories/{eventCategory}', [EventCategoryController::class, 'destroy'])
             ->name('api.admin.event-categories.destroy');
+
+        // Manajemen Akun Admin EO (CRUD)
+        Route::get('/admin/admins', [AdminAccountController::class, 'index'])
+            ->name('api.admin.admins.index');
+        Route::post('/admin/admins', [AdminAccountController::class, 'store'])
+            ->name('api.admin.admins.store');
+        Route::get('/admin/admins/{user}', [AdminAccountController::class, 'show'])
+            ->name('api.admin.admins.show');
+        Route::put('/admin/admins/{user}', [AdminAccountController::class, 'update'])
+            ->name('api.admin.admins.update');
+        Route::delete('/admin/admins/{user}', [AdminAccountController::class, 'destroy'])
+            ->name('api.admin.admins.destroy');
+
+        // Manajemen & Review Pendaftaran Vendor (EO)
+        Route::get('/admin/vendors', [AdminVendorController::class, 'index'])
+            ->name('api.admin.vendors.index');
+        Route::get('/admin/vendors/{vendor}', [AdminVendorController::class, 'show'])
+            ->name('api.admin.vendors.show');
+        Route::patch('/admin/vendors/{vendor}/approve', [AdminVendorController::class, 'approve'])
+            ->name('api.admin.vendors.approve');
+        Route::patch('/admin/vendors/{vendor}/reject', [AdminVendorController::class, 'reject'])
+            ->name('api.admin.vendors.reject');
 
         // Board Inspector (read-only detail event)
         Route::get('/events/{event}', [EventInspectorController::class, 'show'])

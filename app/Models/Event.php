@@ -36,6 +36,9 @@ class Event extends Model
         'is_multi_day',
         'end_date',
         'kanban_status',
+        'rejection_reason',
+        'revision_note',
+        'revision_requested_at',
     ];
 
     /**
@@ -80,6 +83,7 @@ class Event extends Model
             'estimated_budget' => 'decimal:2',
             'agreed_price' => 'decimal:2',
             'dp_percentage' => 'decimal:2',
+            'revision_requested_at' => 'datetime',
             'lat' => 'float',
             'lng' => 'float',
         ];

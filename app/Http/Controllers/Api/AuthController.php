@@ -31,6 +31,19 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        $vendorData = null;
+        if ($user->vendor) {
+            $vendorData = [
+                'id' => $user->vendor->id,
+                'business_name' => $user->vendor->business_name,
+                'category' => $user->vendor->category,
+                'contact_number' => $user->vendor->contact_number,
+                'address' => $user->vendor->address,
+                'status' => $user->vendor->status,
+                'rejection_reason' => $user->vendor->rejection_reason,
+            ];
+        }
+
         return response()->json([
             'message' => 'Login berhasil.',
             'token' => $token,
@@ -39,6 +52,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'vendor' => $vendorData,
             ],
         ]);
     }
@@ -50,12 +64,26 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
+        $vendorData = null;
+        if ($user->vendor) {
+            $vendorData = [
+                'id' => $user->vendor->id,
+                'business_name' => $user->vendor->business_name,
+                'category' => $user->vendor->category,
+                'contact_number' => $user->vendor->contact_number,
+                'address' => $user->vendor->address,
+                'status' => $user->vendor->status,
+                'rejection_reason' => $user->vendor->rejection_reason,
+            ];
+        }
+
         return response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'vendor' => $vendorData,
             ],
         ]);
     }
