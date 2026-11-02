@@ -12,6 +12,7 @@ import {
 } from "../../utils/formatters";
 import InspectorField from "./InspectorField";
 import InspectorSection from "./InspectorSection";
+import InspectorVendorSection from "./InspectorVendorSection";
 
 const TITLE_ID = "board-inspector-title";
 const FOCUSABLE_SELECTOR =
@@ -24,7 +25,7 @@ function SkeletonBlock() {
                 <div key={index} className="space-y-3">
                     <div className="h-3 w-20 bg-slate-200 rounded" />
                     {Array.from({ length: rows }).map((_, row) => (
-                        <div key={row} className="h-4 bg-slate-100 rounded w-full" />
+                        <div key={row} className="h-4 bg-[#FAF6F0] rounded w-full" />
                     ))}
                 </div>
             ))}
@@ -32,12 +33,38 @@ function SkeletonBlock() {
     );
 }
 
-function InspectorPanel({ eventId, onClose }) {
+function InspectorPanel({ eventId, onClose, onQuotationSent }) {
     const panelRef = useRef(null);
     const [status, setStatus] = useState("loading");
     const [event, setEvent] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
     const [retryKey, setRetryKey] = useState(0);
+    const [refreshError, setRefreshError] = useState("");
+    // true selama pemilih vendor / dialog kirim penawaran terbuka: Esc/Tab ditangani modal itu
+    const pickerOpenRef = useRef(false);
+    const eventIdRef = useRef(eventId);
+    eventIdRef.current = eventId;
+
+    const handlePickerToggle = useCallback((open) => {
+        pickerOpenRef.current = open;
+    }, []);
+
+    // Ambil ulang data tanpa menampilkan skeleton (dipakai setelah tambah/hapus vendor)
+    const refreshEvent = useCallback(async () => {
+        try {
+            const response = await api.get(`/events/${eventId}`);
+            if (eventIdRef.current !== eventId) return false;
+
+            setEvent(response.data.data);
+            setRefreshError("");
+            return true;
+        } catch {
+            if (eventIdRef.current === eventId) {
+                setRefreshError("Perubahan tersimpan, tetapi data gagal dimuat ulang.");
+            }
+            return false;
+        }
+    }, [eventId]);
 
     // Simpan fokus sebelumnya, kembalikan saat panel ditutup
     useEffect(() => {
@@ -59,6 +86,7 @@ function InspectorPanel({ eventId, onClose }) {
         const controller = new AbortController();
         setStatus("loading");
         setErrorMessage("");
+        setRefreshError("");
 
         api.get(`/events/${eventId}`, { signal: controller.signal })
             .then((response) => {
@@ -80,12 +108,19 @@ function InspectorPanel({ eventId, onClose }) {
         return () => controller.abort();
     }, [eventId, retryKey]);
 
+    const onCloseRef = useRef(onClose);
+    onCloseRef.current = onClose;
+
     // Esc menutup panel; Tab/Shift+Tab berputar di dalam panel (focus trap)
     const handleKeyDown = useCallback(
         (e) => {
+            // Modal pemilih vendor menangani Esc/Tab sendiri, atau event sudah ditangani
+            if (pickerOpenRef.current || e.defaultPrevented) return;
+
             if (e.key === "Escape") {
+                e.preventDefault();
                 e.stopPropagation();
-                onClose?.();
+                onCloseRef.current?.();
                 return;
             }
 
@@ -110,7 +145,7 @@ function InspectorPanel({ eventId, onClose }) {
                 first.focus();
             }
         },
-        [onClose]
+        []
     );
 
     useEffect(() => {
@@ -126,11 +161,11 @@ function InspectorPanel({ eventId, onClose }) {
         if (status === "error") {
             return (
                 <div className="py-12 text-center flex flex-col items-center gap-3">
-                    <p className="text-sm text-slate-600 max-w-xs">{errorMessage}</p>
+                    <p className="text-sm text-[#738075] max-w-xs">{errorMessage}</p>
                     <button
                         type="button"
                         onClick={() => setRetryKey((key) => key + 1)}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors"
+                        className="px-4 py-2 bg-[#657166] hover:bg-[#556056] text-white font-semibold text-xs rounded-xl shadow-xs transition-colors"
                     >
                         Coba lagi
                     </button>
@@ -151,7 +186,7 @@ function InspectorPanel({ eventId, onClose }) {
         return (
             <div>
                 {event.revision_note && (
-                    <div className="mt-4 rounded-xl border border-[#ebd1b7] bg-[#fde8d3] px-4 py-3 text-[#5a3a1d]">
+                    <div className="mt-4 rounded-xl border border-[#E8E2D7] bg-white px-4 py-3 text-black">
                         <p className="text-[11px] font-bold uppercase tracking-wider">Catatan Revisi Klien</p>
                         <p className="text-xs mt-1 leading-relaxed whitespace-pre-line break-words">
                             {event.revision_note}
@@ -198,7 +233,7 @@ function InspectorPanel({ eventId, onClose }) {
                                 href={mapsUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-700 hover:underline"
+                                className="text-[#657166] hover:text-[#556056] hover:underline"
                             >
                                 Buka di Maps
                             </a>
@@ -212,12 +247,36 @@ function InspectorPanel({ eventId, onClose }) {
                     <InspectorField label="Jumlah Tamu">{formatNumber(event.guest_count)}</InspectorField>
                     <InspectorField label="Estimasi Biaya">{formatRupiah(event.estimated_budget)}</InspectorField>
                 </InspectorSection>
+
+                {refreshError && (
+                    <div
+                        role="alert"
+                        className="mt-4 flex items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"
+                    >
+                        <span>{refreshError}</span>
+                        <button
+                            type="button"
+                            onClick={refreshEvent}
+                            className="shrink-0 font-semibold text-amber-900 underline"
+                        >
+                            Muat ulang
+                        </button>
+                    </div>
+                )}
+
+                <InspectorVendorSection
+                    key={event.id}
+                    event={event}
+                    onChanged={refreshEvent}
+                    onPickerToggle={handlePickerToggle}
+                    onQuotationSent={onQuotationSent}
+                />
             </div>
         );
     };
 
     return (
-        <div className="fixed inset-0 z-40">
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
             {/* Backdrop: klik menutup panel (bukan tombol) */}
             <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} aria-hidden="true" />
 
@@ -227,14 +286,14 @@ function InspectorPanel({ eventId, onClose }) {
                 aria-modal="true"
                 aria-labelledby={TITLE_ID}
                 tabIndex={-1}
-                className="absolute inset-y-0 right-0 w-full md:w-[420px] bg-white shadow-xl flex flex-col focus:outline-none"
+                className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl border border-[#E8E2D7] shadow-xl flex flex-col overflow-hidden focus:outline-none"
             >
-                <header className="flex items-start justify-between gap-3 px-5 py-4 border-b border-slate-200">
+                <header className="flex items-start justify-between gap-3 px-5 py-4 border-b border-[#E8E2D7]">
                     <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-[#738075]">
                             Detail Acara
                         </p>
-                        <h2 id={TITLE_ID} className="text-base font-bold text-slate-900 break-words">
+                        <h2 id={TITLE_ID} className="text-base font-bold text-[#2F3931] break-words">
                             {title}
                         </h2>
                     </div>
@@ -242,7 +301,7 @@ function InspectorPanel({ eventId, onClose }) {
                         type="button"
                         onClick={onClose}
                         aria-label="Tutup"
-                        className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                        className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-[#738075] hover:text-[#2F3931] hover:bg-[#FAF6F0] transition-colors"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -256,8 +315,8 @@ function InspectorPanel({ eventId, onClose }) {
     );
 }
 
-export default function BoardInspector({ eventId, onClose }) {
+export default function BoardInspector({ eventId, onClose, onQuotationSent }) {
     if (eventId === null || eventId === undefined) return null;
 
-    return <InspectorPanel eventId={eventId} onClose={onClose} />;
+    return <InspectorPanel eventId={eventId} onClose={onClose} onQuotationSent={onQuotationSent} />;
 }

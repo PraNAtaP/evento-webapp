@@ -9,8 +9,11 @@ use App\Http\Controllers\Api\ClientEventController;
 use App\Http\Controllers\Api\EventCategoryController;
 use App\Http\Controllers\Api\EventInspectorController;
 use App\Http\Controllers\Api\EventSummaryController;
+use App\Http\Controllers\Api\EventVendorController;
 use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\VendorCatalogController;
+use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\VendorJobController;
 use App\Http\Controllers\Api\VendorPackageController;
 use App\Http\Controllers\Api\VendorProgressController;
@@ -37,6 +40,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard Analitik EO
     Route::get('/admin/event-summary', [EventSummaryController::class, 'index'])
         ->name('api.admin.event-summary');
+
+    // Katalog Vendor & Paket (dapat diakses seluruh pengguna terautentikasi)
+    Route::get('/vendors', [VendorController::class, 'index'])
+        ->name('api.vendors.index');
+    Route::get('/vendors/{slug}', [VendorController::class, 'show'])
+        ->name('api.vendors.show');
 
     // Modul Master & Operasional EO
     Route::middleware('role:eo')->group(function () {
@@ -90,6 +99,18 @@ Route::middleware('auth:sanctum')->group(function () {
         // Board Inspector (read-only detail event)
         Route::get('/events/{event}', [EventInspectorController::class, 'show'])
             ->name('api.events.show');
+
+        // Section Vendor di Board Inspector
+        Route::get('/events/{event}/vendor-catalog', [VendorCatalogController::class, 'index'])
+            ->name('api.events.vendor-catalog.index');
+        Route::get('/events/{event}/vendor-catalog/{vendor}/packages', [VendorCatalogController::class, 'packages'])
+            ->name('api.events.vendor-catalog.packages');
+        Route::post('/events/{event}/vendors', [EventVendorController::class, 'store'])
+            ->name('api.events.vendors.store');
+        Route::delete('/events/{event}/vendors/{assignment}', [EventVendorController::class, 'destroy'])
+            ->name('api.events.vendors.destroy');
+        Route::post('/events/{event}/send-quotation', [EventVendorController::class, 'sendQuotation'])
+            ->name('api.events.send-quotation');
     });
 
     // Booking Acara (Modul Klien - Dian)

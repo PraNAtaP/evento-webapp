@@ -16,9 +16,12 @@ import VendorDashboard from "./pages/vendor/VendorDashboard";
 import VendorPackageForm from "./pages/vendor/VendorPackageForm";
 import VendorJobOffers from "./pages/vendor/VendorJobOffers";
 import ClientDashboard from "./pages/client/ClientDashboard";
+import ClientBookingPage from "./pages/client/ClientBookingPage";
 import ClientBookedEventsPage from "./pages/client/ClientBookedEventsPage";
 import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 import OfferReviewPage from "./pages/client/OfferReviewPage";
+import VendorCatalogIndex from "./pages/vendors/VendorCatalogIndex";
+import VendorCatalogShow from "./pages/vendors/VendorCatalogShow";
 
 const queryClient = new QueryClient();
 
@@ -190,6 +193,16 @@ export default function App() {
                                 }
                             />
 
+                            {/* Rute Form Pengajuan Acara Baru */}
+                            <Route
+                                path="/client/booking"
+                                element={
+                                    <ProtectedRoute allowedRoles={["client"]}>
+                                        <ClientBookingPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                             {/* Rute Acara yang Dibooking (Progress & Pembayaran per Acara) */}
                             <Route
                                 path="/client/booked-events"
@@ -216,6 +229,24 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["client"]}>
                                         <OfferReviewPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Rute Fitur Katalog Vendor & Produk */}
+                            <Route
+                                path="/vendors"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo", "client", "vendor"]}>
+                                        <VendorCatalogIndex />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/vendors/:slug"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo", "client", "vendor"]}>
+                                        <VendorCatalogShow />
                                     </ProtectedRoute>
                                 }
                             />
