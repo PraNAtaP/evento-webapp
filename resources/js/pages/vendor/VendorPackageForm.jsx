@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../api/axios";
@@ -29,6 +30,12 @@ export default function VendorPackageForm() {
     // Status saat paket sedang disimpan
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Memformat harga dengan pemisah ribuan berupa koma
+    const formatPrice = (value) => {
+        const number = value.toString().replace(/\D/g, "");
+        return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+
     // Mengambil data paket berdasarkan id saat mode edit
     useEffect(() => {
         if (!isEdit) {
@@ -54,7 +61,7 @@ export default function VendorPackageForm() {
                 setForm({
                     package_name: packageData.package_name,
                     description: packageData.description,
-                    price: packageData.price,
+                    price: formatPrice(packageData.price || ""),
                     image: null,
                     images: [],
                 });
@@ -99,10 +106,12 @@ export default function VendorPackageForm() {
 
     // Mengubah isi form
     const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value,
-        });
+        const { name, value } = e.target;
+
+        setForm((prev) => ({
+            ...prev,
+            [name]: name === "price" ? formatPrice(value) : value,
+        }));
     };
 
     // Memilih beberapa foto sekaligus
@@ -179,7 +188,9 @@ export default function VendorPackageForm() {
 
             formData.append("package_name", form.package_name);
             formData.append("description", form.description);
-            formData.append("price", form.price);
+
+            // Mengirim harga tanpa pemisah ribuan
+            formData.append("price", form.price.replace(/,/g, ""));
 
             // Foto utama saat tambah paket
             if (form.image) {
@@ -369,14 +380,14 @@ export default function VendorPackageForm() {
                                 </span>
 
                                 <input
-                                    type="number"
+                                    type="text"
                                     name="price"
                                     value={form.price}
                                     onChange={handleChange}
                                     required
-                                    min="0"
+                                    inputMode="numeric"
                                     className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/40 rounded-xl pl-10 pr-3.5 py-2.5 text-sm text-[#2F3931] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition font-medium"
-                                    placeholder="5000000"
+                                    placeholder="5,000,000"
                                 />
                             </div>
                         </div>
