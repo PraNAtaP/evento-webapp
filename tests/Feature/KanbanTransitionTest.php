@@ -331,6 +331,7 @@ class KanbanTransitionTest extends TestCase
 
         $responseSuccess->assertOk();
         $this->assertEquals('done', $event->fresh()->kanban_status);
+        $this->assertNotNull($event->fresh()->completed_at);
     }
 
     public function test_illegal_skipping_steps_and_backward_move_rejected(): void

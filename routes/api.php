@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminAccountController;
+use App\Http\Controllers\Api\AdminActionItemController;
 use App\Http\Controllers\Api\AdminEventOrderController;
 use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
@@ -51,6 +52,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Modul Master & Operasional EO
     Route::middleware('role:eo')->group(function () {
+        // Daftar pekerjaan yang butuh tindakan EO (dashboard)
+        Route::get('/admin/action-items', [AdminActionItemController::class, 'index'])
+            ->name('api.admin.action-items');
+
         Route::get('/admin/kanban', [KanbanController::class, 'index'])
             ->name('api.admin.kanban.index');
         Route::patch('/admin/kanban/{event}/move', [KanbanController::class, 'move'])

@@ -44,6 +44,7 @@ class Event extends Model
         'rejection_reason',
         'revision_note',
         'revision_requested_at',
+        'completed_at',
     ];
 
     /**
@@ -89,6 +90,7 @@ class Event extends Model
             'agreed_price' => 'decimal:2',
             'dp_percentage' => 'decimal:2',
             'revision_requested_at' => 'datetime',
+            'completed_at' => 'datetime',
             'lat' => 'float',
             'lng' => 'float',
         ];
