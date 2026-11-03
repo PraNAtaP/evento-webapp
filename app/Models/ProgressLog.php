@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'assignment_id',
     'note',
+    'photo_url',
+    'photo_public_id',
 ])]
 class ProgressLog extends Model
 {
