@@ -250,6 +250,7 @@ class KanbanTransitionService
 
         $event->update([
             'kanban_status' => 'done',
+            'completed_at' => now(),
         ]);
     }
 }
