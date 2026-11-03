@@ -16,7 +16,7 @@ class PaymentController extends Controller
     {
         $user = $request->user();
 
-        $query = Payment::with(['event:id,client_id,event_name,event_date']);
+        $query = Payment::with(['event:id,client_id,event_name,event_date,kanban_status']);
 
         if ($user->role === 'client') {
             $query->whereHas('event', function ($q) use ($user) {
