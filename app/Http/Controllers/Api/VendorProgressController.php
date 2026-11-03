@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -62,14 +63,35 @@ class VendorProgressController extends Controller
             ], 404);
         }
 
+        // Validasi catatan progress dan foto.
         $validated = $request->validate([
             'note' => ['required', 'string', 'max:2000'],
+            'photo' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        $progressLog = ProgressLog::create([
+        // Data catatan progress.
+        $progressData = [
             'assignment_id' => $assignment->id,
             'note' => $validated['note'],
-        ]);
+        ];
+
+        // Upload foto ke Cloudinary jika vendor menyertakan foto.
+        if ($request->hasFile('photo')) {
+            \Cloudinary::config();
+
+            $upload = \Cloudinary\Uploader::upload(
+                $request->file('photo')->getRealPath(),
+                [
+                    'folder' => 'evento/progress',
+                ]
+            );
+
+            $progressData['photo_url'] = $upload['secure_url'];
+            $progressData['photo_public_id'] = $upload['public_id'];
+        }
+
+        // Simpan catatan progress.
+        $progressLog = ProgressLog::create($progressData);
 
         return response()->json([
             'message' => 'Progress kesiapan berhasil diperbarui.',

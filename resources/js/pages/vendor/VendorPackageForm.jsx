@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../api/axios";
@@ -20,11 +21,20 @@ export default function VendorPackageForm() {
     // Menyimpan foto lama saat edit
     const [existingImages, setExistingImages] = useState([]);
 
+    // Menandai apakah foto utama lama dihapus
+    const [removedMainImage, setRemovedMainImage] = useState(false);
+
     // Menyimpan foto yang sedang dilihat
     const [selectedImage, setSelectedImage] = useState(null);
 
     // Status saat paket sedang disimpan
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Memformat harga dengan pemisah ribuan berupa koma
+    const formatPrice = (value) => {
+        const number = value.toString().replace(/\D/g, "");
+        return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
 
     // Mengambil data paket berdasarkan id saat mode edit
     useEffect(() => {
@@ -51,7 +61,7 @@ export default function VendorPackageForm() {
                 setForm({
                     package_name: packageData.package_name,
                     description: packageData.description,
-                    price: packageData.price,
+                    price: formatPrice(packageData.price || ""),
                     image: null,
                     images: [],
                 });
@@ -96,10 +106,71 @@ export default function VendorPackageForm() {
 
     // Mengubah isi form
     const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value,
-        });
+        const { name, value } = e.target;
+
+        setForm((prev) => ({
+            ...prev,
+            [name]: name === "price" ? formatPrice(value) : value,
+        }));
+    };
+
+    // Memilih beberapa foto sekaligus
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+
+        if (isEdit) {
+            // Saat edit, foto baru ditambahkan sebagai foto tambahan
+            setForm((prev) => ({
+                ...prev,
+                images: [...prev.images, ...files],
+            }));
+        } else {
+            // Saat tambah, foto pertama menjadi foto utama
+            setForm((prev) => ({
+                ...prev,
+                image: files[0] || null,
+                images: [
+                    ...prev.images,
+                    ...files.slice(1),
+                ],
+            }));
+        }
+
+        // Mengosongkan input agar file yang sama bisa dipilih kembali
+        e.target.value = "";
+    };
+
+    // Menghapus foto lama satu per satu
+    const handleRemoveExistingImage = (image) => {
+        setExistingImages((prev) =>
+            prev.filter((item) => item.id !== image.id)
+        );
+
+        // Jika foto utama dihapus, tandai untuk dikirim ke backend
+        if (image.id === "main") {
+            setRemovedMainImage(true);
+        }
+    };
+
+    // Menghapus foto baru yang belum disimpan
+    const handleRemoveNewImage = (index) => {
+        if (!isEdit && index === 0) {
+            // Hapus foto utama saat tambah paket
+            setForm((prev) => ({
+                ...prev,
+                image: null,
+            }));
+            return;
+        }
+
+        const imageIndex = isEdit ? index : index - 1;
+
+        setForm((prev) => ({
+            ...prev,
+            images: prev.images.filter(
+                (_, i) => i !== imageIndex
+            ),
+        }));
     };
 
     // Menyimpan atau update paket
@@ -117,9 +188,11 @@ export default function VendorPackageForm() {
 
             formData.append("package_name", form.package_name);
             formData.append("description", form.description);
-            formData.append("price", form.price);
 
-            // Foto utama
+            // Mengirim harga tanpa pemisah ribuan
+            formData.append("price", form.price.replace(/,/g, ""));
+
+            // Foto utama saat tambah paket
             if (form.image) {
                 formData.append("image", form.image);
             }
@@ -132,6 +205,18 @@ export default function VendorPackageForm() {
             }
 
             if (isEdit) {
+                // Mengirim ID foto tambahan lama yang dipertahankan
+                existingImages
+                    .filter((image) => image.id !== "main")
+                    .forEach((image) => {
+                        formData.append("keep_images[]", image.id);
+                    });
+
+                // Memberi tahu backend jika foto utama dihapus
+                if (removedMainImage) {
+                    formData.append("remove_main_image", "1");
+                }
+
                 // Update paket
                 await api.post(
                     `/vendor/packages/${id}?_method=PUT`,
@@ -230,6 +315,7 @@ export default function VendorPackageForm() {
                         <span className="inline-block text-[11px] font-bold text-[#33422A] bg-[#CFD8C4] px-3 py-0.5 rounded-full border border-[#B6C2AA] mb-1.5">
                             Kelola Paket Jasa
                         </span>
+
                         <h1 className="text-xl font-extrabold text-[#2F3931] tracking-tight">
                             {isEdit
                                 ? "Edit Paket Jasa"
@@ -294,14 +380,14 @@ export default function VendorPackageForm() {
                                 </span>
 
                                 <input
-                                    type="number"
+                                    type="text"
                                     name="price"
                                     value={form.price}
                                     onChange={handleChange}
                                     required
-                                    min="0"
+                                    inputMode="numeric"
                                     className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/40 rounded-xl pl-10 pr-3.5 py-2.5 text-sm text-[#2F3931] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition font-medium"
-                                    placeholder="5000000"
+                                    placeholder="5,000,000"
                                 />
                             </div>
                         </div>
@@ -324,8 +410,7 @@ export default function VendorPackageForm() {
                                           ]
                                               .filter(Boolean)
                                               .map(
-                                                  (file) =>
-                                                      file.name
+                                                  (file) => file.name
                                               )
                                               .join(", ")
                                         : "Belum ada foto dipilih"}
@@ -340,40 +425,20 @@ export default function VendorPackageForm() {
                                         name="image"
                                         accept="image/*"
                                         multiple
-                                        onChange={(e) => {
-                                            const files =
-                                                Array.from(
-                                                    e.target.files
-                                                );
-
-                                            setForm({
-                                                ...form,
-
-                                                // Foto pertama menjadi foto utama
-                                                image:
-                                                    files[0] ||
-                                                    null,
-
-                                                // Foto berikutnya menjadi foto tambahan
-                                                images:
-                                                    files.slice(
-                                                        1
-                                                    ),
-                                            });
-                                        }}
+                                        onChange={handleImageChange}
                                         className="hidden"
                                     />
                                 </label>
                             </div>
 
                             <p className="text-[11px] text-[#738075] mt-1">
-                                Maksimal 2 MB. Format gambar (JPG, PNG).
+                                Bisa memilih beberapa foto sekaligus.
+                                Maksimal 2 MB per foto. Format gambar (JPG, PNG).
                             </p>
 
                             {/* Foto lama saat edit */}
                             {isEdit &&
-                                existingImages.length >
-                                    0 && (
+                                existingImages.length > 0 && (
                                     <div className="mt-4">
                                         <p className="text-xs font-bold text-[#2F3931] mb-2">
                                             Foto Saat Ini
@@ -383,15 +448,11 @@ export default function VendorPackageForm() {
                                             {existingImages.map(
                                                 (image) => (
                                                     <div
-                                                        key={
-                                                            image.id
-                                                        }
+                                                        key={image.id}
                                                         className="relative"
                                                     >
                                                         <img
-                                                            src={
-                                                                image.image_url
-                                                            }
+                                                            src={image.image_url}
                                                             alt="Foto paket"
                                                             onClick={() =>
                                                                 setSelectedImage(
@@ -400,6 +461,18 @@ export default function VendorPackageForm() {
                                                             }
                                                             className="w-20 h-20 object-cover rounded-xl border border-[#E8E2D7] cursor-pointer hover:opacity-85 transition shadow-2xs"
                                                         />
+
+                                                        {/* Tombol hapus foto lama */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleRemoveExistingImage(image)
+                                                            }
+                                                            className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold shadow cursor-pointer"
+                                                            title="Hapus foto"
+                                                        >
+                                                            ×
+                                                        </button>
                                                     </div>
                                                 )
                                             )}
@@ -407,9 +480,47 @@ export default function VendorPackageForm() {
 
                                         <p className="text-[11px] text-[#738075] mt-2">
                                             Klik foto untuk melihat ukuran penuh.
+                                            Klik tombol × untuk menghapus foto.
                                         </p>
                                     </div>
                                 )}
+
+                            {/* Foto baru yang dipilih */}
+                            {(form.image || form.images.length > 0) && (
+                                <div className="mt-4">
+                                    <p className="text-xs font-bold text-[#2F3931] mb-2">
+                                        Foto Baru yang Dipilih
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-3">
+                                        {[
+                                            ...(form.image ? [form.image] : []),
+                                            ...form.images,
+                                        ].map((file, index) => (
+                                            <div
+                                                key={`${file.name}-${index}`}
+                                                className="relative w-20 min-h-20 border border-[#E8E2D7] bg-[#FAF6F0] rounded-xl p-2 flex items-center justify-center"
+                                            >
+                                                <span className="text-[10px] text-center break-all">
+                                                    {file.name}
+                                                </span>
+
+                                                {/* Tombol hapus foto baru */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleRemoveNewImage(index)
+                                                    }
+                                                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold shadow cursor-pointer"
+                                                    title="Hapus foto"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Tombol Simpan */}
@@ -448,6 +559,7 @@ export default function VendorPackageForm() {
                             >
                                 {/* Tombol Close */}
                                 <button
+                                    type="button"
                                     onClick={() =>
                                         setSelectedImage(null)
                                     }
