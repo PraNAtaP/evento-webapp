@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Vendor;
 use App\Models\VendorPackage;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<VendorPackage>
@@ -18,13 +19,17 @@ class VendorPackageFactory extends Factory
      */
     public function definition(): array
     {
+        $packageName = 'Paket '.fake()->word();
+
         return [
             'vendor_id' => Vendor::factory(),
-            'package_name' => 'Paket '.fake()->word(),
+            'package_name' => $packageName,
+            'slug' => Str::slug($packageName).'-'.fake()->unique()->numerify('####'),
             'description' => fake()->sentence(),
             'price' => fake()->numberBetween(5, 100) * 1000000,
             'image_url' => null,
             'image_public_id' => null,
+            'is_active' => true,
         ];
     }
 

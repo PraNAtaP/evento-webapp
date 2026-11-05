@@ -8,7 +8,6 @@ use App\Models\VendorPackageImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-
 class VendorPackageController extends Controller
 {
     /**
@@ -60,14 +59,14 @@ class VendorPackageController extends Controller
             'images.*' => ['image', 'max:2048'],
         ]);
 
-        // Buat data paket tanpa data foto
+        // Data paket tanpa foto
         $packageData = [
             'package_name' => $validated['package_name'],
             'description' => $validated['description'],
             'price' => $validated['price'],
         ];
 
-        // Foto utama tetap menggunakan kolom yang sudah ada
+        // Upload foto utama
         if ($request->hasFile('image')) {
             \Cloudinary::config();
 
@@ -135,25 +134,49 @@ class VendorPackageController extends Controller
             'description' => ['required', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
 
-            // Foto utama
+            // Foto utama baru
             'image' => ['nullable', 'image', 'max:2048'],
 
-            // Foto tambahan
+            // Foto tambahan baru
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'max:2048'],
+
+            // ID foto lama yang ingin dipertahankan
+            'keep_images' => ['nullable', 'array'],
+            'keep_images.*' => ['integer'],
+            'remove_main_image' => ['nullable', 'boolean'],
         ]);
 
-        // Update data paket
+        // Update informasi paket
         $vendorPackage->update([
             'package_name' => $validated['package_name'],
             'description' => $validated['description'],
             'price' => $validated['price'],
         ]);
 
-        // Jika ada foto baru yang dipilih
-        if ($request->hasFile('image') || $request->hasFile('images')) {
+        // Daftar ID foto tambahan yang dipertahankan
+        $keepImageIds = $validated['keep_images'] ?? [];
 
-            // Hapus foto utama lama dari Cloudinary
+        // Ambil foto tambahan yang tidak dipertahankan
+        $oldImages = $vendorPackage->images()
+            ->whereNotIn('id', $keepImageIds)
+            ->get();
+
+        // Hapus foto yang tidak dipertahankan
+        foreach ($oldImages as $oldImage) {
+            if ($oldImage->image_public_id) {
+                \Cloudinary::config();
+
+                \Cloudinary\Uploader::destroy(
+                    $oldImage->image_public_id
+                );
+            }
+
+            $oldImage->delete();
+        }
+
+        // Hapus foto utama jika vendor memilih untuk menghapusnya
+        if ($request->boolean('remove_main_image') && ! $request->hasFile('image')) {
             if ($vendorPackage->image_public_id) {
                 \Cloudinary::config();
 
@@ -162,53 +185,54 @@ class VendorPackageController extends Controller
                 );
             }
 
-            // Hapus foto tambahan lama dari Cloudinary
-            foreach ($vendorPackage->images as $oldImage) {
+            $vendorPackage->update([
+                'image_url' => null,
+                'image_public_id' => null,
+            ]);
+        }
+        
+        // Ganti foto utama hanya jika ada foto baru
+        if ($request->hasFile('image')) {
+            if ($vendorPackage->image_public_id) {
                 \Cloudinary::config();
 
                 \Cloudinary\Uploader::destroy(
-                    $oldImage->image_public_id
+                    $vendorPackage->image_public_id
                 );
             }
 
-            // Hapus data foto tambahan lama dari database
-            $vendorPackage->images()->delete();
+            \Cloudinary::config();
 
-            // Foto utama baru
-            if ($request->hasFile('image')) {
+            $upload = \Cloudinary\Uploader::upload(
+                $request->file('image')->getRealPath(),
+                [
+                    'folder' => 'evento/packages',
+                ]
+            );
+
+            $vendorPackage->update([
+                'image_url' => $upload['secure_url'],
+                'image_public_id' => $upload['public_id'],
+            ]);
+        }
+
+        // Tambahkan foto baru tanpa menghapus foto lama
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
                 \Cloudinary::config();
 
                 $upload = \Cloudinary\Uploader::upload(
-                    $request->file('image')->getRealPath(),
+                    $image->getRealPath(),
                     [
                         'folder' => 'evento/packages',
                     ]
                 );
 
-                $vendorPackage->update([
+                VendorPackageImage::create([
+                    'vendor_package_id' => $vendorPackage->id,
                     'image_url' => $upload['secure_url'],
                     'image_public_id' => $upload['public_id'],
                 ]);
-            }
-
-            // Foto tambahan baru
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    \Cloudinary::config();
-
-                    $upload = \Cloudinary\Uploader::upload(
-                        $image->getRealPath(),
-                        [
-                            'folder' => 'evento/packages',
-                        ]
-                    );
-
-                    VendorPackageImage::create([
-                        'vendor_package_id' => $vendorPackage->id,
-                        'image_url' => $upload['secure_url'],
-                        'image_public_id' => $upload['public_id'],
-                    ]);
-                }
             }
         }
 

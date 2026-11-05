@@ -18,7 +18,18 @@ class VendorCatalogTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = User::factory()->create(['role' => 'client']);
+        $this->user = User::factory()->eo()->create();
+    }
+
+    public function test_client_and_vendor_cannot_access_vendor_catalog(): void
+    {
+        $client = User::factory()->client()->create();
+        $vendorUser = User::factory()->create(['role' => 'vendor']);
+
+        foreach ([$client, $vendorUser] as $forbidden) {
+            $this->actingAs($forbidden, 'sanctum')->getJson('/api/vendors')->assertForbidden();
+            $this->actingAs($forbidden, 'sanctum')->getJson('/api/vendors/some-slug')->assertForbidden();
+        }
     }
 
     public function test_unauthenticated_user_cannot_access_vendor_catalog(): void

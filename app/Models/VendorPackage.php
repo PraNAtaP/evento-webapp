@@ -33,7 +33,7 @@ class VendorPackage extends Model
     protected function casts(): array
     {
         return [
-            'price' => 'decimal:2',
+            'price' => 'integer',
             'is_active' => 'boolean',
         ];
     }

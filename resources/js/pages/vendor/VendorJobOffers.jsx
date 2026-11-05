@@ -9,6 +9,7 @@ export default function VendorJobOffers() {
 
     const [rejectionReasons, setRejectionReasons] = useState({});
     const [progressNotes, setProgressNotes] = useState({});
+    const [progressPhotos, setProgressPhotos] = useState({});
 
     // Mengambil tawaran pekerjaan dan pekerjaan aktif.
     const fetchJobs = async () => {
@@ -72,9 +73,10 @@ export default function VendorJobOffers() {
         }
     };
 
-    // Menambahkan catatan progres pekerjaan aktif.
+    // Menambahkan catatan progres dan foto pekerjaan aktif.
     const handleProgress = async (assignmentId) => {
         const note = progressNotes[assignmentId]?.trim() || "";
+        const photo = progressPhotos[assignmentId];
 
         if (!note) {
             alert("Catatan progres wajib diisi.");
@@ -82,9 +84,16 @@ export default function VendorJobOffers() {
         }
 
         try {
+            const formData = new FormData();
+            formData.append("note", note);
+
+            if (photo) {
+                formData.append("photo", photo);
+            }
+
             await api.post(
                 `/vendor/active-jobs/${assignmentId}/progress`,
-                { note }
+                formData
             );
 
             alert("Catatan progres berhasil ditambahkan.");
@@ -92,6 +101,11 @@ export default function VendorJobOffers() {
             setProgressNotes((prev) => ({
                 ...prev,
                 [assignmentId]: "",
+            }));
+
+            setProgressPhotos((prev) => ({
+                ...prev,
+                [assignmentId]: null,
             }));
 
             fetchJobs();
@@ -233,10 +247,18 @@ export default function VendorJobOffers() {
                                 </h4>
 
                                 {job.progress_logs?.length ? (
-                                    <ul className="list-disc space-y-1 pl-5 text-sm text-gray-600">
+                                    <ul className="list-disc space-y-3 pl-5 text-sm text-gray-600">
                                         {job.progress_logs.map((log) => (
                                             <li key={log.id}>
-                                                {log.note}
+                                                <p>{log.note}</p>
+
+                                                {log.photo_url && (
+                                                    <img
+                                                        src={log.photo_url}
+                                                        alt="Foto catatan progres"
+                                                        className="mt-2 max-h-64 w-auto rounded-lg border border-gray-200 object-cover"
+                                                    />
+                                                )}
                                             </li>
                                         ))}
                                     </ul>
@@ -263,6 +285,45 @@ export default function VendorJobOffers() {
                                     placeholder="Contoh: Persiapan perlengkapan sudah selesai..."
                                     className="w-full rounded-lg border border-gray-300 p-3 text-sm"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="mb-1 block text-sm text-gray-700">
+                                    Tambahkan foto (opsional)
+                                </label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setProgressPhotos((prev) => ({
+                                            ...prev,
+                                            [job.id]: e.target.files?.[0] || null,
+                                        }))
+                                    }
+                                    className="w-full rounded-lg border border-gray-300 p-2 text-sm"
+                                />
+
+                                {progressPhotos[job.id] && (
+                                    <div className="mt-2">
+                                        <img
+                                            src={URL.createObjectURL(progressPhotos[job.id])}
+                                            alt="Preview foto progres"
+                                            className="max-h-48 w-auto rounded-lg border border-gray-200 object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setProgressPhotos((prev) => ({
+                                                    ...prev,
+                                                    [job.id]: null,
+                                                }))
+                                            }
+                                            className="mt-1 text-sm text-red-600 hover:underline"
+                                        >
+                                            Hapus foto
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             <button

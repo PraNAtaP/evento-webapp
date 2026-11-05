@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminAccountController;
+use App\Http\Controllers\Api\AdminActionItemController;
 use App\Http\Controllers\Api\AdminEventOrderController;
 use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
@@ -41,14 +42,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/event-summary', [EventSummaryController::class, 'index'])
         ->name('api.admin.event-summary');
 
-    // Katalog Vendor & Paket (dapat diakses seluruh pengguna terautentikasi)
-    Route::get('/vendors', [VendorController::class, 'index'])
-        ->name('api.vendors.index');
-    Route::get('/vendors/{slug}', [VendorController::class, 'show'])
-        ->name('api.vendors.show');
+    // Katalog Vendor & Paket (khusus EO)
+    Route::middleware('role:eo')->group(function () {
+        Route::get('/vendors', [VendorController::class, 'index'])
+            ->name('api.vendors.index');
+        Route::get('/vendors/{slug}', [VendorController::class, 'show'])
+            ->name('api.vendors.show');
+    });
 
     // Modul Master & Operasional EO
     Route::middleware('role:eo')->group(function () {
+        // Daftar pekerjaan yang butuh tindakan EO (dashboard)
+        Route::get('/admin/action-items', [AdminActionItemController::class, 'index'])
+            ->name('api.admin.action-items');
+
         Route::get('/admin/kanban', [KanbanController::class, 'index'])
             ->name('api.admin.kanban.index');
         Route::patch('/admin/kanban/{event}/move', [KanbanController::class, 'move'])

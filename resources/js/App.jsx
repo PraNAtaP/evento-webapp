@@ -237,7 +237,7 @@ export default function App() {
                             <Route
                                 path="/vendors"
                                 element={
-                                    <ProtectedRoute allowedRoles={["eo", "client", "vendor"]}>
+                                    <ProtectedRoute allowedRoles={["eo"]}>
                                         <VendorCatalogIndex />
                                     </ProtectedRoute>
                                 }
@@ -245,7 +245,7 @@ export default function App() {
                             <Route
                                 path="/vendors/:slug"
                                 element={
-                                    <ProtectedRoute allowedRoles={["eo", "client", "vendor"]}>
+                                    <ProtectedRoute allowedRoles={["eo"]}>
                                         <VendorCatalogShow />
                                     </ProtectedRoute>
                                 }

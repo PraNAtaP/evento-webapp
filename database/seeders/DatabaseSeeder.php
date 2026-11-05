@@ -54,10 +54,14 @@ class DatabaseSeeder extends Seeder
             ['user_id' => $vendorUser->id],
             [
                 'business_name' => 'Dekorasi Impian Kita',
+                'slug' => 'dekorasi-impian-kita',
                 'category' => 'Decoration',
                 'contact_number' => '081234567890',
                 'address' => 'Jl. Sudirman No. 45, Jakarta',
                 'image_url' => null,
+                'status' => Vendor::STATUS_APPROVED,
+                'is_active' => true,
+                'approved_at' => now(),
             ]
         );
         $this->call([

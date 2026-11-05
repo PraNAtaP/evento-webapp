@@ -67,8 +67,8 @@ const ROUTE_TITLES = {
         subtitle: "Pantau tagihan DP 50%, pelunasan, dan unggah bukti transfer",
     },
     "/client/offers": {
-        title: "Review Penawaran Vendor",
-        subtitle: "Tinjau rincian biaya penawaran vendor dan ajukan revisi atau persetujuan",
+        title: "Review Penawaran EO",
+        subtitle: "Tinjau rincian biaya penawaran EO dan ajukan revisi atau persetujuan",
     },
 };
 

@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Vendor>
@@ -18,9 +19,12 @@ class VendorFactory extends Factory
      */
     public function definition(): array
     {
+        $businessName = fake()->company();
+
         return [
             'user_id' => User::factory()->vendor(),
-            'business_name' => fake()->company(),
+            'business_name' => $businessName,
+            'slug' => Str::slug($businessName).'-'.fake()->unique()->numerify('####'),
             'category' => fake()->randomElement(['Catering', 'Decoration', 'Photography']),
             'contact_number' => fake()->numerify('08##########'),
             'address' => fake()->address(),

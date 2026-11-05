@@ -336,7 +336,7 @@ export default function ClientBookedEventsPage() {
                                         <p className="font-bold text-[#2F3931]">Belum ada tagihan pembayaran diterbitkan</p>
                                         <p className="text-[11px] mt-1">
                                             {activeEvent.kanban_status === "request" || activeEvent.kanban_status === "drafting_quotation"
-                                                ? "Tagihan DP 50% akan otomatis dibuat setelah Anda menyetujui penawaran vendor dari EO."
+                                                ? "Tagihan DP 50% akan otomatis dibuat setelah Anda menyetujui penawaran dari EO."
                                                 : "Hubungi admin EO jika tagihan belum tersedia."}
                                         </p>
                                     </div>

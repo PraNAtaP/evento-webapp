@@ -23,6 +23,7 @@ class ClientEventController extends Controller
         $events = Event::with([
             'vendorAssignments.package',
             'vendorAssignments.vendor:id,business_name,category',
+            'vendorAssignments.progressLogs',
             'payments',
         ])
             ->where('client_id', $request->user()->id)
@@ -58,6 +59,7 @@ class ClientEventController extends Controller
         $event->load([
             'vendorAssignments.package',
             'vendorAssignments.vendor:id,business_name,category',
+            'vendorAssignments.progressLogs',
             'payments',
         ]);
 
