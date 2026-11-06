@@ -3,7 +3,7 @@
     { key: 'drafting_quotation', label: 'Penyusunan Penawaran', desc: 'EO sedang menyusun penawaran', icon: '📋' },
     { key: 'client_review', label: 'Review Klien', desc: 'Menunggu persetujuan Anda', icon: '🔍' },
     { key: 'awaiting_dp', label: 'Menunggu DP', desc: 'Menunggu pembayaran DP', icon: '💳' },
-    { key: 'on_progress', label: 'Acara Berlangsung', desc: 'Acara sedang dipersiapkan dan dijalankan', icon: '🎪' }, // ← Ubah Label
+    { key: 'on_progress', label: 'Acara Berlangsung', desc: 'Acara sedang dipersiapkan dan dijalankan', icon: '🎪' },
     { key: 'done', label: 'Selesai', desc: 'Acara telah selesai', icon: '🎉' },
     ];
 
@@ -18,6 +18,15 @@
         return d.toLocaleDateString('id-ID', {
         day: 'numeric', month: 'long', year: 'numeric',
         });
+    };
+
+    // Helper untuk handle URL lokal & Cloudinary
+    const getImageUrl = (path) => {
+        if (!path) return null;
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+        }
+        return `/storage/${path}`;
     };
 
     return (
@@ -71,8 +80,7 @@
             })}
         </div>
 
-        {/* SECTION BUKTI PROGRESS VENDOR (Revisi PM) */}
-        {/* Hanya muncul kalau status sudah masuk 'on_progress' atau 'done' DAN ada log-nya */}
+        {/* SECTION BUKTI PROGRESS VENDOR */}
         {event.vendor_assignments?.some(a => a.progress_logs?.length > 0) && (
             <div className="mt-6 pt-5 border-t border-[#E8E2D7]">
             <h4 className="text-xs uppercase font-bold tracking-wider text-[#738075] mb-4">
@@ -93,10 +101,10 @@
                     <div className="space-y-3">
                         {assignment.progress_logs.map((log) => (
                         <div key={log.id} className="flex flex-col sm:flex-row gap-3 bg-white p-3 rounded-lg border border-[#E8E2D7]">
-                            {/* Foto Bukti */}
+                            {/* Foto Bukti (FIXED) */}
                             {log.photo_url && (
                             <img 
-                                src={`/storage/${log.photo_url}`} 
+                                src={getImageUrl(log.photo_url)} 
                                 alt="Bukti Progress" 
                                 className="w-full sm:w-32 h-24 object-cover rounded-md border border-[#CFD8C4]"
                             />
@@ -120,7 +128,7 @@
             </div>
         )}
 
-        {/* Footer: Terakhir Update (Tetap dipertahankan sesuai revisi sebelumnya) */}
+        {/* Footer */}
         <div className="mt-4 pt-3 border-t border-[#E8E2D7] text-[11px] font-medium text-[#738075] flex items-center gap-1.5">
             <span>🔄</span>
             <span>Terakhir diperbarui: {formatTanggal(event.updated_at)}</span>
