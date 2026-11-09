@@ -28,7 +28,7 @@ class EventFactory extends Factory
             'dp_percentage' => 30.00,
             'has_own_venue' => false,
             'venue' => null,
-            'event_date' => fake()->unique()->dateTimeBetween('+3 months', '+1 year')->format('Y-m-d'),
+            'event_date' => fake()->unique()->dateTimeBetween('+1 month', '+20 years')->format('Y-m-d'),
             'is_multi_day' => false,
             'end_date' => null,
             'kanban_status' => 'request',

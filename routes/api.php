@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ClientEventController;
+use App\Http\Controllers\Api\CustomerRegistrationController;
+use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\EventCategoryController;
 use App\Http\Controllers\Api\EventInspectorController;
 use App\Http\Controllers\Api\EventSummaryController;
@@ -23,7 +25,16 @@ use App\Http\Controllers\SeasonController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
+Route::post('/register', [CustomerRegistrationController::class, 'register'])->name('api.register');
+Route::post('/register/client', [CustomerRegistrationController::class, 'register'])->name('api.register.client');
 Route::post('/register/vendor', [VendorRegistrationController::class, 'register'])->name('api.register.vendor');
+
+// Verifikasi Email
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->name('api.verification.verify');
+Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+    ->middleware('throttle:6,1')
+    ->name('api.verification.send');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me'])->name('api.me');

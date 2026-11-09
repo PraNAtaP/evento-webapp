@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
+    const [searchParams] = useSearchParams();
+    const verifiedParam = searchParams.get("verified");
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -64,6 +67,42 @@ export default function Login() {
 
                 {/* Login Card */}
                 <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E2D7] shadow-xs">
+                    {verifiedParam === "1" && (
+                        <div className="p-3.5 mb-4 bg-[#EBF3E8] border border-[#CFD8C4] text-[#2A4022] rounded-xl text-xs font-medium flex items-start gap-2">
+                            <span className="text-base">🎉</span>
+                            <div>
+                                <p className="font-bold">Email Berhasil Diverifikasi!</p>
+                                <p className="text-[11px] text-[#4F6B43] mt-0.5">
+                                    Akun Anda telah aktif sepenuhnya. Silakan masuk menggunakan email dan kata sandi Anda.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {verifiedParam === "already" && (
+                        <div className="p-3.5 mb-4 bg-[#E8F1F5] border border-[#C5DCE4] text-[#1B434D] rounded-xl text-xs font-medium flex items-start gap-2">
+                            <span className="text-base">ℹ️</span>
+                            <div>
+                                <p className="font-bold">Email Sudah Terverifikasi</p>
+                                <p className="text-[11px] text-[#35616D] mt-0.5">
+                                    Alamat email Anda sudah terverifikasi sebelumnya. Silakan masuk untuk melanjutkan.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {verifiedParam === "invalid" && (
+                        <div className="p-3.5 mb-4 bg-[#F3C3B2]/30 border border-[#F3C3B2] text-[#6B3222] rounded-xl text-xs font-medium flex items-start gap-2">
+                            <span className="text-base">⚠️</span>
+                            <div>
+                                <p className="font-bold">Tautan Verifikasi Tidak Valid</p>
+                                <p className="text-[11px] text-[#843F2E] mt-0.5">
+                                    Tautan telah kedaluwarsa atau tidak valid. Silakan masuk atau daftar ulang.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     {error && (
                         <div className="p-3 mb-4 bg-[#F3C3B2]/30 border border-[#F3C3B2] text-[#6B3222] rounded-xl text-xs font-medium">
                             {error}
@@ -152,12 +191,18 @@ export default function Login() {
                         </div>
                     </div>
 
-                    {/* Link ke Pendaftaran Vendor */}
-                    <div className="mt-4 pt-4 border-t border-[#E8E2D7] text-center">
+                    {/* Link ke Pendaftaran Customer & Vendor */}
+                    <div className="mt-4 pt-4 border-t border-[#E8E2D7] text-center space-y-2">
                         <p className="text-xs text-[#738075]">
+                            Belum punya akun Pelanggan?{" "}
+                            <Link to="/register" className="font-bold text-[#657166] hover:underline">
+                                Daftar Akun Customer Baru →
+                            </Link>
+                        </p>
+                        <p className="text-[11px] text-[#8C998E]">
                             Penyedia jasa / perlengkapan acara?{" "}
                             <Link to="/register/vendor" className="font-bold text-[#657166] hover:underline">
-                                Daftar Sebagai Mitra Vendor →
+                                Daftar Sebagai Mitra Vendor
                             </Link>
                         </p>
                     </div>
