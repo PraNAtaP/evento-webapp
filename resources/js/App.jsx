@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
 import VendorRegister from "./pages/auth/VendorRegister";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import EventOrdersPage from "./pages/admin/EventOrdersPage";
@@ -58,6 +59,8 @@ export default function App() {
                         <Route path="/" element={<RootRedirect />} />
 
                         <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/register/client" element={<Register />} />
                         <Route path="/register/vendor" element={<VendorRegister />} />
                         <Route path="/vendor/register" element={<VendorRegister />} />
 
