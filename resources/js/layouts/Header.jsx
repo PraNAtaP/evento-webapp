@@ -34,6 +34,10 @@ const ROUTE_TITLES = {
         title: "Kelola Akun Admin",
         subtitle: "Daftar, buat akun baru, dan kelola kredensial tim admin EO",
     },
+    "/admin/progress-logs": {
+        title: "Review Progress Vendor",
+        subtitle: "Tinjau dan bagikan update progress dari vendor ke klien",
+    },
     "/vendor/dashboard": {
         title: "Kelola Paket Jasa",
         subtitle: "Kelola paket jasa, harga, foto, dan deskripsi yang ditawarkan",
