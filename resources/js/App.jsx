@@ -25,6 +25,7 @@ import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 import OfferReviewPage from "./pages/client/OfferReviewPage";
 import VendorCatalogIndex from "./pages/vendors/VendorCatalogIndex";
 import VendorCatalogShow from "./pages/vendors/VendorCatalogShow";
+import ProgressApprovalPage from './pages/admin/ProgressApprovalPage';
 
 const queryClient = new QueryClient();
 
@@ -130,6 +131,15 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["eo"]}>
                                         <PaymentVerificationPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/progress-logs"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <ProgressApprovalPage />
                                     </ProtectedRoute>
                                 }
                             />
