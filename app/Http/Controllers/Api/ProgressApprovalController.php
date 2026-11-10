@@ -6,12 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\ProgressLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\ToggleProgressVisibilityRequest;
 
 class ProgressApprovalController extends Controller
 {
-    /**
-     * Menampilkan semua progress log dari semua vendor untuk di-review EO.
-     */
     public function index(Request $request): JsonResponse
     {
         $logs = ProgressLog::with([
@@ -26,21 +24,16 @@ class ProgressApprovalController extends Controller
         ]);
     }
 
-    /**
-     * Mengubah status visibilitas progress log (Bagikan ke Klien / Sembunyikan).
-     */
-    public function toggleVisibility(Request $request, ProgressLog $progressLog): JsonResponse
-    {
-        $validated = $request->validate([
-            'is_visible_to_client' => ['required', 'boolean'],
-        ]);
-
+    public function toggleVisibility(
+        ToggleProgressVisibilityRequest $request,
+        ProgressLog $progressLog
+    ): JsonResponse {
         $progressLog->update([
-            'is_visible_to_client' => $validated['is_visible_to_client'],
+            'is_visible_to_client' => $request->boolean('is_visible_to_client'),
         ]);
 
         return response()->json([
-            'message' => $validated['is_visible_to_client']
+            'message' => $request->boolean('is_visible_to_client')
                 ? 'Progress berhasil dibagikan ke Klien.'
                 : 'Progress berhasil disembunyikan dari Klien.',
             'log' => $progressLog->fresh(),
