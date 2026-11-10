@@ -54,12 +54,13 @@ export default function Login() {
                 
                 {/* Logo & Brand Header */}
                 <div className="text-center mb-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#F3C3B2] border border-[#E8CEB2] shadow-xs mb-3">
-                        <span className="text-[#55271C] font-black text-2xl tracking-tighter">E</span>
-                    </div>
-                    <h1 className="text-2xl font-extrabold text-[#2F3931] tracking-tight">
-                        Login ke <span className="text-[#657166]">EVENTO</span>
-                    </h1>
+                    <Link to="/" className="inline-block mb-3 hover:opacity-90 transition-opacity">
+                        <img
+                            src="/logo.png"
+                            alt="EVENTO"
+                            className="h-12 w-auto mx-auto object-contain"
+                        />
+                    </Link>
                     <p className="text-xs text-[#738075] mt-1">
                         Platform Manajemen Kalender & Vendor Acara Terintegrasi
                     </p>

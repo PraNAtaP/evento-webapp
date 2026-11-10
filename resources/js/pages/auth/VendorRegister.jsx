@@ -143,8 +143,12 @@ export default function VendorRegister() {
                 </div>
 
                 <div className="text-center">
-                    <Link to="/" className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#F3C3B2] border border-[#E8CEB2] shadow-xs mb-3 hover:scale-105 transition-transform">
-                        <span className="text-[#55271C] font-black text-2xl tracking-tighter">E</span>
+                    <Link to="/" className="inline-block mb-3 hover:opacity-90 transition-opacity">
+                        <img
+                            src="/logo.png"
+                            alt="EVENTO"
+                            className="h-14 w-auto mx-auto object-contain"
+                        />
                     </Link>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2F3931] tracking-tight">
                         Pendaftaran Mitra Vendor <span className="text-[#657166]">EVENTO</span>

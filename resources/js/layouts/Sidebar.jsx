@@ -220,13 +220,13 @@ export default function Sidebar({ isOpen, onClose }) {
                         onClick={onClose}
                         className="flex items-center gap-2.5 group"
                     >
-                        {/* Lingkaran Logo Coral/Peach #F3C3B2 */}
-                        <span className="w-7 h-7 rounded-full bg-[#F3C3B2] text-[#424C43] font-black text-sm flex items-center justify-center shadow-xs">
-                            E
-                        </span>
-                        <span className="font-extrabold text-lg tracking-tight text-white block lowercase">
-                            evento
-                        </span>
+                        <div className="bg-[#FAF6F0] rounded-xl px-2.5 py-1.5 flex items-center shadow-xs group-hover:bg-white transition-colors">
+                            <img
+                                src="/logo.png"
+                                alt="EVENTO"
+                                className="h-6 w-auto object-contain"
+                            />
+                        </div>
                     </Link>
 
                     {/* Mobile Close Button */}

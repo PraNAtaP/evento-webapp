@@ -42,9 +42,13 @@ export default function ForgotPassword() {
 
                 {/* Logo & Brand Header */}
                 <div className="text-center mb-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#F3C3B2] border border-[#E8CEB2] shadow-xs mb-3">
-                        <span className="text-[#55271C] font-black text-2xl tracking-tighter">E</span>
-                    </div>
+                    <Link to="/" className="inline-block mb-3 hover:opacity-90 transition-opacity">
+                        <img
+                            src="/logo.png"
+                            alt="EVENTO"
+                            className="h-12 w-auto mx-auto object-contain"
+                        />
+                    </Link>
                     <h1 className="text-2xl font-extrabold text-[#2F3931] tracking-tight">
                         Lupa <span className="text-[#657166]">Kata Sandi?</span>
                     </h1>

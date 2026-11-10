@@ -14,8 +14,10 @@
                     <!-- Header -->
                     <tr>
                         <td style="background-color: #657166; padding: 32px 30px; text-align: center;">
-                            <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; background-color: #F3C3B2; color: #55271C; font-weight: 900; font-size: 24px; border-radius: 12px; margin-bottom: 12px;">E</div>
-                            <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">EVENTO PLATFORM</h1>
+                            <div style="display: inline-block; background-color: #ffffff; padding: 8px 18px; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                                <img src="{{ asset('logo.png') }}" alt="EVENTO" height="28" style="height: 28px; width: auto; display: block; border: 0;" />
+                            </div>
+                            <h1 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">EVENTO PLATFORM</h1>
                             <p style="margin: 6px 0 0 0; color: #E8E2D7; font-size: 13px;">Pengaturan Ulang Kata Sandi Akun</p>
                         </td>
                     </tr>
