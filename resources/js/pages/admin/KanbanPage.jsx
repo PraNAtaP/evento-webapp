@@ -292,11 +292,12 @@ export default function KanbanPage() {
                 </div>
             )}
 
-            {/* Board Inspector (read-only detail event) */}
+            {/* Board Inspector (detail event & reschedule tanggal) */}
             <BoardInspector
                 eventId={selectedEventId}
                 onClose={() => setSelectedEventId(null)}
                 onQuotationSent={handleEventUpdated}
+                onEventRescheduled={handleEventUpdated}
             />
 
             {/* Modal Input Persentase DP saat kirim penawaran ke klien */}

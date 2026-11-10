@@ -13,6 +13,7 @@ import {
 import InspectorField from "./InspectorField";
 import InspectorSection from "./InspectorSection";
 import InspectorVendorSection from "./InspectorVendorSection";
+import RescheduleDatePicker from "./RescheduleDatePicker";
 
 const TITLE_ID = "board-inspector-title";
 const FOCUSABLE_SELECTOR =
@@ -33,13 +34,17 @@ function SkeletonBlock() {
     );
 }
 
-function InspectorPanel({ eventId, onClose, onQuotationSent }) {
+function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled }) {
     const panelRef = useRef(null);
     const [status, setStatus] = useState("loading");
     const [event, setEvent] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
     const [retryKey, setRetryKey] = useState(0);
     const [refreshError, setRefreshError] = useState("");
+    const [isRescheduling, setIsRescheduling] = useState(false);
+    const [isSavingReschedule, setIsSavingReschedule] = useState(false);
+    const [rescheduleError, setRescheduleError] = useState("");
+    const [bookedDatesOther, setBookedDatesOther] = useState([]);
     // true selama pemilih vendor / dialog kirim penawaran terbuka: Esc/Tab ditangani modal itu
     const pickerOpenRef = useRef(false);
     const eventIdRef = useRef(eventId);
@@ -87,6 +92,8 @@ function InspectorPanel({ eventId, onClose, onQuotationSent }) {
         setStatus("loading");
         setErrorMessage("");
         setRefreshError("");
+        setIsRescheduling(false);
+        setRescheduleError("");
 
         api.get(`/events/${eventId}`, { signal: controller.signal })
             .then((response) => {
@@ -107,6 +114,46 @@ function InspectorPanel({ eventId, onClose, onQuotationSent }) {
 
         return () => controller.abort();
     }, [eventId, retryKey]);
+
+    const handleOpenReschedule = async () => {
+        setRescheduleError("");
+        setIsRescheduling(true);
+        try {
+            const res = await api.get("/admin/smart-calendar");
+            const eventsByDate = res.data?.events_by_date || {};
+            // Kumpulkan tanggal terblokir selain acara ini sendiri
+            const otherDates = Object.entries(eventsByDate)
+                .filter(([, evtObj]) => Number(evtObj.id) !== Number(event.id))
+                .map(([ymd]) => ymd);
+            setBookedDatesOther(otherDates);
+        } catch {
+            setBookedDatesOther([]);
+        }
+    };
+
+    const handleSaveReschedule = async (payload) => {
+        setIsSavingReschedule(true);
+        setRescheduleError("");
+        try {
+            const res = await api.patch(`/events/${event.id}/reschedule`, payload);
+            if (res.data?.data) {
+                setEvent(res.data.data);
+            }
+            if (onEventRescheduled && res.data?.event) {
+                onEventRescheduled(res.data.event);
+            }
+            setIsRescheduling(false);
+        } catch (err) {
+            const msg =
+                err.response?.data?.errors?.event_date?.[0] ||
+                err.response?.data?.errors?.end_date?.[0] ||
+                err.response?.data?.message ||
+                "Gagal memperbarui jadwal acara.";
+            setRescheduleError(msg);
+        } finally {
+            setIsSavingReschedule(false);
+        }
+    };
 
     const onCloseRef = useRef(onClose);
     onCloseRef.current = onClose;
@@ -215,11 +262,50 @@ function InspectorPanel({ eventId, onClose, onQuotationSent }) {
 
                 <InspectorSection title="Jadwal">
                     <InspectorField label="Tanggal Event" fullWidth>
-                        <span>{scheduleText}</span>
-                        {hasInvalidRange && (
-                            <span className="ml-2 inline-flex items-center align-middle text-[10px] font-semibold px-1.5 py-0.5 rounded border bg-amber-50 text-amber-700 border-amber-200">
-                                Tanggal berakhir tidak valid
-                            </span>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <span>{scheduleText}</span>
+                                {hasInvalidRange && (
+                                    <span className="ml-2 inline-flex items-center align-middle text-[10px] font-semibold px-1.5 py-0.5 rounded border bg-amber-50 text-amber-700 border-amber-200">
+                                        Tanggal berakhir tidak valid
+                                    </span>
+                                )}
+                            </div>
+
+                            {event.can_reschedule && !isRescheduling && (
+                                <button
+                                    type="button"
+                                    onClick={handleOpenReschedule}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#DAEBE3] hover:bg-[#c8e0d5] text-[#224436] text-xs font-bold border border-[#BCD4C9] transition cursor-pointer shadow-2xs"
+                                >
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span>Reschedule Tanggal</span>
+                                </button>
+                            )}
+                        </div>
+
+                        {!event.can_reschedule && (
+                            <p className="text-[11px] text-[#738075] font-normal mt-1">
+                                Perubahan tanggal (Reschedule) hanya tersedia hingga tahap Menunggu DP.
+                            </p>
+                        )}
+
+                        {isRescheduling && event.can_reschedule && (
+                            <RescheduleDatePicker
+                                initialStartDate={event.event_date}
+                                initialEndDate={event.end_date}
+                                initialMultiDay={event.is_multi_day}
+                                blockedDates={bookedDatesOther}
+                                onSave={handleSaveReschedule}
+                                onCancel={() => {
+                                    setIsRescheduling(false);
+                                    setRescheduleError("");
+                                }}
+                                isSaving={isSavingReschedule}
+                                errorMessage={rescheduleError}
+                            />
                         )}
                     </InspectorField>
                 </InspectorSection>
@@ -315,8 +401,15 @@ function InspectorPanel({ eventId, onClose, onQuotationSent }) {
     );
 }
 
-export default function BoardInspector({ eventId, onClose, onQuotationSent }) {
+export default function BoardInspector({ eventId, onClose, onQuotationSent, onEventRescheduled }) {
     if (eventId === null || eventId === undefined) return null;
 
-    return <InspectorPanel eventId={eventId} onClose={onClose} onQuotationSent={onQuotationSent} />;
+    return (
+        <InspectorPanel
+            eventId={eventId}
+            onClose={onClose}
+            onQuotationSent={onQuotationSent}
+            onEventRescheduled={onEventRescheduled}
+        />
+    );
 }
