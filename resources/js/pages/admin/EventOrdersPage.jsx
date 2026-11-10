@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 import { CATEGORY_LABELS } from "../../data/kanbanData";
-import { formatRupiah, formatNumber } from "../../utils/formatters";
+import { formatDateTime, formatNumber, formatRupiah } from "../../utils/formatters";
 
 export default function EventOrdersPage() {
     const queryClient = useQueryClient();
@@ -69,7 +69,8 @@ export default function EventOrdersPage() {
     });
 
     const handleAccept = (order) => {
-        if (confirm(`Yakin ingin menerima pesanan acara "${order.event_name}" dari ${order.client?.name || "Klien"}?`)) {
+        const displayClient = order.manual_client_name || order.client?.name || "Klien";
+        if (confirm(`Yakin ingin menerima pesanan acara "${order.event_name}" dari ${displayClient}?`)) {
             acceptMutation.mutate(order.id);
         }
     };
@@ -150,11 +151,11 @@ export default function EventOrdersPage() {
                     <button
                         type="button"
                         onClick={() => {
-                            setStatusFilter("drafting_quotation");
+                            setStatusFilter("accepted");
                             setPage(1);
                         }}
                         className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                            statusFilter === "drafting_quotation"
+                            statusFilter === "accepted"
                                 ? "bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]"
                                 : "text-[#738075] hover:text-[#2F3931]"
                         }`}
@@ -242,25 +243,37 @@ export default function EventOrdersPage() {
                                         <tr key={order.id} className="hover:bg-[#FAF6F0]/40 transition-colors">
                                             <td className="py-3.5 px-4">
                                                 <div className="font-bold text-[#2F3931]">{order.event_name}</div>
-                                                <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#CFD8C4]/50 text-[#2D3A28] border border-[#B6C2AA]">
-                                                    {catLabel}
-                                                </span>
+                                                <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                                                    <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#CFD8C4]/50 text-[#2D3A28] border border-[#B6C2AA]">
+                                                        {catLabel}
+                                                    </span>
+                                                    {order.booked_by_eo && (
+                                                        <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#99CDD8]/30 text-[#1D4A54] border border-[#86BAC5]">
+                                                            Input EO
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
 
                                             <td className="py-3.5 px-4">
                                                 <div className="font-semibold text-[#2F3931]">
-                                                    {order.client?.name || "-"}
+                                                    {order.manual_client_name || order.client?.name || "-"}
                                                 </div>
                                                 <div className="text-[11px] text-[#738075]">
-                                                    {order.client?.email || "-"}
+                                                    {order.manual_client_contact || order.client?.email || "-"}
                                                 </div>
                                             </td>
 
                                             <td className="py-3.5 px-4 text-[#2F3931] font-medium">
-                                                {formatDateRange(order)}
+                                                <div>{formatDateRange(order)}</div>
                                                 {order.venue && (
                                                     <div className="text-[11px] text-[#738075] truncate max-w-xs mt-0.5">
-                                                        📍 {order.venue}
+                                                        {order.venue}
+                                                    </div>
+                                                )}
+                                                {order.updated_at && (
+                                                    <div className="text-[10px] text-[#738075] mt-1">
+                                                        Diupdate: {formatDateTime(order.updated_at)}
                                                     </div>
                                                 )}
                                             </td>
@@ -393,7 +406,7 @@ export default function EventOrdersPage() {
 
                         <form onSubmit={handleConfirmReject} className="mt-4 flex flex-col gap-3">
                             <p className="text-xs text-[#556056] leading-relaxed">
-                                Anda akan menolak pesanan acara <strong className="text-[#2F3931]">{rejectModalData.event_name}</strong> dari klien <strong className="text-[#2F3931]">{rejectModalData.client?.name}</strong>.
+                                Anda akan menolak pesanan acara <strong className="text-[#2F3931]">{rejectModalData.event_name}</strong> dari klien <strong className="text-[#2F3931]">{rejectModalData.manual_client_name || rejectModalData.client?.name}</strong>.
                             </p>
 
                             <div>

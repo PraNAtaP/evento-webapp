@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 import KanbanBoard from "../../components/kanban/KanbanBoard";
 import BoardInspector from "../../components/kanban/BoardInspector";
@@ -8,6 +9,7 @@ import {
 } from "../../data/kanbanData";
 
 export default function KanbanPage() {
+    const queryClient = useQueryClient();
     const isExplicitDummy =
         import.meta.env.DEV && import.meta.env.VITE_USE_DUMMY_KANBAN === "true";
 
@@ -144,7 +146,7 @@ export default function KanbanPage() {
             categoryValue.toLowerCase() === selectedCategory.toLowerCase();
 
         const title = evt.event_name || evt.namaEvent || evt.title || "";
-        const client = evt.client?.name || evt.namaKlien || evt.clientName || "";
+        const client = evt.manual_client_name || evt.client?.name || evt.namaKlien || evt.clientName || "";
         const location = evt.venue || evt.lokasi || evt.location || "";
 
         const query = searchQuery.toLowerCase();
@@ -163,6 +165,10 @@ export default function KanbanPage() {
                 String(evt.id) === String(updatedEvent.id) ? updatedEvent : evt
             )
         );
+        // Sinkronkan cache Pesanan Masuk, Smart Calendar EO, dan tanggal terblokir klien
+        queryClient.invalidateQueries(["admin-event-orders"]);
+        queryClient.invalidateQueries(["admin-smart-calendar"]);
+        queryClient.invalidateQueries(["booked-dates"]);
     };
 
     return (
@@ -292,11 +298,12 @@ export default function KanbanPage() {
                 </div>
             )}
 
-            {/* Board Inspector (read-only detail event) */}
+            {/* Board Inspector (detail event & reschedule tanggal) */}
             <BoardInspector
                 eventId={selectedEventId}
                 onClose={() => setSelectedEventId(null)}
                 onQuotationSent={handleEventUpdated}
+                onEventRescheduled={handleEventUpdated}
             />
 
             {/* Modal Input Persentase DP saat kirim penawaran ke klien */}

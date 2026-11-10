@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AdminAccountController;
 use App\Http\Controllers\Api\AdminActionItemController;
+use App\Http\Controllers\Api\AdminCalendarBookingController;
 use App\Http\Controllers\Api\AdminEventOrderController;
 use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\EventVendorController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ProgressApprovalController;
 use App\Http\Controllers\Api\VendorCatalogController;
 use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\VendorJobController;
@@ -24,7 +26,6 @@ use App\Http\Controllers\Api\VendorProgressController;
 use App\Http\Controllers\Api\VendorRegistrationController;
 use App\Http\Controllers\SeasonController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\ProgressApprovalController;
 
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
 Route::post('/register', [CustomerRegistrationController::class, 'register'])->name('api.register');
@@ -95,6 +96,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/admin/orders/{event}/reject', [AdminEventOrderController::class, 'reject'])
             ->name('api.admin.orders.reject');
 
+        // Smart Calendar EO (Manual Booking & Read-Only Tanggal Terisi)
+        Route::get('/admin/smart-calendar', [AdminCalendarBookingController::class, 'index'])
+            ->name('api.admin.smart-calendar.index');
+        Route::post('/admin/smart-calendar/bookings', [AdminCalendarBookingController::class, 'store'])
+            ->name('api.admin.smart-calendar.store');
+
         // Master Data Kategori Acara (EO CRUD)
         Route::get('/admin/event-categories', [EventCategoryController::class, 'adminIndex'])
             ->name('api.admin.event-categories.index');
@@ -129,9 +136,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/admin/vendors/{vendor}/reject', [AdminVendorController::class, 'reject'])
             ->name('api.admin.vendors.reject');
 
-        // Board Inspector (read-only detail event)
+        // Board Inspector (detail event & reschedule oleh EO)
         Route::get('/events/{event}', [EventInspectorController::class, 'show'])
             ->name('api.events.show');
+        Route::patch('/events/{event}/reschedule', [EventInspectorController::class, 'reschedule'])
+            ->name('api.events.reschedule');
 
         // Section Vendor di Board Inspector
         Route::get('/events/{event}/vendor-catalog', [VendorCatalogController::class, 'index'])

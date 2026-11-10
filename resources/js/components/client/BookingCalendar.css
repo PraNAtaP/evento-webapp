@@ -127,6 +127,12 @@
   color: #ffffff !important;
 }
 
+/* Mode EO: Tanggal terisi tetap terlihat diblokir, namun memiliki kursor pointer untuk dilihat detailnya */
+.eo-calendar-mode .react-calendar__tile--booked,
+.eo-calendar-mode .react-calendar__tile--booked:disabled {
+  cursor: pointer !important;
+}
+
 /* Tanggal di bawah batas persiapan minimal kategori (Urgent / Terblokir - Pastel Peach #F3C3B2) */
 .evento-calendar-wrapper .react-calendar__tile--below-lead-time,
 .evento-calendar-wrapper .react-calendar__tile--below-lead-time:disabled {

@@ -10,6 +10,10 @@ const ROUTE_TITLES = {
         title: "Pesanan Acara Masuk",
         subtitle: "Tinjau dan proses persetujuan atau penolakan booking baru dari klien",
     },
+    "/admin/smart-calendar": {
+        title: "Smart Calendar EO",
+        subtitle: "Input pesanan acara mendadak secara manual atau tinjau jadwal terisi",
+    },
     "/admin/dashboard": {
         title: "Dashboard Analitik",
         subtitle: "Ringkasan pendapatan, margin, dan jumlah acara",
