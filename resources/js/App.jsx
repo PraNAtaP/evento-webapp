@@ -9,6 +9,7 @@ import VendorRegister from "./pages/auth/VendorRegister";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import EoSmartCalendarPage from "./pages/admin/EoSmartCalendarPage";
 import EventOrdersPage from "./pages/admin/EventOrdersPage";
 import EventCategoryPage from "./pages/admin/EventCategoryPage";
 import AdminAccountPage from "./pages/admin/AdminAccountPage";
@@ -83,6 +84,15 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["eo"]}>
                                         <EventOrdersPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/smart-calendar"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <EoSmartCalendarPage />
                                     </ProtectedRoute>
                                 }
                             />

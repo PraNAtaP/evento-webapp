@@ -26,6 +26,9 @@ class Event extends Model
      */
     protected $fillable = [
         'client_id',
+        'booked_by_eo',
+        'manual_client_name',
+        'manual_client_contact',
         'event_name',
         'category',
         'guest_count',
@@ -85,6 +88,7 @@ class Event extends Model
             'end_date' => 'date:Y-m-d',
             'is_multi_day' => 'boolean',
             'has_own_venue' => 'boolean',
+            'booked_by_eo' => 'boolean',
             'guest_count' => 'integer',
             'estimated_budget' => 'decimal:2',
             'agreed_price' => 'decimal:2',
