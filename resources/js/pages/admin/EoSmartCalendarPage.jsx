@@ -8,7 +8,7 @@ import BookingCalendar, {
 } from "../../components/client/BookingCalendar";
 import LocationPicker from "../../components/location/LocationPicker";
 import { CATEGORY_LABELS } from "../../data/kanbanData";
-import { formatDate, formatNumber, formatRupiah } from "../../utils/formatters";
+import { formatCurrencyInput, formatDate, formatNumber, formatRupiah, parseCurrencyInput } from "../../utils/formatters";
 
 export default function EoSmartCalendarPage() {
     const queryClient = useQueryClient();
@@ -624,13 +624,12 @@ export default function EoSmartCalendarPage() {
                                         <div className="relative">
                                             <span className="absolute left-3.5 top-2.5 text-xs font-bold text-slate-400">Rp</span>
                                             <input
-                                                type="number"
-                                                min="0"
-                                                step="100000"
-                                                value={budget}
-                                                onChange={(e) => setBudget(e.target.value)}
-                                                placeholder="Contoh: 50000000"
-                                                className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#99CDD8]"
+                                                type="text"
+                                                inputMode="numeric"
+                                                value={formatCurrencyInput(budget)}
+                                                onChange={(e) => setBudget(parseCurrencyInput(e.target.value))}
+                                                placeholder="Contoh: 50.000.000"
+                                                className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#99CDD8]"
                                             />
                                         </div>
                                         {fieldErrors.budget && (

@@ -3,6 +3,7 @@ import api from "../../api/axios";
 import { checkRangeOverlap, formatDateToDMY, formatDateToYMD } from "./BookingCalendar";
 import LocationPicker from "../location/LocationPicker";
 import WeatherIcon from "./WeatherIcon";
+import { formatCurrencyInput, parseCurrencyInput } from "../../utils/formatters";
 
 /**
  * Komponen Form Pemesanan Acara untuk Klien.
@@ -625,16 +626,15 @@ export default function BookingForm({
                             </span>
                             <input
                                 id="budget"
-                                type="number"
-                                min="0"
-                                step="100000"
-                                value={budget}
-                                onChange={(e) => setBudget(e.target.value)}
-                                placeholder="Contoh: 50000000"
+                                type="text"
+                                inputMode="numeric"
+                                value={formatCurrencyInput(budget)}
+                                onChange={(e) => setBudget(parseCurrencyInput(e.target.value))}
+                                placeholder="Contoh: 50.000.000"
                                 disabled={isSubmitting}
                                 className={`w-full pl-10 pr-3.5 py-2.5 bg-white border ${
                                     fieldErrors.budget ? "border-rose-400 ring-1 ring-rose-200" : "border-slate-300"
-                                } rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
+                                } rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
                             />
                         </div>
                         {fieldErrors.budget && (
