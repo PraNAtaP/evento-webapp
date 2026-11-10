@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\EventCategoryController;
 use App\Http\Controllers\Api\EventInspectorController;
 use App\Http\Controllers\Api\EventSummaryController;
 use App\Http\Controllers\Api\EventVendorController;
+use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\VendorCatalogController;
@@ -28,6 +29,14 @@ Route::post('/login', [AuthController::class, 'login'])->name('api.login');
 Route::post('/register', [CustomerRegistrationController::class, 'register'])->name('api.register');
 Route::post('/register/client', [CustomerRegistrationController::class, 'register'])->name('api.register.client');
 Route::post('/register/vendor', [VendorRegistrationController::class, 'register'])->name('api.register.vendor');
+
+// Lupa Password & Reset Password
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+    ->middleware('throttle:5,1')
+    ->name('api.password.email');
+Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])
+    ->middleware('throttle:5,1')
+    ->name('api.password.update');
 
 // Verifikasi Email
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])

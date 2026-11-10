@@ -125,9 +125,17 @@ export default function Login() {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
-                                Kata Sandi
-                            </label>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className="block text-xs font-bold text-[#2F3931]">
+                                    Kata Sandi
+                                </label>
+                                <Link
+                                    to="/forgot-password"
+                                    className="text-[11px] font-semibold text-[#657166] hover:underline"
+                                >
+                                    Lupa kata sandi?
+                                </Link>
+                            </div>
                             <input
                                 type="password"
                                 value={password}
