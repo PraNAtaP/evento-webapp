@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\VendorProgressController;
 use App\Http\Controllers\Api\VendorRegistrationController;
 use App\Http\Controllers\SeasonController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ProgressApprovalController;
 
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
 Route::post('/register', [CustomerRegistrationController::class, 'register'])->name('api.register');
@@ -68,6 +69,11 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.vendors.index');
         Route::get('/vendors/{slug}', [VendorController::class, 'show'])
             ->name('api.vendors.show');
+        // Review Progress Vendor (EO)
+        Route::get('/admin/progress-logs', [ProgressApprovalController::class, 'index'])
+            ->name('api.admin.progress-logs.index');
+        Route::patch('/admin/progress-logs/{progressLog}/visibility', [ProgressApprovalController::class, 'toggleVisibility'])
+            ->name('api.admin.progress-logs.visibility');
     });
 
     // Modul Master & Operasional EO
