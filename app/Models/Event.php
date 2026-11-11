@@ -48,6 +48,8 @@ class Event extends Model
         'revision_note',
         'revision_requested_at',
         'completed_at',
+        'terms_accepted_at',
+        'terms_version',
     ];
 
     /**
@@ -95,6 +97,7 @@ class Event extends Model
             'dp_percentage' => 'decimal:2',
             'revision_requested_at' => 'datetime',
             'completed_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
             'lat' => 'float',
             'lng' => 'float',
         ];

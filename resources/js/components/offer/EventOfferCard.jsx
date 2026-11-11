@@ -3,6 +3,8 @@ import api from "../../api/axios";
 
 export default function EventOfferCard({ event, onRevision, onSuccess }) {
     const [isApproving, setIsApproving] = useState(false);
+    const [isTermsOpen, setIsTermsOpen] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
     const rupiah = (n) =>
         new Intl.NumberFormat("id-ID", {
@@ -28,6 +30,11 @@ export default function EventOfferCard({ event, onRevision, onSuccess }) {
     const dpPercent = Number(event.dp_percentage) || 30;
 
     const handleApprove = async () => {
+        if (!termsAccepted) {
+            alert("Silakan baca dan setujui Syarat dan Ketentuan terlebih dahulu.");
+            return;
+        }
+
         const yakin = confirm(
             `Setujui semua penawaran untuk acara "${event.event_name}"?\n\nTotal: ${rupiah(totalHarga)}\n\nTagihan DP akan otomatis dibuat.`
         );
@@ -35,14 +42,22 @@ export default function EventOfferCard({ event, onRevision, onSuccess }) {
 
         setIsApproving(true);
         try {
-            const res = await api.post(`/client/events/${event.id}/approve-quotation`);
+            const res = await api.post(
+                `/client/events/${event.id}/approve-quotation`,
+                {
+                    terms_accepted: true,
+                }
+            );
+
             alert(res.data.message);
             onSuccess();
         } catch (err) {
             const msg =
                 err.response?.data?.message ||
                 err.response?.data?.errors?.event?.[0] ||
+                err.response?.data?.errors?.terms_accepted?.[0] ||
                 "Gagal menyetujui penawaran.";
+
             alert("Gagal: " + msg);
         } finally {
             setIsApproving(false);
@@ -140,11 +155,154 @@ export default function EventOfferCard({ event, onRevision, onSuccess }) {
                 </div>
             )}
 
+            {/* Syarat dan Ketentuan */}
+            <div className="border border-[#E8E2D7] rounded-xl overflow-hidden">
+                <button
+                    type="button"
+                    onClick={() => setIsTermsOpen(!isTermsOpen)}
+                    className="w-full flex items-center justify-between gap-3 p-4 bg-[#FAF6F0] text-left hover:bg-[#F3EEE6] transition-colors cursor-pointer"
+                >
+                    <div>
+                        <p className="text-sm font-bold text-[#2F3931]">
+                            Syarat dan Ketentuan EVENTO
+                        </p>
+                        <p className="text-[11px] text-[#738075] mt-1">
+                            Versi 1.0 — Harap baca sebelum menyetujui penawaran.
+                        </p>
+                    </div>
+                    <span className="text-sm font-bold text-[#657166]">
+                        {isTermsOpen ? "Tutup ▲" : "Baca S&K ▼"}
+                    </span>
+                </button>
+
+                {isTermsOpen && (
+                    <div className="p-4 flex flex-col gap-3 text-xs text-[#59645A] leading-relaxed">
+                        <div>
+                            <p className="font-bold text-[#2F3931] mb-1">
+                                1. Ketentuan Umum
+                            </p>
+                            <p>
+                                EVENTO merupakan sistem yang membantu Klien,
+                                Event Organizer (EO), dan Vendor dalam
+                                mengelola kebutuhan serta pelaksanaan acara.
+                                Klien wajib memberikan informasi acara yang
+                                benar dan sesuai kebutuhan.
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="font-bold text-[#2F3931] mb-1">
+                                2. Pemesanan Acara
+                            </p>
+                            <p>
+                                Pemesanan mengikuti ketersediaan tanggal acara.
+                                Satu tanggal hanya dapat digunakan untuk satu
+                                event. Pemesanan juga mengikuti batas minimal
+                                waktu berdasarkan kategori acara yang berlaku
+                                di EVENTO.
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="font-bold text-[#2F3931] mb-1">
+                                3. Penawaran dan Persetujuan
+                            </p>
+                            <p>
+                                Klien wajib memeriksa rincian layanan, paket,
+                                dan total harga yang diberikan EO sebelum
+                                menyetujui penawaran. Persetujuan penawaran
+                                menjadi dasar untuk melanjutkan proses
+                                pembayaran.
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="font-bold text-[#2F3931] mb-1">
+                                4. Vendor dan Layanan
+                            </p>
+                            <p>
+                                Pemilihan serta pengelolaan Vendor dilakukan
+                                melalui koordinasi dengan EO. Informasi
+                                identitas Vendor dapat dibatasi sesuai
+                                ketentuan Vendor Masking yang berlaku di
+                                EVENTO.
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="font-bold text-[#2F3931] mb-1">
+                                5. Pembayaran
+                            </p>
+                            <p>
+                                Pembayaran dilakukan melalui transfer sesuai
+                                tagihan DP dan pelunasan yang diterbitkan
+                                sistem. Klien wajib mengunggah bukti transfer.
+                                Pembayaran akan diperiksa dan diverifikasi
+                                secara manual oleh EO.
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="font-bold text-[#2F3931] mb-1">
+                                6. Revisi dan Perubahan Acara
+                            </p>
+                            <p>
+                                Klien dapat mengajukan revisi penawaran melalui
+                                fitur yang tersedia. Perubahan jadwal atau
+                                kebutuhan acara harus dikoordinasikan dengan
+                                EO dan mengikuti ketersediaan yang ada.
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="font-bold text-[#2F3931] mb-1">
+                                7. Pemantauan Acara
+                            </p>
+                            <p>
+                                Klien dapat memantau perkembangan persiapan
+                                acara melalui papan progres EVENTO. Pelaksanaan
+                                layanan dikoordinasikan oleh EO bersama Vendor
+                                yang terlibat.
+                            </p>
+                        </div>
+
+                        <div className="pt-3 border-t border-[#E8E2D7]">
+                            <p className="font-bold text-[#2F3931] mb-1">
+                                8. Persetujuan Syarat dan Ketentuan
+                            </p>
+                            <p>
+                                Dengan mencentang pernyataan persetujuan,
+                                Klien menyatakan telah membaca, memahami,
+                                dan menyetujui Syarat dan Ketentuan EVENTO
+                                versi 1.0 sebelum menyetujui penawaran.
+                            </p>
+                        </div>
+
+                        <label className="flex items-start gap-2.5 p-3 bg-[#FAF6F0] border border-[#E8E2D7] rounded-lg cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={termsAccepted}
+                                onChange={(e) => setTermsAccepted(e.target.checked)}
+                                className="mt-0.5 accent-[#657166] cursor-pointer"
+                            />
+                            <span className="font-semibold text-[#2F3931]">
+                                Saya telah membaca, memahami, dan menyetujui
+                                seluruh Syarat dan Ketentuan EVENTO versi 1.0.
+                            </span>
+                        </label>
+                    </div>
+                )}
+            </div>
+
             {/* Tombol Aksi */}
             <div className="flex items-center gap-2.5 pt-2">
                 <button
                     onClick={handleApprove}
-                    disabled={isApproving || event.vendor_assignments?.length === 0}
+                    disabled={
+                        isApproving ||
+                        event.vendor_assignments?.length === 0 ||
+                        !termsAccepted
+                    }
                     className="flex-1 bg-[#657166] hover:bg-[#556056] text-white font-bold text-xs rounded-xl shadow-xs transition-colors px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border border-[#525C53]"
                 >
                     {isApproving ? "Memproses..." : "Setujui Penawaran"}

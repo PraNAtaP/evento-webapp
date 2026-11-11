@@ -94,6 +94,20 @@ class ClientEventController extends Controller
             ]);
         }
 
+        // Validasi persetujuan Syarat dan Ketentuan
+        $validated = $request->validate([
+            'terms_accepted' => ['required', 'accepted'],
+        ], [
+            'terms_accepted.required' => 'Anda harus menyetujui Syarat dan Ketentuan terlebih dahulu.',
+            'terms_accepted.accepted' => 'Anda harus menyetujui Syarat dan Ketentuan terlebih dahulu.',
+        ]);
+
+        // Simpan waktu dan versi Syarat dan Ketentuan yang disetujui
+        $event->update([
+            'terms_accepted_at' => now(),
+            'terms_version' => '1.0',
+        ]);
+
         // Setujui seluruh assignment vendor yang aktif
         $event->vendorAssignments()
             ->where('eo_offer_status', '!=', 'rejected')
