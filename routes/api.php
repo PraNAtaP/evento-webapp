@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AdminAccountController;
 use App\Http\Controllers\Api\AdminActionItemController;
 use App\Http\Controllers\Api\AdminCalendarBookingController;
+use App\Http\Controllers\Api\AdminClientController;
 use App\Http\Controllers\Api\AdminEventOrderController;
 use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
@@ -70,6 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.vendors.index');
         Route::get('/vendors/{slug}', [VendorController::class, 'show'])
             ->name('api.vendors.show');
+
         // Review Progress Vendor (EO)
         Route::get('/admin/progress-logs', [ProgressApprovalController::class, 'index'])
             ->name('api.admin.progress-logs.index');
@@ -125,6 +127,25 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.admin.admins.update');
         Route::delete('/admin/admins/{user}', [AdminAccountController::class, 'destroy'])
             ->name('api.admin.admins.destroy');
+
+        // Manajemen Akun Client (EO)
+        Route::get('/admin/clients', [AdminClientController::class, 'index'])
+            ->name('api.admin.clients.index');
+
+        // Daftar Client yang sudah dihapus sementara
+        Route::get('/admin/clients/deleted', [AdminClientController::class, 'deletedIndex'])
+            ->name('api.admin.clients.deleted');
+
+        // Memulihkan akun Client maksimal 14 hari sejak dihapus
+        Route::post('/admin/clients/{id}/restore', [AdminClientController::class, 'restore'])
+            ->name('api.admin.clients.restore');
+
+        Route::get('/admin/clients/{user}', [AdminClientController::class, 'show'])
+            ->name('api.admin.clients.show');
+        Route::put('/admin/clients/{user}', [AdminClientController::class, 'update'])
+            ->name('api.admin.clients.update');
+        Route::delete('/admin/clients/{user}', [AdminClientController::class, 'destroy'])
+            ->name('api.admin.clients.destroy');
 
         // Manajemen & Review Pendaftaran Vendor (EO)
         Route::get('/admin/vendors', [AdminVendorController::class, 'index'])

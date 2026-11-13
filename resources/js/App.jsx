@@ -13,6 +13,7 @@ import EoSmartCalendarPage from "./pages/admin/EoSmartCalendarPage";
 import EventOrdersPage from "./pages/admin/EventOrdersPage";
 import EventCategoryPage from "./pages/admin/EventCategoryPage";
 import AdminAccountPage from "./pages/admin/AdminAccountPage";
+import AdminClientPage from "./pages/admin/AdminClientPage";
 import VendorRegistrationPage from "./pages/admin/VendorRegistrationPage";
 import KanbanPage from "./pages/admin/KanbanPage";
 import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
@@ -164,6 +165,16 @@ export default function App() {
                                 }
                             />
 
+                            {/* Rute Kelola Akun Client untuk EO */}
+                            <Route
+                                path="/admin/clients"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <AdminClientPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                             {/* Rute langsung untuk kemudahan pratinjau kanban */}
                             <Route
                                 path="/kanban"
@@ -250,7 +261,7 @@ export default function App() {
                                 }
                             />
 
-                            {/* Rute Review Tawaran untuk Client */} 
+                            {/* Rute Review Tawaran untuk Client */}
                             <Route
                                 path="/client/offers"
                                 element={
@@ -277,13 +288,13 @@ export default function App() {
                                     </ProtectedRoute>
                                 }
                             />
-                            </Route>
+                        </Route>
 
-                            {/* Fallback */}
-                            <Route
-                                path="*"
-                                element={<Navigate to="/" replace />}
-                            />
+                        {/* Fallback */}
+                        <Route
+                            path="*"
+                            element={<Navigate to="/" replace />}
+                        />
                     </Routes>
                 </BrowserRouter>
             </AuthProvider>
