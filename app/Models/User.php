@@ -21,9 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Mengatur tipe data atribut pada model User.
      */
     protected function casts(): array
     {
@@ -33,28 +31,40 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    /**
+     * Memeriksa apakah email pengguna sudah diverifikasi.
+     */
     public function isEmailVerified(): bool
     {
         return ! is_null($this->email_verified_at);
     }
 
+    /**
+     * Memeriksa apakah pengguna memiliki peran Client.
+     */
     public function isClient(): bool
     {
         return $this->role === 'client';
     }
 
+    /**
+     * Memeriksa apakah pengguna memiliki peran EO.
+     */
     public function isEo(): bool
     {
         return $this->role === 'eo';
     }
 
+    /**
+     * Memeriksa apakah pengguna memiliki peran Vendor.
+     */
     public function isVendor(): bool
     {
         return $this->role === 'vendor';
     }
 
     /**
-     * Get all events booked by this user.
+     * Mengambil seluruh event yang dimiliki Client.
      *
      * @return HasMany<Event, $this>
      */
@@ -64,7 +74,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the vendor profile owned by the user.
+     * Mengambil profil Vendor yang dimiliki pengguna.
      *
      * @return HasOne<Vendor, $this>
      */
