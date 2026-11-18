@@ -1,6 +1,7 @@
     import PaymentStatusBadge from './PaymentStatusBadge';
 
-    export default function PaymentCard({ payment, role, onUpload, onVerify }) {
+    export default function PaymentCard({ payment, role, onUpload, onVerify, isReadOnly = false }) {
+    const isCancelled = isReadOnly || payment.event?.kanban_status === 'cancelled';
     const rupiah = (n) =>
         new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -54,12 +55,18 @@
             <div className="flex gap-2">
             {/* Tombol Upload Bukti (Klien) */}
             {role === 'client' && payment.status === 'unpaid' && (
-                <button
-                onClick={() => onUpload(payment)}
-                className="bg-[#657166] hover:bg-[#4A534B] text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer"
-                >
-                Unggah Bukti Transfer
-                </button>
+                isCancelled ? (
+                    <span className="inline-block text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl">
+                        Acara Dibatalkan (Unggah Ditutup)
+                    </span>
+                ) : (
+                    <button
+                    onClick={() => onUpload && onUpload(payment)}
+                    className="bg-[#657166] hover:bg-[#4A534B] text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer"
+                    >
+                    Unggah Bukti Transfer
+                    </button>
+                )
             )}
 
             {/* Tombol Verifikasi (EO) */}

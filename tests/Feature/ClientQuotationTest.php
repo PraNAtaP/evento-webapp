@@ -89,7 +89,9 @@ class ClientQuotationTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->client1, 'sanctum')
-            ->postJson("/api/client/events/{$event->id}/approve-quotation");
+            ->postJson("/api/client/events/{$event->id}/approve-quotation", [
+                'terms_accepted' => true,
+            ]);
 
         $response->assertOk();
         $event->refresh();
