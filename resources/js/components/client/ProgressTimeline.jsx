@@ -43,9 +43,15 @@
                 <span className="flex items-center gap-1">🔄 Terakhir update: {formatTanggal(event.updated_at)}</span>
             </div>
             </div>
-            <span className="px-2.5 py-1 text-[11px] font-bold text-[#2F3931] bg-[#DAEBE3] rounded-md border border-[#CFD8C4] shrink-0 ml-2">
-            {STAGES[safeIndex]?.label}
-            </span>
+            {event.kanban_status === 'cancelled' ? (
+                <span className="px-2.5 py-1 text-[11px] font-bold text-rose-800 bg-rose-100 rounded-md border border-rose-300 shrink-0 ml-2">
+                    Dibatalkan
+                </span>
+            ) : (
+                <span className="px-2.5 py-1 text-[11px] font-bold text-[#2F3931] bg-[#DAEBE3] rounded-md border border-[#CFD8C4] shrink-0 ml-2">
+                    {STAGES[safeIndex]?.label}
+                </span>
+            )}
         </div>
 
         {/* Timeline Vertikal */}

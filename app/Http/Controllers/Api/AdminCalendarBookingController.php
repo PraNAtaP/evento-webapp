@@ -21,7 +21,7 @@ class AdminCalendarBookingController extends Controller
     public function index(): JsonResponse
     {
         $events = Event::with(['client:id,name,email,role'])
-            ->where('kanban_status', '!=', 'rejected')
+            ->whereNotIn('kanban_status', ['rejected', 'cancelled'])
             ->orderBy('event_date', 'asc')
             ->get();
 

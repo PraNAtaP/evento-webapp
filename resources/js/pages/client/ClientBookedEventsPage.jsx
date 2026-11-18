@@ -95,6 +95,11 @@ export default function ClientBookedEventsPage() {
                     label: "Ditolak EO",
                     className: "bg-rose-50 text-rose-700 border-rose-200",
                 };
+            case "cancelled":
+                return {
+                    label: "Dibatalkan oleh EO",
+                    className: "bg-rose-100 text-rose-800 border-rose-300",
+                };
             default:
                 return {
                     label: status || "Diproses",
@@ -263,6 +268,40 @@ export default function ClientBookedEventsPage() {
                 <div className="lg:col-span-7 flex flex-col gap-6">
                     {activeEvent ? (
                         <div className="flex flex-col gap-6 animate-fadeIn">
+                            {/* Peringatan Acara Dibatalkan oleh EO */}
+                            {activeEvent.kanban_status === "cancelled" && (
+                                <div
+                                    role="alert"
+                                    className="bg-rose-50 border-2 border-rose-300 rounded-2xl p-5 shadow-xs flex items-start gap-3.5 text-rose-900 animate-fadeIn"
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-rose-200/80 border border-rose-300 text-rose-700 flex items-center justify-center font-black text-lg shrink-0">
+                                        !
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider bg-rose-200 text-rose-800 px-2.5 py-0.5 rounded-full border border-rose-300">
+                                                Status: Dibatalkan
+                                            </span>
+                                            {activeEvent.cancelled_at && (
+                                                <span className="text-[11px] text-rose-600 font-medium">
+                                                    Dibatalkan pada {new Date(activeEvent.cancelled_at).toLocaleDateString("id-ID", {
+                                                        day: "numeric",
+                                                        month: "long",
+                                                        year: "numeric",
+                                                    })}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <h3 className="text-base font-black text-rose-950 mt-1">
+                                            Acara Dibatalkan oleh EO. Alasan: {activeEvent.cancellation_reason || "Tidak ada rincian alasan yang disertakan."}
+                                        </h3>
+                                        <p className="text-xs text-rose-700 mt-1 leading-relaxed">
+                                            Seluruh interaksi dan jadwal acara ini telah dihentikan dalam mode Read-Only.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Banner Acara Aktif */}
                             <div className="bg-[#DAEBE3]/50 rounded-2xl border border-[#CFD8C4] p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div>
@@ -327,7 +366,8 @@ export default function ClientBookedEventsPage() {
                                                 key={payment.id}
                                                 payment={{ ...payment, event: activeEvent }}
                                                 role="client"
-                                                onUpload={setUploadingPayment}
+                                                isReadOnly={activeEvent.kanban_status === "cancelled"}
+                                                onUpload={activeEvent.kanban_status === "cancelled" ? undefined : setUploadingPayment}
                                             />
                                         ))}
                                     </div>
@@ -335,7 +375,9 @@ export default function ClientBookedEventsPage() {
                                     <div className="p-8 text-center text-xs text-[#738075] bg-[#FAF6F0]/40 rounded-xl border border-dashed border-[#E8E2D7]">
                                         <p className="font-bold text-[#2F3931]">Belum ada tagihan pembayaran diterbitkan</p>
                                         <p className="text-[11px] mt-1">
-                                            {activeEvent.kanban_status === "request" || activeEvent.kanban_status === "drafting_quotation"
+                                            {activeEvent.kanban_status === "cancelled"
+                                                ? "Acara ini telah dibatalkan oleh EO."
+                                                : activeEvent.kanban_status === "request" || activeEvent.kanban_status === "drafting_quotation"
                                                 ? "Tagihan DP 50% akan otomatis dibuat setelah Anda menyetujui penawaran dari EO."
                                                 : "Hubungi admin EO jika tagihan belum tersedia."}
                                         </p>

@@ -294,27 +294,37 @@ export default function EventOfferCard({ event, onRevision, onSuccess }) {
                 )}
             </div>
 
+            {/* Banner Acara Dibatalkan */}
+            {event.kanban_status === "cancelled" && (
+                <div className="bg-rose-50 border border-rose-300 rounded-xl p-4 text-rose-900 text-xs">
+                    <p className="font-bold">Acara Dibatalkan oleh EO. Alasan: {event.cancellation_reason || "-"}</p>
+                    <p className="mt-1 text-rose-700">Penawaran ini tidak lagi dapat disetujui atau diajukan revisi.</p>
+                </div>
+            )}
+
             {/* Tombol Aksi */}
-            <div className="flex items-center gap-2.5 pt-2">
-                <button
-                    onClick={handleApprove}
-                    disabled={
-                        isApproving ||
-                        event.vendor_assignments?.length === 0 ||
-                        !termsAccepted
-                    }
-                    className="flex-1 bg-[#657166] hover:bg-[#556056] text-white font-bold text-xs rounded-xl shadow-xs transition-colors px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border border-[#525C53]"
-                >
-                    {isApproving ? "Memproses..." : "Setujui Penawaran"}
-                </button>
-                <button
-                    onClick={() => onRevision(event)}
-                    disabled={isApproving}
-                    className="flex-1 bg-white border border-[#E8E2D7] text-[#738075] hover:bg-[#FAF6F0] hover:text-[#2F3931] font-bold text-xs rounded-xl shadow-xs transition-colors px-4 py-2.5 disabled:opacity-50 cursor-pointer"
-                >
-                    Minta Penyesuaian / Revisi
-                </button>
-            </div>
+            {event.kanban_status !== "cancelled" ? (
+                <div className="flex items-center gap-2.5 pt-2">
+                    <button
+                        onClick={handleApprove}
+                        disabled={
+                            isApproving ||
+                            event.vendor_assignments?.length === 0 ||
+                            !termsAccepted
+                        }
+                        className="flex-1 bg-[#657166] hover:bg-[#556056] text-white font-bold text-xs rounded-xl shadow-xs transition-colors px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border border-[#525C53]"
+                    >
+                        {isApproving ? "Memproses..." : "Setujui Penawaran"}
+                    </button>
+                    <button
+                        onClick={() => onRevision(event)}
+                        disabled={isApproving}
+                        className="flex-1 bg-white border border-[#E8E2D7] text-[#738075] hover:bg-[#FAF6F0] hover:text-[#2F3931] font-bold text-xs rounded-xl shadow-xs transition-colors px-4 py-2.5 disabled:opacity-50 cursor-pointer"
+                    >
+                        Minta Penyesuaian / Revisi
+                    </button>
+                </div>
+            ) : null}
         </div>
     );
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\EventVendorAssignmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'package_name',
     'package_price',
     'eo_offer_status',
+    'status',
     'client_approval',
     'locked_price',
     'notes',
@@ -54,6 +56,17 @@ class EventVendorAssignment extends Model
                 }
             }
         });
+    }
+
+    /**
+     * Alias atribut status untuk kompatibilitas ke eo_offer_status.
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->eo_offer_status,
+            set: fn ($value) => ['eo_offer_status' => $value]
+        );
     }
 
     /**
