@@ -429,7 +429,7 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-rose-900">
-                                    Area Khusus (Danger Zone)
+                                    Pembatalan Acara (Danger Zone)
                                 </h3>
                                 <p className="text-xs text-[#738075] mt-0.5 max-w-md">
                                     Membatalkan acara akan mengosongkan kembali tanggal di kalender dan membebaskan seluruh penugasan vendor terkait.
