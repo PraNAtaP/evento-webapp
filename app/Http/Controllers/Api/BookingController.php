@@ -22,6 +22,7 @@ class BookingController extends Controller
     public function bookedDates(): JsonResponse
     {
         $events = Event::query()
+            ->whereNotIn('kanban_status', ['rejected', 'cancelled'])
             ->orderBy('event_date', 'asc')
             ->get(['event_date', 'end_date', 'is_multi_day']);
 

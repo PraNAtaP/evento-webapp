@@ -8,6 +8,8 @@ use App\Http\Resources\EventInspectorResource;
 use App\Models\Event;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EventInspectorController extends Controller
 {
@@ -55,6 +57,59 @@ class EventInspectorController extends Controller
 
         return response()->json([
             'message' => 'Jadwal acara berhasil diperbarui (Reschedule).',
+            'data' => new EventInspectorResource($event),
+            'event' => $event,
+        ]);
+    }
+
+    /**
+     * Membatalkan acara oleh EO dengan menyertakan alasan pembatalan.
+     * Mengubah status acara menjadi cancelled, membebaskan jadwal vendor terkait,
+     * serta mempertahankan data (tanpa hard delete).
+     */
+    public function cancel(Request $request, Event $event): JsonResponse
+    {
+        $validated = $request->validate([
+            'reason' => ['required_without:cancellation_reason', 'nullable', 'string', 'max:1000'],
+            'cancellation_reason' => ['required_without:reason', 'nullable', 'string', 'max:1000'],
+        ], [
+            'reason.required_without' => 'Alasan pembatalan wajib diisi.',
+            'cancellation_reason.required_without' => 'Alasan pembatalan wajib diisi.',
+            'reason.max' => 'Alasan pembatalan maksimal 1000 karakter.',
+            'cancellation_reason.max' => 'Alasan pembatalan maksimal 1000 karakter.',
+        ]);
+
+        $reason = $validated['reason'] ?? $validated['cancellation_reason'];
+
+        if ($event->kanban_status === 'cancelled') {
+            return response()->json([
+                'message' => 'Acara sudah dibatalkan sebelumnya.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($event, $reason) {
+            $event->update([
+                'kanban_status' => 'cancelled',
+                'cancellation_reason' => $reason,
+                'cancelled_at' => Carbon::now(),
+            ]);
+
+            // Bebaskan seluruh jadwal vendor terkait
+            $event->vendorAssignments()->update([
+                'eo_offer_status' => 'cancelled',
+            ]);
+        });
+
+        $event->load([
+            'client:id,name,email',
+            'vendorAssignments' => fn ($query) => $query->orderBy('id'),
+            'vendorAssignments.package:id,vendor_id,package_name,price',
+            'vendorAssignments.vendor:id,business_name,category',
+            'payments',
+        ]);
+
+        return response()->json([
+            'message' => 'Acara berhasil dibatalkan.',
             'data' => new EventInspectorResource($event),
             'event' => $event,
         ]);

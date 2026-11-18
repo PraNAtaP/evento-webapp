@@ -157,11 +157,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/admin/vendors/{vendor}/reject', [AdminVendorController::class, 'reject'])
             ->name('api.admin.vendors.reject');
 
-        // Board Inspector (detail event & reschedule oleh EO)
+        // Board Inspector (detail event, reschedule, dan pembatalan acara oleh EO)
         Route::get('/events/{event}', [EventInspectorController::class, 'show'])
             ->name('api.events.show');
         Route::patch('/events/{event}/reschedule', [EventInspectorController::class, 'reschedule'])
             ->name('api.events.reschedule');
+        Route::post('/events/{event}/cancel', [EventInspectorController::class, 'cancel'])
+            ->name('api.events.cancel');
 
         // Section Vendor di Board Inspector
         Route::get('/events/{event}/vendor-catalog', [VendorCatalogController::class, 'index'])
