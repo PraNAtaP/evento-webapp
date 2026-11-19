@@ -1,7 +1,7 @@
 import { Navigate, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export default function ProtectedRoute({ children, allowedRoles }) {
+export default function ProtectedRoute({ children, allowedRoles, requireVerified = false }) {
     const { user, isAuthenticated, isLoading, getRoleDashboard } = useAuth();
     const location = useLocation();
 
@@ -19,6 +19,10 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
     if (allowedRoles && !allowedRoles.includes(user.role)) {
         return <Navigate to={getRoleDashboard(user.role)} replace />;
+    }
+
+    if (requireVerified && user && !user.email_verified_at && user.is_email_verified !== true) {
+        return <Navigate to="/client/dashboard" replace />;
     }
 
     return children ? children : <Outlet />;

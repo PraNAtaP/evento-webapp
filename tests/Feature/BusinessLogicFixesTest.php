@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Mail\CancellationApprovedMail;
+use App\Mail\OrderRejectedMail;
+use App\Models\Client;
 use App\Models\Event;
 use App\Models\EventVendorAssignment;
 use App\Models\Payment;
@@ -281,5 +283,187 @@ class BusinessLogicFixesTest extends TestCase
                 'id' => $payment->id,
                 'status' => 'paid',
             ]);
+    }
+
+    /**
+     * BUG-LOGIC-007: Klien belum verifikasi email dilarang membuat pemesanan atau menyetujui penawaran.
+     */
+    public function test_bug_logic_007_unverified_client_cannot_create_booking_or_approve_quotation(): void
+    {
+        $unverifiedClient = User::factory()->client()->unverified()->create();
+
+        $payload = [
+            'event_name' => 'Acara Pernikahan Belum Verif',
+            'category' => 'wedding',
+            'event_date' => Carbon::now()->addDays(70)->format('Y-m-d'),
+            'guest_count' => 150,
+            'budget' => 50000000,
+            'has_own_venue' => false,
+            'location' => 'Gedung Serbaguna',
+        ];
+
+        // Pemesanan dilarang bagi klien belum verifikasi email
+        $this->actingAs($unverifiedClient, 'sanctum')
+            ->postJson('/api/bookings', $payload)
+            ->assertStatus(403);
+
+        // Menyetujui penawaran juga dilarang bagi akun belum verifikasi email
+        $event = Event::factory()->clientReview()->create(['client_id' => $unverifiedClient->id]);
+        $this->actingAs($unverifiedClient, 'sanctum')
+            ->postJson("/api/client/events/{$event->id}/approve-quotation", ['terms_accepted' => true])
+            ->assertStatus(403);
+    }
+
+    /**
+     * BUG-LOGIC-008: Acara dibatalkan tidak dihitung sebagai acara aktif atau piutang di dashboard EO.
+     */
+    public function test_bug_logic_008_cancelled_events_are_excluded_from_eo_dashboard_active_events_and_receivables(): void
+    {
+        // 1 acara batal dengan nilai agreed_price 10jt
+        $cancelledEvent = Event::factory()->create([
+            'client_id' => $this->client->id,
+            'kanban_status' => 'cancelled',
+            'agreed_price' => 10000000,
+            'event_date' => Carbon::now()->addDays(15)->format('Y-m-d'),
+        ]);
+
+        Payment::create([
+            'event_id' => $cancelledEvent->id,
+            'payment_type' => 'dp',
+            'nominal' => 3000000,
+            'status' => 'paid',
+            'verified_at' => Carbon::now(),
+        ]);
+
+        Payment::create([
+            'event_id' => $cancelledEvent->id,
+            'payment_type' => 'pelunasan',
+            'nominal' => 7000000,
+            'status' => 'unpaid',
+        ]);
+
+        $response = $this->actingAs($this->eo, 'sanctum')
+            ->getJson('/api/admin/event-summary');
+
+        $response->assertOk();
+
+        // Acara aktif harus 0 (karena satu-satunya acara berstatus cancelled)
+        $this->assertEquals(0, $response->json('operational.active_events_count'));
+
+        // Piutang aktif harus 0 (tidak boleh memasukkan 7jt dari acara yang batal)
+        $this->assertEquals(0, $response->json('operational.total_receivables'));
+
+        // Uang muka operasional tersimpan harus 0
+        $this->assertEquals(0, $response->json('operational.deferred_revenue'));
+    }
+
+    /**
+     * BUG-LOGIC-009: Upload bukti dan verifikasi pelunasan dilarang jika DP belum lunas.
+     */
+    public function test_bug_logic_009_cannot_upload_or_verify_pelunasan_before_dp_is_paid(): void
+    {
+        Storage::fake('public');
+
+        $event = Event::factory()->awaitingDp()->create([
+            'client_id' => $this->client->id,
+        ]);
+
+        $dpPayment = Payment::create([
+            'event_id' => $event->id,
+            'payment_type' => 'dp',
+            'nominal' => 3000000,
+            'status' => 'unpaid',
+        ]);
+
+        $pelunasanPayment = Payment::create([
+            'event_id' => $event->id,
+            'payment_type' => 'pelunasan',
+            'nominal' => 7000000,
+            'status' => 'unpaid',
+        ]);
+
+        $file = UploadedFile::fake()->image('pelunasan.jpg');
+
+        // Klien coba upload pelunasan saat DP masih unpaid -> Ditolak 422
+        $this->actingAs($this->client, 'sanctum')
+            ->postJson("/api/payments/{$pelunasanPayment->id}/proof", [
+                'payment_proof' => $file,
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Uang muka (DP) harus dilunasi dan diverifikasi terlebih dahulu sebelum mengunggah bukti pelunasan.');
+
+        // Begitu juga verifikasi pelunasan oleh EO ditolak jika DP belum paid
+        $pelunasanPayment->update(['status' => 'pending_verification']);
+        $this->actingAs($this->eo, 'sanctum')
+            ->patchJson("/api/payments/{$pelunasanPayment->id}/verify", [
+                'action' => 'approve',
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Tidak dapat memverifikasi pelunasan karena pembayaran DP belum lunas.');
+    }
+
+    /**
+     * BUG-LOGIC-010: Kartu Kanban tidak dapat dimajukan saat acara memiliki permohonan pembatalan pending.
+     */
+    public function test_bug_logic_010_cannot_move_kanban_card_when_cancellation_request_is_pending(): void
+    {
+        $event = Event::factory()->awaitingDp()->create([
+            'client_id' => $this->client->id,
+            'cancellation_request_status' => 'pending',
+            'cancellation_request_reason' => 'Ingin membatalkan acara',
+        ]);
+
+        $this->actingAs($this->eo, 'sanctum')
+            ->patchJson("/api/admin/kanban/{$event->id}/move", [
+                'target_status' => 'on_progress',
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('errors.target_status.0', 'Tidak dapat memindahkan status acara. Klien telah mengajukan permohonan pembatalan yang sedang menunggu konfirmasi EO.');
+    }
+
+    /**
+     * BUG-LOGIC-011: EO dilarang menghapus akun klien yang masih memiliki acara aktif.
+     */
+    public function test_bug_logic_011_cannot_soft_delete_client_with_active_events(): void
+    {
+        $clientUser = User::factory()->client()->create();
+        Event::factory()->onProgress()->create(['client_id' => $clientUser->id]);
+
+        $clientModel = Client::findOrFail($clientUser->id);
+
+        $this->actingAs($this->eo, 'sanctum')
+            ->deleteJson("/api/admin/clients/{$clientModel->id}")
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Tidak dapat menghapus akun Client yang masih memiliki acara aktif atau berjalan. Harap selesaikan atau batalkan acara terlebih dahulu.');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $clientModel->id,
+            'deleted_at' => null,
+        ]);
+    }
+
+    /**
+     * BUG-LOGIC-012: Penolakan pesanan masuk oleh EO men-dispatch email notifikasi ke klien.
+     */
+    public function test_bug_logic_012_eo_reject_order_dispatches_notification_email_to_client(): void
+    {
+        Mail::fake();
+
+        $event = Event::factory()->create([
+            'client_id' => $this->client->id,
+            'kanban_status' => 'request',
+        ]);
+
+        $response = $this->actingAs($this->eo, 'sanctum')
+            ->patchJson("/api/admin/orders/{$event->id}/reject", [
+                'reason' => 'Kapasitas EO penuh pada jadwal tersebut.',
+            ]);
+
+        $response->assertOk();
+
+        Mail::assertQueued(OrderRejectedMail::class, function (OrderRejectedMail $mail) {
+            return $mail->event->client_id === $this->client->id
+                && $mail->reason === 'Kapasitas EO penuh pada jadwal tersebut.';
+        });
     }
 }

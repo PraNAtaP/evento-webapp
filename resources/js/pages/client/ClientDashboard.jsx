@@ -104,12 +104,23 @@ export default function ClientDashboard() {
                         Berikut adalah penawaran acara dari Event Organizer yang sedang menunggu persetujuan Anda.
                     </p>
                 </div>
-                <Link
-                    to="/client/booking"
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#657166] hover:bg-[#556056] text-white font-bold text-xs rounded-xl shadow-xs transition-colors shrink-0 border border-[#525C53]"
-                >
-                    <span>+ Buat Pengajuan Acara Baru</span>
-                </Link>
+                {isUnverified ? (
+                    <button
+                        type="button"
+                        onClick={() => alert("Silakan verifikasi alamat email Anda terlebih dahulu untuk membuat pengajuan acara baru.")}
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#A8B2A4] text-white font-bold text-xs rounded-xl shadow-xs transition-colors shrink-0 border border-[#96A092] cursor-not-allowed opacity-80"
+                        title="Verifikasi email Anda terlebih dahulu"
+                    >
+                        <span>+ Buat Pengajuan Acara Baru</span>
+                    </button>
+                ) : (
+                    <Link
+                        to="/client/booking"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#657166] hover:bg-[#556056] text-white font-bold text-xs rounded-xl shadow-xs transition-colors shrink-0 border border-[#525C53]"
+                    >
+                        <span>+ Buat Pengajuan Acara Baru</span>
+                    </Link>
+                )}
             </div>
 
             {/* Konten Utama: Penawaran yang Butuh Ditinjau */}
@@ -133,12 +144,23 @@ export default function ClientDashboard() {
                         </p>
                     </div>
                     <div className="flex items-center gap-3 mt-2">
-                        <Link
-                            to="/client/booking"
-                            className="px-4 py-2.5 bg-[#657166] hover:bg-[#556056] text-white font-bold text-xs rounded-xl shadow-xs transition-colors border border-[#525C53]"
-                        >
-                            Ajukan Acara Baru
-                        </Link>
+                        {isUnverified ? (
+                            <button
+                                type="button"
+                                onClick={() => alert("Silakan verifikasi alamat email Anda terlebih dahulu untuk membuat pengajuan acara baru.")}
+                                className="px-4 py-2.5 bg-[#A8B2A4] text-white font-bold text-xs rounded-xl shadow-xs transition-colors border border-[#96A092] cursor-not-allowed opacity-80"
+                                title="Verifikasi email Anda terlebih dahulu"
+                            >
+                                Ajukan Acara Baru
+                            </button>
+                        ) : (
+                            <Link
+                                to="/client/booking"
+                                className="px-4 py-2.5 bg-[#657166] hover:bg-[#556056] text-white font-bold text-xs rounded-xl shadow-xs transition-colors border border-[#525C53]"
+                            >
+                                Ajukan Acara Baru
+                            </Link>
+                        )}
                         <Link
                             to="/client/booked-events"
                             className="px-4 py-2.5 bg-white hover:bg-[#FAF6F0] text-[#738075] hover:text-[#2F3931] font-bold text-xs rounded-xl border border-[#E8E2D7] transition-colors"

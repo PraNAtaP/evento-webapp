@@ -100,6 +100,11 @@ class StoreBookingRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
+            // 0. Validasi Email Terverifikasi
+            if ($this->user() && ! $this->user()->hasVerifiedEmail()) {
+                $validator->errors()->add('email', 'Alamat email Anda belum diverifikasi. Harap verifikasi email Anda terlebih dahulu sebelum mengajukan acara.');
+            }
+
             $category = $this->input('category');
             $eventDateInput = $this->input('event_date');
             $isMultiDay = (bool) $this->input('is_multi_day', false);

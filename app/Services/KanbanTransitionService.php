@@ -42,6 +42,13 @@ class KanbanTransitionService
             ]);
         }
 
+        // 0. Validasi permohonan pembatalan klien yang masih pending
+        if ($event->cancellation_request_status === 'pending') {
+            throw ValidationException::withMessages([
+                'target_status' => ['Tidak dapat memindahkan status acara. Klien telah mengajukan permohonan pembatalan yang sedang menunggu konfirmasi EO.'],
+            ]);
+        }
+
         // 1. Kasus khusus revisi penawaran: client_review -> drafting_quotation
         if ($currentStatus === 'client_review' && $targetStatus === 'drafting_quotation') {
             $this->handleRevisionTransition($event, $options['revision_note'] ?? null);

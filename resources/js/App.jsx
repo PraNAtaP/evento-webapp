@@ -237,7 +237,7 @@ export default function App() {
                             <Route
                                 path="/client/booking"
                                 element={
-                                    <ProtectedRoute allowedRoles={["client"]}>
+                                    <ProtectedRoute allowedRoles={["client"]} requireVerified={true}>
                                         <ClientBookingPage />
                                     </ProtectedRoute>
                                 }

@@ -127,6 +127,17 @@ class AdminClientController extends Controller
             ], 404);
         }
 
+        // Cegah penghapusan jika klien masih memiliki acara aktif yang berjalan
+        $hasActiveEvents = $user->events()
+            ->whereNotIn('kanban_status', ['done', 'rejected', 'cancelled'])
+            ->exists();
+
+        if ($hasActiveEvents) {
+            return response()->json([
+                'message' => 'Tidak dapat menghapus akun Client yang masih memiliki acara aktif atau berjalan. Harap selesaikan atau batalkan acara terlebih dahulu.',
+            ], 422);
+        }
+
         // Menghapus token agar Client tidak dapat menggunakan sesi lama.
         $user->tokens()->delete();
 

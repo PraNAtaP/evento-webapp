@@ -51,6 +51,19 @@ class PaymentController extends Controller
             ], 422);
         }
 
+        if ($payment->payment_type === 'pelunasan') {
+            $isDpPaid = $payment->event->payments()
+                ->where('payment_type', 'dp')
+                ->where('status', 'paid')
+                ->exists();
+
+            if (! $isDpPaid) {
+                return response()->json([
+                    'message' => 'Uang muka (DP) harus dilunasi dan diverifikasi terlebih dahulu sebelum mengunggah bukti pelunasan.',
+                ], 422);
+            }
+        }
+
         if ($payment->status !== 'unpaid') {
             return response()->json([
                 'message' => 'Bukti transfer sudah diunggah atau sudah diverifikasi.',
@@ -84,6 +97,19 @@ class PaymentController extends Controller
             return response()->json([
                 'message' => 'Tidak dapat memverifikasi pembayaran untuk acara yang sudah dibatalkan atau ditolak.',
             ], 422);
+        }
+
+        if ($payment->payment_type === 'pelunasan' && $request->action === 'approve') {
+            $isDpPaid = $payment->event->payments()
+                ->where('payment_type', 'dp')
+                ->where('status', 'paid')
+                ->exists();
+
+            if (! $isDpPaid) {
+                return response()->json([
+                    'message' => 'Tidak dapat memverifikasi pelunasan karena pembayaran DP belum lunas.',
+                ], 422);
+            }
         }
 
         if ($payment->status !== 'pending_verification') {

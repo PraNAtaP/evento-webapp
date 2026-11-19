@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderRejectedMail;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class AdminEventOrderController extends Controller
 {
@@ -82,10 +84,18 @@ class AdminEventOrderController extends Controller
             'reason' => ['nullable', 'string', 'max:500'],
         ]);
 
+        $reason = $validated['reason'] ?? 'Pesanan ditolak oleh Event Organizer.';
+
         $event->update([
             'kanban_status' => 'rejected',
-            'rejection_reason' => $validated['reason'] ?? 'Pesanan ditolak oleh Event Organizer.',
+            'rejection_reason' => $reason,
         ]);
+
+        $event->load('client');
+        $clientEmail = $event->client?->email;
+        if ($clientEmail) {
+            Mail::to($clientEmail)->queue(new OrderRejectedMail($event, $reason));
+        }
 
         return response()->json([
             'message' => 'Pesanan acara berhasil ditolak.',

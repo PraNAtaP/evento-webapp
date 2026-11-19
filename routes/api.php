@@ -191,7 +191,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings/booked-dates', [BookingController::class, 'bookedDates'])
         ->name('api.bookings.booked-dates');
     Route::post('/bookings', [BookingController::class, 'store'])
-        ->middleware('role:client')
+        ->middleware(['role:client', 'verified'])
         ->name('api.bookings.store');
 
     // Event & Review Penawaran (Modul Klien)
@@ -200,18 +200,22 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.client.events.index');
         Route::get('/client/events/{event}', [ClientEventController::class, 'show'])
             ->name('api.client.events.show');
-        Route::post('/client/events/{event}/approve-quotation', [ClientEventController::class, 'approveQuotation'])
-            ->name('api.client.events.approve-quotation');
-        Route::post('/client/events/{event}/request-revision', [ClientEventController::class, 'requestRevision'])
-            ->name('api.client.events.request-revision');
 
-        // Permintaan Pembatalan Acara (Klien)
-        Route::get('/client/events/{event}/cancellation-request/policy', [CancellationRequestController::class, 'policy'])
-            ->name('api.client.events.cancellation-request.policy');
-        Route::post('/client/events/{event}/cancellation-request', [CancellationRequestController::class, 'request'])
-            ->name('api.client.events.cancellation-request.store');
-        Route::delete('/client/events/{event}/cancellation-request', [CancellationRequestController::class, 'withdraw'])
-            ->name('api.client.events.cancellation-request.withdraw');
+        // Aksi perubahan status / transaksi (Wajib Email Terverifikasi)
+        Route::middleware('verified')->group(function () {
+            Route::post('/client/events/{event}/approve-quotation', [ClientEventController::class, 'approveQuotation'])
+                ->name('api.client.events.approve-quotation');
+            Route::post('/client/events/{event}/request-revision', [ClientEventController::class, 'requestRevision'])
+                ->name('api.client.events.request-revision');
+
+            // Permintaan Pembatalan Acara (Klien)
+            Route::get('/client/events/{event}/cancellation-request/policy', [CancellationRequestController::class, 'policy'])
+                ->name('api.client.events.cancellation-request.policy');
+            Route::post('/client/events/{event}/cancellation-request', [CancellationRequestController::class, 'request'])
+                ->name('api.client.events.cancellation-request.store');
+            Route::delete('/client/events/{event}/cancellation-request', [CancellationRequestController::class, 'withdraw'])
+                ->name('api.client.events.cancellation-request.withdraw');
+        });
     });
 
     // Modul Vendor Packages (Agnes)
