@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { AlertTriangle, PartyPopper } from "lucide-react";
 import api from "../../api/axios";
 
 export default function ResetPassword() {
@@ -76,8 +77,8 @@ export default function ResetPassword() {
                 <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E2D7] shadow-xs">
                     {isTokenMissing ? (
                         <div className="text-center py-4 space-y-4">
-                            <div className="w-16 h-16 bg-[#F3C3B2]/30 border border-[#F3C3B2] rounded-2xl flex items-center justify-center mx-auto text-3xl">
-                                ⚠️
+                            <div className="w-16 h-16 bg-[#F3C3B2]/30 border border-[#F3C3B2] rounded-2xl flex items-center justify-center mx-auto text-[#6B3222]">
+                                <AlertTriangle className="w-8 h-8" />
                             </div>
 
                             <div>
@@ -100,8 +101,8 @@ export default function ResetPassword() {
                         </div>
                     ) : isSuccess ? (
                         <div className="text-center py-4 space-y-4">
-                            <div className="w-16 h-16 bg-[#EBF3E8] border border-[#CFD8C4] rounded-2xl flex items-center justify-center mx-auto text-3xl">
-                                🎉
+                            <div className="w-16 h-16 bg-[#EBF3E8] border border-[#CFD8C4] rounded-2xl flex items-center justify-center mx-auto text-[#4F6B43]">
+                                <PartyPopper className="w-8 h-8" />
                             </div>
 
                             <div>

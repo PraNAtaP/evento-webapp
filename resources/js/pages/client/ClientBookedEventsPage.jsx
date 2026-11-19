@@ -1,5 +1,18 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import {
+    AlertTriangle,
+    Coins,
+    CheckCircle2,
+    Lock,
+    MessageSquare,
+    Camera,
+    MapPin,
+    Calendar,
+    Clock,
+    Check,
+    ClipboardList,
+} from "lucide-react";
 import api from "../../api/axios";
 import ProgressTimeline from "../../components/client/ProgressTimeline";
 import PaymentCard from "../../components/payment/PaymentCard";
@@ -91,7 +104,7 @@ function CancellationRequestModal({ event, onClose, onSuccess }) {
                             {/* Peringatan DP Hangus */}
                             {policy?.is_dp_forfeited ? (
                                 <div className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 flex gap-3">
-                                    <span className="text-amber-500 text-lg shrink-0">⚠️</span>
+                                    <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                                     <div>
                                         <p className="font-black text-xs text-amber-800">DP Akan Hangus</p>
                                         <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
@@ -101,7 +114,7 @@ function CancellationRequestModal({ event, onClose, onSuccess }) {
                                 </div>
                             ) : policy && (
                                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex gap-3">
-                                    <span className="text-emerald-500 text-lg shrink-0">💰</span>
+                                    <Coins className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                                     <div>
                                         <p className="font-black text-xs text-emerald-800">DP Berpotensi Dikembalikan</p>
                                         <p className="text-xs text-emerald-700 mt-0.5 leading-relaxed">
@@ -279,7 +292,7 @@ function ClientVendorDetailModal({ assignment, isUnmasked, onClose, onPreviewIma
                     {/* Status Masking Banner */}
                     {isUnmasked ? (
                         <div className="bg-[#DAEBE3]/50 border border-[#BCD4C9] rounded-2xl p-4 flex items-start gap-3 text-[#224436]">
-                            <span className="text-xl shrink-0">✓</span>
+                            <CheckCircle2 className="w-5 h-5 text-[#224436] shrink-0 mt-0.5" />
                             <div className="text-xs leading-relaxed">
                                 <p className="font-extrabold">Profil & Kontak Resmi Vendor Terbuka</p>
                                 <p className="text-[#3F5B4E] mt-0.5">
@@ -289,7 +302,7 @@ function ClientVendorDetailModal({ assignment, isUnmasked, onClose, onPreviewIma
                         </div>
                     ) : (
                         <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-amber-900">
-                            <span className="text-xl shrink-0">🔒</span>
+                            <Lock className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
                             <div className="text-xs leading-relaxed">
                                 <p className="font-extrabold">Kontak Langsung Vendor Dirahasiakan Sementara</p>
                                 <p className="text-amber-800 mt-0.5">
@@ -316,7 +329,7 @@ function ClientVendorDetailModal({ assignment, isUnmasked, onClose, onPreviewIma
                                         className="flex items-center gap-2.5 p-3 rounded-xl bg-[#FAF6F0] hover:bg-[#DAEBE3]/50 border border-[#E8E2D7] transition text-xs text-[#2F3931]"
                                     >
                                         <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shrink-0">
-                                            💬
+                                            <MessageSquare className="w-4 h-4" />
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <span className="block text-[10px] text-[#738075] font-semibold">WhatsApp / Telepon</span>
@@ -342,7 +355,7 @@ function ClientVendorDetailModal({ assignment, isUnmasked, onClose, onPreviewIma
                                         className="flex items-center gap-2.5 p-3 rounded-xl bg-[#FAF6F0] hover:bg-[#99CDD8]/20 border border-[#E8E2D7] transition text-xs text-[#2F3931]"
                                     >
                                         <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center font-bold shrink-0">
-                                            📸
+                                            <Camera className="w-4 h-4" />
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <span className="block text-[10px] text-[#738075] font-semibold">Portofolio / Instagram</span>
@@ -363,7 +376,7 @@ function ClientVendorDetailModal({ assignment, isUnmasked, onClose, onPreviewIma
                             {/* Alamat Vendor */}
                             {vendor.address && (
                                 <div className="text-xs text-[#556056] bg-[#FAF6F0]/60 p-3 rounded-xl border border-[#E8E2D7] flex items-start gap-2">
-                                    <span className="shrink-0 text-sm">📍</span>
+                                    <MapPin className="w-4 h-4 text-[#738075] shrink-0 mt-0.5" />
                                     <div className="leading-relaxed">
                                         <span className="font-bold text-[#2F3931]">Alamat Vendor: </span>
                                         {vendor.address}
@@ -696,12 +709,16 @@ export default function ClientBookedEventsPage() {
                                                 {catLabel}
                                             </span>
                                             <span>&bull;</span>
-                                            <span>📅 {formatDateRange(evt)}</span>
+                                            <span className="flex items-center gap-1">
+                                                <Calendar className="w-3.5 h-3.5" />
+                                                <span>{formatDateRange(evt)}</span>
+                                            </span>
                                         </div>
 
                                         {evt.venue && (
-                                            <p className="text-[11px] text-[#738075] truncate mb-2.5">
-                                                📍 {evt.venue}
+                                            <p className="text-[11px] text-[#738075] truncate mb-2.5 flex items-center gap-1">
+                                                <MapPin className="w-3.5 h-3.5 shrink-0" />
+                                                <span>{evt.venue}</span>
                                             </p>
                                         )}
 
@@ -839,8 +856,9 @@ export default function ClientBookedEventsPage() {
                                     {/* Tombol Ajukan Pembatalan */}
                                     {["drafting_quotation", "client_review", "awaiting_dp", "on_progress"].includes(activeEvent.kanban_status) && (
                                         activeEvent.cancellation_request_status === "pending" ? (
-                                            <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-                                                ⏳ Menunggu Review EO
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
+                                                <Clock className="w-3.5 h-3.5" />
+                                                <span>Menunggu Review EO</span>
                                             </span>
                                         ) : (
                                             <button
@@ -901,13 +919,13 @@ export default function ClientBookedEventsPage() {
                                     </div>
 
                                     {activeEvent.is_vendor_unmasked ? (
-                                        <span className="self-start sm:self-auto px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9] flex items-center gap-1 shrink-0">
-                                            <span>✓</span>
+                                        <span className="self-start sm:self-auto px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9] flex items-center gap-1.5 shrink-0">
+                                            <Check className="w-3.5 h-3.5" />
                                             <span>Profil Resmi Terbuka</span>
                                         </span>
                                     ) : (
-                                        <span className="self-start sm:self-auto px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#FAF6F0] text-[#738075] border border-[#E8E2D7] flex items-center gap-1 shrink-0">
-                                            <span>🔒</span>
+                                        <span className="self-start sm:self-auto px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#FAF6F0] text-[#738075] border border-[#E8E2D7] flex items-center gap-1.5 shrink-0">
+                                            <Lock className="w-3.5 h-3.5" />
                                             <span>Kontak Terbuka Pasca-DP</span>
                                         </span>
                                     )}
@@ -957,8 +975,9 @@ export default function ClientBookedEventsPage() {
                                                                 </h4>
 
                                                                 {isUnmasked && vendor.address && (
-                                                                    <p className="text-[10px] text-[#738075] truncate mt-0.5">
-                                                                        📍 {vendor.address}
+                                                                    <p className="text-[10px] text-[#738075] truncate mt-0.5 flex items-center gap-1">
+                                                                        <MapPin className="w-3 h-3 shrink-0" />
+                                                                        <span>{vendor.address}</span>
                                                                     </p>
                                                                 )}
                                                             </div>
@@ -987,19 +1006,22 @@ export default function ClientBookedEventsPage() {
                                                             {isUnmasked ? (
                                                                 <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-[#E8E2D7]/50 text-[10px]">
                                                                     {vendor.contact_number && (
-                                                                        <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                                                                            💬 {vendor.contact_number}
+                                                                        <span className="inline-flex items-center gap-1 font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                                                            <MessageSquare className="w-3 h-3" />
+                                                                            <span>{vendor.contact_number}</span>
                                                                         </span>
                                                                     )}
                                                                     {vendor.social_media && (
-                                                                        <span className="font-semibold text-[#1D4A54] bg-[#99CDD8]/20 px-2 py-0.5 rounded border border-[#86BAC5]">
-                                                                            📸 {vendor.social_media}
+                                                                        <span className="inline-flex items-center gap-1 font-semibold text-[#1D4A54] bg-[#99CDD8]/20 px-2 py-0.5 rounded border border-[#86BAC5]">
+                                                                            <Camera className="w-3 h-3" />
+                                                                            <span>{vendor.social_media}</span>
                                                                         </span>
                                                                     )}
                                                                 </div>
                                                             ) : (
-                                                                <p className="text-[10px] text-[#738075] mt-1.5 italic">
-                                                                    🔒 Kontak & sosmed terbuka setelah DP diverifikasi
+                                                                <p className="text-[10px] text-[#738075] mt-1.5 italic flex items-center gap-1">
+                                                                    <Lock className="w-3 h-3 shrink-0" />
+                                                                    <span>Kontak & sosmed terbuka setelah DP diverifikasi</span>
                                                                 </p>
                                                             )}
                                                         </div>
@@ -1075,8 +1097,8 @@ export default function ClientBookedEventsPage() {
                     ) : (
                         /* Empty State Saat Belum Ada Acara yang Dipilih */
                         <div className="bg-white rounded-2xl border-2 border-dashed border-[#E8E2D7] p-12 text-center text-[#738075] shadow-xs">
-                            <div className="w-14 h-14 rounded-2xl bg-[#FAF6F0] flex items-center justify-center mx-auto mb-3 border border-[#E8E2D7] text-2xl">
-                                📋
+                            <div className="w-14 h-14 rounded-2xl bg-[#FAF6F0] flex items-center justify-center mx-auto mb-3 border border-[#E8E2D7] text-[#738075]">
+                                <ClipboardList className="w-7 h-7" />
                             </div>
                             <h3 className="text-sm font-extrabold text-[#2F3931] mb-1">
                                 Belum Ada Acara yang Dipilih

@@ -1,11 +1,24 @@
-    const STAGES = [
-    { key: 'request', label: 'Pengajuan', desc: 'Acara sedang diajukan', icon: '📝' },
-    { key: 'drafting_quotation', label: 'Penyusunan Penawaran', desc: 'EO sedang menyusun penawaran', icon: '📋' },
-    { key: 'client_review', label: 'Review Klien', desc: 'Menunggu persetujuan Anda', icon: '🔍' },
-    { key: 'awaiting_dp', label: 'Menunggu DP', desc: 'Menunggu pembayaran DP', icon: '💳' },
-    { key: 'on_progress', label: 'Acara Berlangsung', desc: 'Acara sedang dipersiapkan dan dijalankan', icon: '🎪' },
-    { key: 'done', label: 'Selesai', desc: 'Acara telah selesai', icon: '🎉' },
-    ];
+import {
+    Calendar,
+    Clock,
+    Check,
+    RefreshCw,
+    FileText,
+    ClipboardList,
+    Search,
+    CreditCard,
+    Sparkles,
+    Trophy,
+} from "lucide-react";
+
+const STAGES = [
+    { key: 'request', label: 'Pengajuan', desc: 'Acara sedang diajukan', Icon: FileText },
+    { key: 'drafting_quotation', label: 'Penyusunan Penawaran', desc: 'EO sedang menyusun penawaran', Icon: ClipboardList },
+    { key: 'client_review', label: 'Review Klien', desc: 'Menunggu persetujuan Anda', Icon: Search },
+    { key: 'awaiting_dp', label: 'Menunggu DP', desc: 'Menunggu pembayaran DP', Icon: CreditCard },
+    { key: 'on_progress', label: 'Acara Berlangsung', desc: 'Acara sedang dipersiapkan dan dijalankan', Icon: Sparkles },
+    { key: 'done', label: 'Selesai', desc: 'Acara telah selesai', Icon: Trophy },
+];
 
     export default function ProgressTimeline({ event }) {
     const currentIndex = STAGES.findIndex((s) => s.key === event.kanban_status);
@@ -38,9 +51,15 @@
                 {event.event_name === "-" ? "Acara Tanpa Nama" : event.event_name}
             </h3>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[11px] font-medium text-[#738075]">
-                <span className="flex items-center gap-1">📅 Pelaksanaan: {formatTanggal(event.event_date)}</span>
+                <span className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-[#738075]" />
+                    Pelaksanaan: {formatTanggal(event.event_date)}
+                </span>
                 <span className="hidden sm:inline">•</span>
-                <span className="flex items-center gap-1">🔄 Terakhir update: {formatTanggal(event.updated_at)}</span>
+                <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#738075]" />
+                    Terakhir update: {formatTanggal(event.updated_at)}
+                </span>
             </div>
             </div>
             {event.kanban_status === 'cancelled' ? (
@@ -67,7 +86,13 @@
                         isDone ? 'bg-[#657166] text-white' : isCurrent ? 'bg-[#99CDD8] text-[#2F3931] ring-4 ring-[#DAEBE3] scale-110 font-bold' : 'bg-[#F3F0EA] text-[#A8B2A4] border border-[#CFD8C4]'
                     }`}
                     >
-                    {isDone ? '✓' : isCurrent ? '●' : stage.icon}
+                    {isDone ? (
+                        <Check className="w-4 h-4 stroke-[2.5]" />
+                    ) : isCurrent ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#2F3931]" />
+                    ) : (
+                        <stage.Icon className="w-3.5 h-3.5" />
+                    )}
                     </div>
                     {i < STAGES.length - 1 && (
                     <div className={`w-0.5 h-10 my-0.5 ${isDone ? 'bg-[#657166]' : 'bg-[#E8E2D7]'}`} />
@@ -136,7 +161,7 @@
 
         {/* Footer */}
         <div className="mt-4 pt-3 border-t border-[#E8E2D7] text-[11px] font-medium text-[#738075] flex items-center gap-1.5">
-            <span>🔄</span>
+            <RefreshCw className="w-3.5 h-3.5 text-[#738075]" />
             <span>Terakhir diperbarui: {formatTanggal(event.updated_at)}</span>
         </div>
         </div>

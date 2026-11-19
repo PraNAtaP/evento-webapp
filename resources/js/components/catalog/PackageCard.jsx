@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Package } from "lucide-react";
 
 export default function PackageCard({ pkg }) {
     const [imageError, setImageError] = useState(false);
@@ -25,7 +26,7 @@ export default function PackageCard({ pkg }) {
                     />
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 text-[#738075]/70 bg-gradient-to-br from-[#FAF6F0] to-[#E8E2D7]/40">
-                        <span className="text-3xl">📦</span>
+                        <Package className="w-8 h-8 text-[#738075]" />
                         <span className="text-[10px] font-semibold uppercase tracking-wider">
                             Paket Layanan
                         </span>

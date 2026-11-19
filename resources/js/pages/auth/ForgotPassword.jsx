@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Search, Mail, ArrowRight } from "lucide-react";
 import api from "../../api/axios";
 
 export default function ForgotPassword() {
@@ -62,8 +63,8 @@ export default function ForgotPassword() {
                     {notRegistered ? (
                         /* Notifikasi Akun Belum Terdaftar */
                         <div className="text-center py-2 space-y-4">
-                            <div className="w-16 h-16 bg-[#FDE8D3] border border-[#E8CEB2] rounded-2xl flex items-center justify-center mx-auto text-3xl">
-                                🔍
+                            <div className="w-16 h-16 bg-[#FDE8D3] border border-[#E8CEB2] rounded-2xl flex items-center justify-center mx-auto text-[#63482B]">
+                                <Search className="w-8 h-8" />
                             </div>
 
                             <div>
@@ -116,8 +117,8 @@ export default function ForgotPassword() {
                     ) : isSuccess ? (
                         /* Tampilan Sukses Pengiriman Link */
                         <div className="text-center py-2 space-y-4">
-                            <div className="w-16 h-16 bg-[#EBF3E8] border border-[#CFD8C4] rounded-2xl flex items-center justify-center mx-auto text-3xl">
-                                ✉️
+                            <div className="w-16 h-16 bg-[#EBF3E8] border border-[#CFD8C4] rounded-2xl flex items-center justify-center mx-auto text-[#4F6B43]">
+                                <Mail className="w-8 h-8" />
                             </div>
 
                             <div>
@@ -134,7 +135,8 @@ export default function ForgotPassword() {
 
                             <div className="bg-[#FAF6F0] border border-[#E8E2D7] rounded-2xl p-4 text-left text-xs text-[#556056] space-y-2">
                                 <p className="font-bold text-[#2F3931] flex items-center gap-1.5">
-                                    <span>👉</span> Langkah Selanjutnya:
+                                    <ArrowRight className="w-3.5 h-3.5 text-[#2F3931]" />
+                                    <span>Langkah Selanjutnya:</span>
                                 </p>
                                 <ol className="list-decimal list-inside space-y-1 text-[11px] text-[#738075] pl-1">
                                     <li>Buka email Anda dan cari pesan dari <strong>EVENTO</strong>.</li>

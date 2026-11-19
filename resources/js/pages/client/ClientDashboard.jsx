@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { PartyPopper, Mail, ClipboardList } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 import ClientQuotationsSection from "../../components/client/ClientQuotationsSection";
@@ -50,7 +51,7 @@ export default function ClientDashboard() {
             {verifiedParam === "1" && (
                 <div className="p-4 bg-[#EBF3E8] border border-[#CFD8C4] text-[#2A4022] rounded-2xl text-xs font-medium flex items-center justify-between shadow-xs">
                     <div className="flex items-center gap-2.5">
-                        <span className="text-xl">🎉</span>
+                        <PartyPopper className="w-5 h-5 text-emerald-700 shrink-0" />
                         <div>
                             <p className="font-bold text-sm">Alamat Email Berhasil Diverifikasi!</p>
                             <p className="text-[11px] text-[#4F6B43] mt-0.5">
@@ -65,7 +66,7 @@ export default function ClientDashboard() {
             {isUnverified && (
                 <div className="p-4 bg-[#FDE8D3]/70 border border-[#E8CEB2] text-[#5C3F22] rounded-2xl text-xs font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                     <div className="flex items-start gap-2.5">
-                        <span className="text-xl">✉️</span>
+                        <Mail className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
                         <div>
                             <p className="font-bold text-sm">Verifikasi Alamat Email Anda</p>
                             <p className="text-[11px] text-[#7A5432] mt-0.5">
@@ -120,8 +121,8 @@ export default function ClientDashboard() {
                 <ClientQuotationsSection />
             ) : (
                 <div className="bg-white rounded-2xl border border-[#E8E2D7] p-8 text-center shadow-xs flex flex-col items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-[#FAF6F0] text-[#657166] border border-[#E8E2D7] flex items-center justify-center font-bold text-xl">
-                        📋
+                    <div className="w-12 h-12 rounded-2xl bg-[#FAF6F0] text-[#657166] border border-[#E8E2D7] flex items-center justify-center font-bold">
+                        <ClipboardList className="w-6 h-6 text-[#657166]" />
                     </div>
                     <div>
                         <h3 className="text-sm font-bold text-[#2F3931]">

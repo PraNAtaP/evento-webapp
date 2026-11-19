@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AlertCircle } from 'lucide-react';
 
 export default function RejectionModal({ isOpen, onConfirm, onCancel }) {
     const [note, setNote] = useState('');
@@ -56,8 +57,9 @@ export default function RejectionModal({ isOpen, onConfirm, onCancel }) {
                 
                 {/* Pesan Error / Counter Karakter */}
                 {showError ? (
-                    <p className="text-xs text-rose-600 font-semibold mb-4 animate-fadeIn">
-                        ⚠️ Alasan penolakan wajib diisi minimal {MIN_CHARS} karakter.
+                    <p className="text-xs text-rose-600 font-semibold mb-4 animate-fadeIn flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>Alasan penolakan wajib diisi minimal {MIN_CHARS} karakter.</span>
                     </p>
                 ) : (
                     <p className={`text-[11px] mb-4 text-right ${note.length > 0 && note.length < MIN_CHARS ? 'text-amber-600' : 'text-[#738075]'}`}>

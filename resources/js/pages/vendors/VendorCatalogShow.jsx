@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { AlertTriangle, MapPin, Phone, Mail } from "lucide-react";
 import api from "../../api/axios";
 import Breadcrumb from "../../components/catalog/Breadcrumb";
 import PackageCard from "../../components/catalog/PackageCard";
@@ -62,8 +63,8 @@ export default function VendorCatalogShow() {
             <div className="flex flex-col gap-6 max-w-4xl mx-auto py-10">
                 <Breadcrumb items={[{ label: "Vendor Tidak Ditemukan" }]} />
                 <div className="bg-white rounded-2xl border border-[#E8E2D7] p-10 text-center shadow-xs flex flex-col items-center gap-3">
-                    <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center font-bold text-2xl">
-                        ⚠️
+                    <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center font-bold">
+                        <AlertTriangle className="w-7 h-7 text-rose-600" />
                     </div>
                     <div>
                         <h2 className="text-base font-bold text-[#2F3931]">
@@ -150,19 +151,19 @@ export default function VendorCatalogShow() {
                         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#738075] mt-4 pt-4 border-t border-[#E8E2D7]/70">
                             {vendor?.address && (
                                 <div className="flex items-center gap-1.5">
-                                    <span>📍</span>
+                                    <MapPin className="w-3.5 h-3.5 text-[#738075] shrink-0" />
                                     <span>{vendor.address}</span>
                                 </div>
                             )}
                             {vendor?.phone && (
                                 <div className="flex items-center gap-1.5">
-                                    <span>📞</span>
+                                    <Phone className="w-3.5 h-3.5 text-[#738075] shrink-0" />
                                     <span>{vendor.phone}</span>
                                 </div>
                             )}
                             {vendor?.email && (
                                 <div className="flex items-center gap-1.5">
-                                    <span>✉️</span>
+                                    <Mail className="w-3.5 h-3.5 text-[#738075] shrink-0" />
                                     <span>{vendor.email}</span>
                                 </div>
                             )}

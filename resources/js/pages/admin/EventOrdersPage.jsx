@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Coins } from "lucide-react";
 import api from "../../api/axios";
 import { useDialog } from "../../context/DialogContext";
 import { CATEGORY_LABELS } from "../../data/kanbanData";
@@ -370,12 +371,14 @@ export default function EventOrdersPage() {
                                                     daysUntil !== null && (
                                                         <div className="mt-1">
                                                             {daysUntil <= 30 ? (
-                                                                <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
-                                                                    ⚠️ DP Hangus (H-{daysUntil})
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                                                                    <AlertTriangle className="w-3 h-3 shrink-0" />
+                                                                    <span>DP Hangus (H-{daysUntil})</span>
                                                                 </span>
                                                             ) : (
-                                                                <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
-                                                                    💰 DP Berpotensi Kembali ({daysUntil} hari lagi)
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                                                                    <Coins className="w-3 h-3 shrink-0" />
+                                                                    <span>DP Berpotensi Kembali ({daysUntil} hari lagi)</span>
                                                                 </span>
                                                             )}
                                                         </div>
@@ -664,14 +667,20 @@ export default function EventOrdersPage() {
                                 if (days === null) return null;
                                 return days <= 30 ? (
                                     <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-900">
-                                        <p className="font-bold">⚠️ Informasi DP Hangus (H-{days})</p>
+                                        <p className="font-bold flex items-center gap-1.5">
+                                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                            <span>Informasi DP Hangus (H-{days})</span>
+                                        </p>
                                         <p className="text-[11px] mt-0.5 leading-relaxed">
                                             Karena acara kurang dari 30 hari lagi, uang Down Payment (DP) tidak dikembalikan ke klien (hangus).
                                         </p>
                                     </div>
                                 ) : (
                                     <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-3 text-xs text-emerald-900">
-                                        <p className="font-bold">💰 DP Berpotensi Dikembalikan ({days} hari lagi)</p>
+                                        <p className="font-bold flex items-center gap-1.5">
+                                            <Coins className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                            <span>DP Berpotensi Dikembalikan ({days} hari lagi)</span>
+                                        </p>
                                         <p className="text-[11px] mt-0.5 leading-relaxed">
                                             Acara masih lebih dari 30 hari lagi. Sistem akan memberitahukan klien bahwa proses refund DP akan ditindaklanjuti.
                                         </p>

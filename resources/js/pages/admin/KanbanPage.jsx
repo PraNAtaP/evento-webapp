@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { X } from "lucide-react";
 import api from "../../api/axios";
 import KanbanBoard from "../../components/kanban/KanbanBoard";
 import BoardInspector from "../../components/kanban/BoardInspector";
@@ -208,7 +209,7 @@ export default function KanbanPage() {
                         onClick={() => setActionError(null)}
                         className="text-rose-500 hover:text-rose-700 font-bold"
                     >
-                        ✕
+                        <X className="w-4 h-4" />
                     </button>
                 </div>
             )}
@@ -324,7 +325,7 @@ export default function KanbanPage() {
                                 onClick={() => setDpModalData(null)}
                                 className="text-slate-400 hover:text-slate-600 font-bold text-sm"
                             >
-                                ✕
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 

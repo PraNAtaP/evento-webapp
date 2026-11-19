@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { PartyPopper, Info, AlertTriangle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
@@ -70,7 +71,7 @@ export default function Login() {
                 <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E2D7] shadow-xs">
                     {verifiedParam === "1" && (
                         <div className="p-3.5 mb-4 bg-[#EBF3E8] border border-[#CFD8C4] text-[#2A4022] rounded-xl text-xs font-medium flex items-start gap-2">
-                            <span className="text-base">🎉</span>
+                            <PartyPopper className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                             <div>
                                 <p className="font-bold">Email Berhasil Diverifikasi!</p>
                                 <p className="text-[11px] text-[#4F6B43] mt-0.5">
@@ -82,7 +83,7 @@ export default function Login() {
 
                     {verifiedParam === "already" && (
                         <div className="p-3.5 mb-4 bg-[#E8F1F5] border border-[#C5DCE4] text-[#1B434D] rounded-xl text-xs font-medium flex items-start gap-2">
-                            <span className="text-base">ℹ️</span>
+                            <Info className="w-4 h-4 text-[#1B434D] shrink-0 mt-0.5" />
                             <div>
                                 <p className="font-bold">Email Sudah Terverifikasi</p>
                                 <p className="text-[11px] text-[#35616D] mt-0.5">
@@ -94,7 +95,7 @@ export default function Login() {
 
                     {verifiedParam === "invalid" && (
                         <div className="p-3.5 mb-4 bg-[#F3C3B2]/30 border border-[#F3C3B2] text-[#6B3222] rounded-xl text-xs font-medium flex items-start gap-2">
-                            <span className="text-base">⚠️</span>
+                            <AlertTriangle className="w-4 h-4 text-[#6B3222] shrink-0 mt-0.5" />
                             <div>
                                 <p className="font-bold">Tautan Verifikasi Tidak Valid</p>
                                 <p className="text-[11px] text-[#843F2E] mt-0.5">

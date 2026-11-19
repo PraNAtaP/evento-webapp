@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Coins, X } from "lucide-react";
 import api from "../../api/axios";
 import { CATEGORY_LABELS } from "../../data/kanbanData";
 import {
@@ -356,7 +357,7 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                     <div className="mt-4 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 text-amber-950 shadow-xs animate-fadeIn">
                         <div className="flex items-start gap-3">
                             <span className="w-8 h-8 rounded-xl bg-amber-200 text-amber-800 flex items-center justify-center font-bold text-sm shrink-0">
-                                ⚠️
+                                <AlertTriangle className="w-4 h-4 text-amber-800" />
                             </span>
                             <div className="flex-1 min-w-0">
                                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -384,12 +385,14 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                                     evD.setHours(0, 0, 0, 0);
                                     const days = Math.ceil((evD - today) / (1000 * 60 * 60 * 24));
                                     return days <= 30 ? (
-                                        <p className="text-[11px] text-amber-800 mt-2 font-medium">
-                                            ⚠️ Sisa <strong>{days} hari (≤ 30 hari)</strong>: Uang DP akan <strong>hangus</strong> sesuai ketentuan jika pembatalan disetujui.
+                                        <p className="text-[11px] text-amber-800 mt-2 font-medium flex items-center gap-1.5">
+                                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                            <span>Sisa <strong>{days} hari (≤ 30 hari)</strong>: Uang DP akan <strong>hangus</strong> sesuai ketentuan jika pembatalan disetujui.</span>
                                         </p>
                                     ) : (
-                                        <p className="text-[11px] text-emerald-800 mt-2 font-medium">
-                                            💰 Sisa <strong>{days} hari (&gt; 30 hari)</strong>: DP berpotensi dapat dikembalikan ke klien.
+                                        <p className="text-[11px] text-emerald-800 mt-2 font-medium flex items-center gap-1.5">
+                                            <Coins className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                            <span>Sisa <strong>{days} hari (&gt; 30 hari)</strong>: DP berpotensi dapat dikembalikan ke klien.</span>
                                         </p>
                                     );
                                 })()}
@@ -546,7 +549,7 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                     <div className="mt-8 mb-4 rounded-2xl border border-rose-200 bg-rose-50/70 p-4 sm:p-5 text-rose-900">
                         <div className="flex items-start gap-3">
                             <span className="w-7 h-7 rounded-lg bg-rose-200 text-rose-800 flex items-center justify-center font-bold text-xs shrink-0">
-                                ✕
+                                <X className="w-4 h-4 text-rose-800 stroke-[2.5]" />
                             </span>
                             <div>
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-rose-900">
@@ -660,7 +663,7 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                                     onClick={() => setIsCancelModalOpen(false)}
                                     className="text-slate-400 hover:text-slate-600 font-bold text-sm p-1 rounded-lg"
                                 >
-                                    ✕
+                                    <X className="w-4 h-4" />
                                 </button>
                             </div>
 

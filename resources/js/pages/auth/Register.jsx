@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Mail, ArrowRight, Zap } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 
@@ -138,8 +139,8 @@ export default function Register() {
                     {registrationSuccess ? (
                         /* Tampilan Sukses Registrasi & Instruksi Verifikasi Email */
                         <div className="text-center py-2 space-y-4">
-                            <div className="w-16 h-16 bg-[#EBF3E8] border border-[#CFD8C4] rounded-2xl flex items-center justify-center mx-auto text-3xl">
-                                ✉️
+                            <div className="w-16 h-16 bg-[#EBF3E8] border border-[#CFD8C4] rounded-2xl flex items-center justify-center mx-auto text-[#4F6B43]">
+                                <Mail className="w-8 h-8" />
                             </div>
 
                             <div>
@@ -156,7 +157,8 @@ export default function Register() {
 
                             <div className="bg-[#FAF6F0] border border-[#E8E2D7] rounded-2xl p-4 text-left text-xs text-[#556056] space-y-2">
                                 <p className="font-bold text-[#2F3931] flex items-center gap-1.5">
-                                    <span>👉</span> Langkah Selanjutnya:
+                                    <ArrowRight className="w-3.5 h-3.5 text-[#2F3931]" />
+                                    <span>Langkah Selanjutnya:</span>
                                 </p>
                                 <ol className="list-decimal list-inside space-y-1 text-[11px] text-[#738075] pl-1">
                                     <li>Buka aplikasi atau web email Anda.</li>
@@ -294,7 +296,8 @@ export default function Register() {
                                     onClick={handleQuickFill}
                                     className="w-full py-2 px-3 text-xs bg-[#FAF6F0] hover:bg-[#F3EFE8] text-[#556056] font-medium border border-[#E8E2D7] rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"
                                 >
-                                    <span>⚡</span> Isi Form Otomatis (Demo Test)
+                                    <Zap className="w-3.5 h-3.5 text-amber-600" />
+                                    <span>Isi Form Otomatis (Demo Test)</span>
                                 </button>
                             </div>
 
