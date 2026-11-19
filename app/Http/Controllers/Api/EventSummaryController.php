@@ -92,7 +92,7 @@ class EventSummaryController extends Controller
         // 4. Baris Kedua: Uang Muka Diterima (akumulatif acara belum done & bukan rejected)
         $deferredRevenue = (float) Payment::where('status', 'paid')
             ->whereHas('event', function ($query) {
-                $query->whereNotIn('kanban_status', ['done', 'rejected']);
+                $query->whereNotIn('kanban_status', ['done', 'rejected', 'cancelled']);
             })
             ->sum('nominal');
 
@@ -103,7 +103,7 @@ class EventSummaryController extends Controller
             ->sum('nominal');
 
         // 5. Piutang / Sisa Tagihan (agreed_price - pembayaran paid untuk seluruh acara aktif)
-        $activeEventsWithPayments = Event::whereNotIn('kanban_status', ['done', 'rejected'])
+        $activeEventsWithPayments = Event::whereNotIn('kanban_status', ['done', 'rejected', 'cancelled'])
             ->whereNotNull('agreed_price')
             ->where('agreed_price', '>', 0)
             ->with(['payments' => function ($query) {
@@ -130,7 +130,7 @@ class EventSummaryController extends Controller
             });
 
         // 6. Jumlah Acara Aktif (belum done dan bukan rejected)
-        $activeEventsCount = Event::whereNotIn('kanban_status', ['done', 'rejected'])->count();
+        $activeEventsCount = Event::whereNotIn('kanban_status', ['done', 'rejected', 'cancelled'])->count();
 
         // 7. Diagram Pendapatan Bulanan: 6 bulan ke belakang dari bulan terpilih
         $monthlyChart = [];
@@ -156,9 +156,9 @@ class EventSummaryController extends Controller
         }
 
         // Metrik Ringkasan Proyek Global
-        $totalProyek = Event::count();
+        $totalProyek = Event::visible()->count();
         $sedangBerjalan = $activeEventsCount;
-        $totalNilaiKontrak = (float) Event::whereNotIn('kanban_status', ['request', 'rejected'])->sum('agreed_price');
+        $totalNilaiKontrak = (float) Event::whereNotIn('kanban_status', ['request', 'rejected', 'cancelled'])->sum('agreed_price');
         $totalTelahMasuk = (float) Payment::where('status', 'paid')->sum('nominal');
 
         $statusCounts = [

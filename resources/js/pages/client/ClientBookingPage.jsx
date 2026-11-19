@@ -90,8 +90,10 @@ export default function ClientBookingPage() {
     });
 
     const handleBookingSuccess = () => {
-        // Refresh data tanggal terisi secara realtime di kalender
+        // Refresh data tanggal terisi di kalender dan daftar acara klien
         queryClient.invalidateQueries({ queryKey: ["booked-dates"] });
+        queryClient.invalidateQueries({ queryKey: ["client-events-list"] });
+        queryClient.invalidateQueries({ queryKey: ["client-events"] });
     };
 
     return (

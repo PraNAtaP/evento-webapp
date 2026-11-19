@@ -28,6 +28,9 @@ class AdminActionItemController extends Controller
                 ->whereNotNull('revision_requested_at')
                 ->count(),
             'payments_pending' => Payment::where('status', 'pending_verification')->count(),
+            'cancellation_requests' => Event::where('cancellation_request_status', Event::CANCELLATION_REQUEST_PENDING)
+                ->where('kanban_status', '!=', 'cancelled')
+                ->count(),
             'vendor_registrations' => Vendor::where('status', Vendor::STATUS_PENDING)->count(),
             'vendor_offers_unanswered' => EventVendorAssignment::where('eo_offer_status', 'pending')
                 ->whereHas('event', fn ($query) => $query->where('kanban_status', Event::VENDOR_MANAGEABLE_STATUS))
@@ -38,6 +41,7 @@ class AdminActionItemController extends Controller
             ['key' => 'new_requests', 'label' => 'Request acara baru', 'path' => '/admin/kanban'],
             ['key' => 'revision_requests', 'label' => 'Klien minta revisi penawaran', 'path' => '/admin/kanban'],
             ['key' => 'payments_pending', 'label' => 'Bukti bayar menunggu verifikasi', 'path' => '/admin/payments'],
+            ['key' => 'cancellation_requests', 'label' => 'Klien minta batal acara', 'path' => '/admin/kanban'],
             ['key' => 'vendor_registrations', 'label' => 'Pendaftar vendor menunggu', 'path' => '/admin/vendors'],
             ['key' => 'vendor_offers_unanswered', 'label' => 'Tawaran vendor belum dijawab', 'path' => '/admin/kanban'],
         ];

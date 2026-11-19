@@ -6,10 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RescheduleEventRequest;
 use App\Http\Resources\EventInspectorResource;
 use App\Models\Event;
-use Carbon\Carbon;
+use App\Services\EventCancellationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class EventInspectorController extends Controller
 {
@@ -67,8 +66,11 @@ class EventInspectorController extends Controller
      * Mengubah status acara menjadi cancelled, membebaskan jadwal vendor terkait,
      * serta mempertahankan data (tanpa hard delete).
      */
-    public function cancel(Request $request, Event $event): JsonResponse
-    {
+    public function cancel(
+        Request $request,
+        Event $event,
+        EventCancellationService $cancellationService
+    ): JsonResponse {
         $validated = $request->validate([
             'reason' => ['required_without:cancellation_reason', 'nullable', 'string', 'max:1000'],
             'cancellation_reason' => ['required_without:reason', 'nullable', 'string', 'max:1000'],
@@ -87,18 +89,7 @@ class EventInspectorController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($event, $reason) {
-            $event->update([
-                'kanban_status' => 'cancelled',
-                'cancellation_reason' => $reason,
-                'cancelled_at' => Carbon::now(),
-            ]);
-
-            // Bebaskan seluruh jadwal vendor terkait
-            $event->vendorAssignments()->update([
-                'eo_offer_status' => 'cancelled',
-            ]);
-        });
+        $cancellationService->cancel($event, $reason);
 
         $event->load([
             'client:id,name,email',

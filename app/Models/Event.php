@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\EventFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -46,6 +47,11 @@ class Event extends Model
         'kanban_status',
         'rejection_reason',
         'cancellation_reason',
+        'cancellation_request_status',
+        'cancellation_request_reason',
+        'cancellation_requested_at',
+        'cancellation_review_note',
+        'cancellation_reviewed_at',
         'revision_note',
         'revision_requested_at',
         'completed_at',
@@ -100,6 +106,8 @@ class Event extends Model
             'revision_requested_at' => 'datetime',
             'completed_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'cancellation_requested_at' => 'datetime',
+            'cancellation_reviewed_at' => 'datetime',
             'terms_accepted_at' => 'datetime',
             'lat' => 'float',
             'lng' => 'float',
@@ -301,6 +309,52 @@ class Event extends Model
     public function canSendQuotation(): bool
     {
         return $this->kanban_status === self::VENDOR_MANAGEABLE_STATUS && empty($this->quotationBlockers());
+    }
+
+    /**
+     * Status kanban saat klien boleh mengajukan permintaan pembatalan.
+     */
+    public const CANCELLATION_REQUESTABLE_STATUSES = [
+        'request',
+        'drafting_quotation',
+        'client_review',
+        'awaiting_dp',
+        'on_progress',
+    ];
+
+    public const CANCELLATION_REQUEST_PENDING = 'pending';
+
+    public const CANCELLATION_REQUEST_APPROVED = 'approved';
+
+    public const CANCELLATION_REQUEST_REJECTED = 'rejected';
+
+    /**
+     * Scope: hanya acara yang belum dibatalkan.
+     *
+     * @param  Builder<Event>  $query
+     * @return Builder<Event>
+     */
+    public function scopeVisible(Builder $query): Builder
+    {
+        return $query->where('kanban_status', '!=', 'cancelled');
+    }
+
+    /**
+     * Apakah ada permintaan pembatalan dari klien yang sedang menunggu review EO.
+     */
+    public function hasPendingCancellationRequest(): bool
+    {
+        return $this->cancellation_request_status === self::CANCELLATION_REQUEST_PENDING
+            && $this->kanban_status !== 'cancelled';
+    }
+
+    /**
+     * Apakah klien boleh mengajukan permintaan pembatalan pada acara ini.
+     */
+    public function canRequestCancellation(): bool
+    {
+        return in_array($this->kanban_status, self::CANCELLATION_REQUESTABLE_STATUSES, true)
+            && ! $this->hasPendingCancellationRequest();
     }
 
     /**

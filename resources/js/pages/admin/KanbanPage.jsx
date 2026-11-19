@@ -161,9 +161,11 @@ export default function KanbanPage() {
     const handleEventUpdated = (updatedEvent) => {
         if (!updatedEvent) return;
         setEvents((prevEvents) =>
-            prevEvents.map((evt) =>
-                String(evt.id) === String(updatedEvent.id) ? updatedEvent : evt
-            )
+            updatedEvent.kanban_status === "cancelled"
+                ? prevEvents.filter((evt) => String(evt.id) !== String(updatedEvent.id))
+                : prevEvents.map((evt) =>
+                      String(evt.id) === String(updatedEvent.id) ? updatedEvent : evt
+                  )
         );
         // Sinkronkan cache Pesanan Masuk, Smart Calendar EO, dan tanggal terblokir klien
         queryClient.invalidateQueries(["admin-event-orders"]);

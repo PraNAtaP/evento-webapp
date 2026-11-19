@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RequestEventCancellationRequest;
 use App\Models\Event;
 use App\Services\KanbanTransitionService;
 use Illuminate\Http\JsonResponse;
@@ -119,6 +120,44 @@ class ClientEventController extends Controller
         return response()->json([
             'message' => 'Penawaran berhasil disetujui. Tagihan pembayaran DP telah diterbitkan.',
             'event' => $updatedEvent,
+        ]);
+    }
+
+    /**
+     * Endpoint bagi klien untuk mengajukan permintaan pembatalan acara kepada EO.
+     * Status kanban tetap sampai EO menyetujui permintaan.
+     */
+    public function requestCancellation(RequestEventCancellationRequest $request, Event $event): JsonResponse
+    {
+        if ($event->client_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Anda tidak memiliki hak akses ke acara ini.',
+            ], 403);
+        }
+
+        if ($event->hasPendingCancellationRequest()) {
+            throw ValidationException::withMessages([
+                'event' => ['Permintaan pembatalan untuk acara ini masih menunggu review EO.'],
+            ]);
+        }
+
+        if (! $event->canRequestCancellation()) {
+            throw ValidationException::withMessages([
+                'event' => ['Acara pada tahap ini tidak dapat diajukan pembatalan.'],
+            ]);
+        }
+
+        $event->update([
+            'cancellation_request_status' => Event::CANCELLATION_REQUEST_PENDING,
+            'cancellation_request_reason' => $request->validated('reason'),
+            'cancellation_requested_at' => now(),
+            'cancellation_review_note' => null,
+            'cancellation_reviewed_at' => null,
+        ]);
+
+        return response()->json([
+            'message' => 'Permintaan pembatalan berhasil dikirim dan menunggu review Event Organizer.',
+            'event' => $event->fresh(),
         ]);
     }
 

@@ -53,6 +53,11 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
     const [cancellationReasonInput, setCancellationReasonInput] = useState("");
     const [cancellationError, setCancellationError] = useState("");
 
+    // State untuk review permintaan pembatalan dari klien
+    const [isRejectingCancellation, setIsRejectingCancellation] = useState(false);
+    const [rejectNoteInput, setRejectNoteInput] = useState("");
+    const [cancellationReviewError, setCancellationReviewError] = useState("");
+
     // true selama pemilih vendor / dialog kirim penawaran / modal batal terbuka: Esc/Tab ditangani modal itu
     const pickerOpenRef = useRef(false);
     const isCancelModalOpenRef = useRef(false);
@@ -97,6 +102,38 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
     const handlePickerToggle = useCallback((open) => {
         pickerOpenRef.current = open;
     }, []);
+
+    const reviewMutation = useMutation({
+        mutationFn: async ({ action, note }) => {
+            const response = await api.patch(`/events/${eventId}/cancellation-request/${action}`, {
+                note,
+            });
+            return response.data;
+        },
+        onSuccess: (data) => {
+            if (data?.data) {
+                setEvent(data.data);
+            }
+            setIsRejectingCancellation(false);
+            setRejectNoteInput("");
+            setCancellationReviewError("");
+
+            queryClient.invalidateQueries({ queryKey: ["admin", "action-items"] });
+            queryClient.invalidateQueries({ queryKey: ["admin-smart-calendar"] });
+            queryClient.invalidateQueries({ queryKey: ["booked-dates"] });
+
+            if (onEventCancelled && data?.event) {
+                onEventCancelled(data.event);
+            }
+        },
+        onError: (err) => {
+            setCancellationReviewError(
+                err.response?.data?.errors?.note?.[0] ||
+                    err.response?.data?.message ||
+                    "Gagal memproses permintaan pembatalan."
+            );
+        },
+    });
 
     // Ambil ulang data tanpa menampilkan skeleton (dipakai setelah tambah/hapus vendor)
     const refreshEvent = useCallback(async () => {
@@ -401,6 +438,108 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                     onPickerToggle={handlePickerToggle}
                     onQuotationSent={onQuotationSent}
                 />
+
+                {/* Review Permintaan Pembatalan dari Klien */}
+                {event.can_review_cancellation && (
+                    <div className="mt-8 rounded-2xl border border-amber-300 bg-amber-50 p-4 sm:p-5 text-amber-900">
+                        <h3 className="text-xs font-bold uppercase tracking-wider">
+                            Permintaan Pembatalan dari Klien
+                        </h3>
+                        <p className="text-xs mt-1.5 leading-relaxed">
+                            <span className="font-semibold">Alasan klien:</span>{" "}
+                            {event.cancellation_request_reason || "-"}
+                        </p>
+                        {event.cancellation_requested_at && (
+                            <p className="text-[10px] text-amber-700 mt-1">
+                                Diajukan: {formatDateTime(event.cancellation_requested_at)}
+                            </p>
+                        )}
+                        <p className="text-xs mt-1.5">
+                            <span className="font-semibold">Pembayaran masuk:</span>{" "}
+                            {formatRupiah(event.paid_amount || 0)}
+                            {Number(event.paid_amount) > 0 && " (refund diurus manual di luar sistem)"}
+                        </p>
+
+                        {isRejectingCancellation && (
+                            <div className="mt-3">
+                                <label htmlFor="cancellation-reject-note" className="block text-xs font-bold mb-1">
+                                    Catatan penolakan (wajib)
+                                </label>
+                                <textarea
+                                    id="cancellation-reject-note"
+                                    rows={3}
+                                    maxLength={1000}
+                                    value={rejectNoteInput}
+                                    onChange={(e) => {
+                                        setRejectNoteInput(e.target.value);
+                                        if (cancellationReviewError) setCancellationReviewError("");
+                                    }}
+                                    className="w-full border border-amber-300 rounded-xl p-2 text-xs bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                                    placeholder="Tuliskan alasan penolakan permintaan pembatalan"
+                                />
+                            </div>
+                        )}
+
+                        {cancellationReviewError && (
+                            <p role="alert" className="text-[11px] text-rose-600 mt-2">
+                                {cancellationReviewError}
+                            </p>
+                        )}
+
+                        <div className="flex flex-wrap justify-end gap-2 mt-3">
+                            {isRejectingCancellation ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        disabled={reviewMutation.isPending}
+                                        onClick={() => {
+                                            setIsRejectingCancellation(false);
+                                            setCancellationReviewError("");
+                                        }}
+                                        className="px-3 py-1.5 text-xs font-bold rounded-lg border border-amber-300 bg-white hover:bg-amber-100 cursor-pointer disabled:opacity-50"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={reviewMutation.isPending || !rejectNoteInput.trim()}
+                                        onClick={() =>
+                                            reviewMutation.mutate({
+                                                action: "reject",
+                                                note: rejectNoteInput.trim(),
+                                            })
+                                        }
+                                        className="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-700 text-white hover:bg-slate-800 cursor-pointer disabled:opacity-50"
+                                    >
+                                        {reviewMutation.isPending ? "Memproses..." : "Kirim Penolakan"}
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        disabled={reviewMutation.isPending}
+                                        onClick={() => {
+                                            setCancellationReviewError("");
+                                            setIsRejectingCancellation(true);
+                                        }}
+                                        className="px-3 py-1.5 text-xs font-bold rounded-lg border border-amber-400 bg-white hover:bg-amber-100 cursor-pointer disabled:opacity-50"
+                                    >
+                                        Tolak
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={reviewMutation.isPending}
+                                        onClick={() => reviewMutation.mutate({ action: "approve" })}
+                                        className="px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 text-white hover:bg-rose-700 cursor-pointer disabled:opacity-50"
+                                    >
+                                        {reviewMutation.isPending ? "Memproses..." : "Setujui & Batalkan Acara"}
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Danger Zone: Pembatalan Acara oleh EO */}
                 {event.kanban_status === "cancelled" ? (

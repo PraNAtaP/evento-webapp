@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\AdminEventOrderController;
 use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\CancellationRequestController;
 use App\Http\Controllers\Api\ClientEventController;
 use App\Http\Controllers\Api\CustomerRegistrationController;
 use App\Http\Controllers\Api\EmailVerificationController;
@@ -164,6 +165,10 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.events.reschedule');
         Route::post('/events/{event}/cancel', [EventInspectorController::class, 'cancel'])
             ->name('api.events.cancel');
+        Route::patch('/events/{event}/cancellation-request/approve', [CancellationRequestController::class, 'approve'])
+            ->name('api.events.cancellation-request.approve');
+        Route::patch('/events/{event}/cancellation-request/reject', [CancellationRequestController::class, 'reject'])
+            ->name('api.events.cancellation-request.reject');
 
         // Section Vendor di Board Inspector
         Route::get('/events/{event}/vendor-catalog', [VendorCatalogController::class, 'index'])
@@ -195,6 +200,8 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.client.events.approve-quotation');
         Route::post('/client/events/{event}/request-revision', [ClientEventController::class, 'requestRevision'])
             ->name('api.client.events.request-revision');
+        Route::post('/client/events/{event}/request-cancellation', [ClientEventController::class, 'requestCancellation'])
+            ->name('api.client.events.request-cancellation');
     });
 
     // Modul Vendor Packages (Agnes)

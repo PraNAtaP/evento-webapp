@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "../../api/axios";
 import ProgressTimeline from "../../components/client/ProgressTimeline";
 import PaymentCard from "../../components/payment/PaymentCard";
@@ -7,9 +7,26 @@ import UploadProofForm from "../../components/payment/UploadProofForm";
 import { CATEGORY_LABELS } from "../../data/kanbanData";
 import { formatRupiah } from "../../utils/formatters";
 
+const CANCELLABLE_STATUSES = [
+    "request",
+    "drafting_quotation",
+    "client_review",
+    "awaiting_dp",
+    "on_progress",
+];
+
+const isCancellationPending = (evt) =>
+    evt?.cancellation_request_status === "pending" && evt?.kanban_status !== "cancelled";
+
+const canRequestCancellation = (evt) =>
+    CANCELLABLE_STATUSES.includes(evt?.kanban_status) && !isCancellationPending(evt);
+
 export default function ClientBookedEventsPage() {
     const [selectedEventId, setSelectedEventId] = useState(null);
     const [uploadingPayment, setUploadingPayment] = useState(null);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [cancellationReason, setCancellationReason] = useState("");
+    const [cancellationError, setCancellationError] = useState("");
     const [page, setPage] = useState(1);
 
     // 1. Fetch seluruh acara yang sudah dibooking oleh klien
@@ -39,6 +56,27 @@ export default function ClientBookedEventsPage() {
     const handleUploadSuccess = () => {
         refetch();
     };
+
+    const cancelRequestMutation = useMutation({
+        mutationFn: async ({ eventId, reason }) => {
+            const res = await api.post(`/client/events/${eventId}/request-cancellation`, { reason });
+            return res.data;
+        },
+        onSuccess: () => {
+            setIsCancelModalOpen(false);
+            setCancellationReason("");
+            setCancellationError("");
+            refetch();
+        },
+        onError: (err) => {
+            setCancellationError(
+                err.response?.data?.errors?.reason?.[0] ||
+                    err.response?.data?.errors?.event?.[0] ||
+                    err.response?.data?.message ||
+                    "Gagal mengirim permintaan pembatalan."
+            );
+        },
+    });
 
     const formatDateRange = (evt) => {
         if (!evt?.event_date) return "-";
@@ -293,12 +331,52 @@ export default function ClientBookedEventsPage() {
                                             )}
                                         </div>
                                         <h3 className="text-base font-black text-rose-950 mt-1">
-                                            Acara Dibatalkan oleh EO. Alasan: {activeEvent.cancellation_reason || "Tidak ada rincian alasan yang disertakan."}
+                                            {activeEvent.cancellation_request_status === "approved"
+                                                ? "Acara Dibatalkan (Permintaan Disetujui EO)."
+                                                : "Acara Dibatalkan oleh EO."}{" "}
+                                            Alasan: {activeEvent.cancellation_reason || "Tidak ada rincian alasan yang disertakan."}
                                         </h3>
+                                        {activeEvent.cancellation_review_note && (
+                                            <p className="text-xs text-rose-800 mt-1 leading-relaxed">
+                                                Catatan EO: {activeEvent.cancellation_review_note}
+                                            </p>
+                                        )}
                                         <p className="text-xs text-rose-700 mt-1 leading-relaxed">
                                             Seluruh interaksi dan jadwal acara ini telah dihentikan dalam mode Read-Only.
                                         </p>
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Status Permintaan Pembatalan Klien */}
+                            {isCancellationPending(activeEvent) && (
+                                <div
+                                    role="status"
+                                    className="bg-amber-50 border border-amber-300 rounded-2xl p-4 shadow-xs text-amber-900"
+                                >
+                                    <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-200 text-amber-800 px-2.5 py-0.5 rounded-full border border-amber-300">
+                                        Menunggu Review EO
+                                    </span>
+                                    <p className="text-sm font-bold mt-1.5">
+                                        Permintaan pembatalan Anda sedang ditinjau Event Organizer.
+                                    </p>
+                                    <p className="text-xs mt-1 leading-relaxed">
+                                        Alasan: {activeEvent.cancellation_request_reason}
+                                    </p>
+                                </div>
+                            )}
+
+                            {activeEvent.cancellation_request_status === "rejected" && activeEvent.kanban_status !== "cancelled" && (
+                                <div
+                                    role="alert"
+                                    className="bg-rose-50 border border-rose-300 rounded-2xl p-4 shadow-xs text-rose-900"
+                                >
+                                    <span className="text-[10px] font-bold uppercase tracking-wider bg-rose-200 text-rose-800 px-2.5 py-0.5 rounded-full border border-rose-300">
+                                        Permintaan Pembatalan Ditolak EO
+                                    </span>
+                                    <p className="text-xs mt-1.5 leading-relaxed">
+                                        Catatan EO: {activeEvent.cancellation_review_note || "Permintaan pembatalan tidak disetujui."}
+                                    </p>
                                 </div>
                             )}
 
@@ -321,6 +399,19 @@ export default function ClientBookedEventsPage() {
                                     <span className={`inline-block mt-0.5 text-xs font-bold px-3 py-1 rounded-full border ${getStatusBadge(activeEvent.kanban_status).className}`}>
                                         {getStatusBadge(activeEvent.kanban_status).label}
                                     </span>
+                                    {canRequestCancellation(activeEvent) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setCancellationReason("");
+                                                setCancellationError("");
+                                                setIsCancelModalOpen(true);
+                                            }}
+                                            className="block mt-2 sm:ml-auto text-[11px] font-bold text-rose-700 hover:text-rose-900 underline cursor-pointer"
+                                        >
+                                            Ajukan Pembatalan
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -401,6 +492,68 @@ export default function ClientBookedEventsPage() {
                     )}
                 </div>
             </div>
+
+            {/* Modal Ajukan Pembatalan */}
+            {isCancelModalOpen && activeEvent && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="request-cancel-dialog-title"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+                >
+                    <div className="bg-white rounded-2xl border border-[#E8E2D7] shadow-xl w-full max-w-md p-5">
+                        <h3 id="request-cancel-dialog-title" className="text-sm font-extrabold text-[#2F3931]">
+                            Ajukan Pembatalan Acara
+                        </h3>
+                        <p className="text-xs text-[#738075] mt-1 leading-relaxed">
+                            Permintaan akan ditinjau oleh Event Organizer. Pengembalian dana/DP (jika ada) mengikuti kebijakan EO dan diurus manual.
+                        </p>
+                        <label htmlFor="client-cancellation-reason" className="block text-xs font-bold text-[#2F3931] mt-3 mb-1">
+                            Alasan pembatalan
+                        </label>
+                        <textarea
+                            id="client-cancellation-reason"
+                            value={cancellationReason}
+                            maxLength={1000}
+                            rows={4}
+                            onChange={(e) => {
+                                setCancellationReason(e.target.value);
+                                if (cancellationError) setCancellationError("");
+                            }}
+                            className="w-full border border-[#E8E2D7] rounded-xl p-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#CFD8C4]"
+                            placeholder="Tuliskan alasan Anda membatalkan acara ini"
+                        />
+                        {cancellationError && (
+                            <p role="alert" className="text-[11px] text-rose-600 mt-1">
+                                {cancellationError}
+                            </p>
+                        )}
+                        <div className="flex justify-end gap-2 mt-4">
+                            <button
+                                type="button"
+                                disabled={cancelRequestMutation.isPending}
+                                onClick={() => setIsCancelModalOpen(false)}
+                                className="px-3 py-1.5 text-xs font-bold rounded-lg border border-[#E8E2D7] bg-[#FAF6F0] hover:bg-[#E8E2D7]/50 cursor-pointer disabled:opacity-50"
+                            >
+                                Kembali
+                            </button>
+                            <button
+                                type="button"
+                                disabled={cancelRequestMutation.isPending || !cancellationReason.trim()}
+                                onClick={() =>
+                                    cancelRequestMutation.mutate({
+                                        eventId: activeEvent.id,
+                                        reason: cancellationReason.trim(),
+                                    })
+                                }
+                                className="px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 text-white hover:bg-rose-700 cursor-pointer disabled:opacity-50"
+                            >
+                                {cancelRequestMutation.isPending ? "Mengirim..." : "Kirim Permintaan"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal Unggah Bukti Transfer */}
             {uploadingPayment && (

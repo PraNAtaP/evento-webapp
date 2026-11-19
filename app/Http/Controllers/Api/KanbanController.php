@@ -25,6 +25,7 @@ class KanbanController extends Controller
             'vendorAssignments.vendor:id,business_name,category',
             'payments',
         ])
+            ->visible()
             ->orderBy('event_date', 'asc')
             ->get();
 
