@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\EventInspectorController;
 use App\Http\Controllers\Api\EventSummaryController;
 use App\Http\Controllers\Api\EventVendorController;
 use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProgressApprovalController;
@@ -185,6 +186,10 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.events.vendors.destroy');
         Route::post('/events/{event}/send-quotation', [EventVendorController::class, 'sendQuotation'])
             ->name('api.events.send-quotation');
+
+        // Pencairan Honorarium Vendor oleh EO (Payout / Settlement)
+        Route::post('/admin/vendor-assignments/{assignment}/payout', [InvoiceController::class, 'disburseVendorPayout'])
+            ->name('api.admin.vendor-assignments.payout');
     });
 
     // Booking Acara (Modul Klien - Dian)
@@ -244,6 +249,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/vendor/active-jobs/{assignment}/progress', [VendorProgressController::class, 'store'])
             ->name('api.vendor.active-jobs.progress.store');
+
+        Route::put('/vendor/bank-account', [InvoiceController::class, 'updateVendorBankAccount'])
+            ->name('api.vendor.bank-account.update');
     });
 
     // Modul Payment Tracking (Nety)
@@ -253,4 +261,10 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('api.payments.upload-proof');
     Route::patch('/payments/{payment}/verify', [PaymentController::class, 'verify'])
         ->name('api.payments.verify');
+
+    // Modul Dokumen Invoice & Kuitansi / Nota Pembayaran Resmi (Klien, EO, & Vendor)
+    Route::get('/payments/{payment}/invoice', [InvoiceController::class, 'clientInvoice'])
+        ->name('api.payments.invoice');
+    Route::get('/vendor-assignments/{assignment}/invoice', [InvoiceController::class, 'vendorInvoice'])
+        ->name('api.vendor-assignments.invoice');
 });

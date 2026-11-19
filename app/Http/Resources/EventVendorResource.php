@@ -31,6 +31,10 @@ class EventVendorResource extends JsonResource
             'notes' => $this->notes,
             'offer_status' => $this->eo_offer_status,
             'rejection_reason' => $this->rejection_reason,
+            'payout_status' => $this->payout_status ?? 'unpaid',
+            'payout_nominal' => $this->payout_nominal !== null ? (float) $this->payout_nominal : null,
+            'payout_at' => $this->payout_at?->toIso8601String(),
+            'payout_receipt_number' => $this->payout_receipt_number,
         ];
     }
 }

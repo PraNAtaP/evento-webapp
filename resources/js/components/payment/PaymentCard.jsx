@@ -1,5 +1,6 @@
     import { useState } from 'react';
     import PaymentStatusBadge from './PaymentStatusBadge';
+    import ClientInvoiceModal from '../invoice/ClientInvoiceModal';
 
     function ProofModal({ url, onClose }) {
         return (
@@ -78,6 +79,7 @@
 
     export default function PaymentCard({ payment, role, onUpload, onVerify, isReadOnly = false }) {
     const [proofOpen, setProofOpen] = useState(false);
+    const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
     const isCancelled = isReadOnly || payment.event?.kanban_status === 'cancelled';
     const rupiah = (n) =>
         new Intl.NumberFormat('id-ID', {
@@ -192,8 +194,10 @@
             {/* Invoice: Muncul jika BELUM lunas */}
             {!isLunas && (
                 <button
-                className="border border-[#CFD8C4] text-[#738075] hover:bg-[#F3F0EA] px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-not-allowed"
-                title="Fitur pratinjau PDF segera hadir"
+                type="button"
+                onClick={() => setInvoiceModalOpen(true)}
+                className="border border-[#CFD8C4] text-[#2F3931] hover:bg-[#FAF6F0] px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+                title="Lihat lembar invoice tagihan resmi"
                 >
                 Lihat Invoice
                 </button>
@@ -202,14 +206,23 @@
             {/* Kwitansi: Muncul jika SUDAH lunas */}
             {isLunas && (
                 <button
-                className="border border-[#CFD8C4] text-[#738075] hover:bg-[#F3F0EA] px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-not-allowed"
-                title="Fitur pratinjau PDF segera hadir"
+                type="button"
+                onClick={() => setInvoiceModalOpen(true)}
+                className="bg-[#DAEBE3] border border-[#BCD4C9] text-[#224436] hover:bg-[#C5DED4] px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+                title="Cetak Kuitansi / Bukti Pembayaran Sah"
                 >
-                Lihat Kwitansi
+                Cetak Kuitansi
                 </button>
             )}
             </div>
         </div>
+
+        {invoiceModalOpen && (
+            <ClientInvoiceModal
+                paymentId={payment.id}
+                onClose={() => setInvoiceModalOpen(false)}
+            />
+        )}
         </div>
     );
     }

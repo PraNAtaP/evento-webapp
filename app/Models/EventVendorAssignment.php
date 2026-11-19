@@ -29,6 +29,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'locked_price',
     'notes',
     'rejection_reason',
+    'payout_status',
+    'payout_nominal',
+    'payout_at',
+    'payout_proof_url',
+    'payout_receipt_number',
+    'payout_note',
 ])]
 #[Hidden(['notes', 'package_price'])]
 class EventVendorAssignment extends Model
@@ -79,7 +85,37 @@ class EventVendorAssignment extends Model
         return [
             'locked_price' => 'decimal:2',
             'package_price' => 'decimal:2',
+            'payout_nominal' => 'decimal:2',
+            'payout_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Accessor nomor invoice tagihan vendor.
+     */
+    public function getVendorInvoiceNumberAttribute(): string
+    {
+        $ym = $this->created_at ? $this->created_at->format('Ym') : date('Ym');
+
+        return sprintf('INV/VND/%s/%04d', $ym, $this->id);
+    }
+
+    /**
+     * Accessor nomor voucher pencairan honor ke vendor.
+     */
+    public function getPayoutReceiptNumberAttribute(?string $value): ?string
+    {
+        if (! empty($value)) {
+            return $value;
+        }
+
+        if ($this->payout_status !== 'paid') {
+            return null;
+        }
+
+        $ym = $this->payout_at ? $this->payout_at->format('Ym') : date('Ym');
+
+        return sprintf('VCH/EVN/%s/%04d', $ym, $this->id);
     }
 
     /**

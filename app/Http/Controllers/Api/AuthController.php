@@ -51,6 +51,9 @@ class AuthController extends Controller
                 'address' => $user->vendor->address,
                 'status' => $user->vendor->status,
                 'rejection_reason' => $user->vendor->rejection_reason,
+                'bank_name' => $user->vendor->bank_name,
+                'bank_account_number' => $user->vendor->bank_account_number,
+                'bank_account_holder' => $user->vendor->bank_account_holder,
             ];
         }
 
@@ -87,6 +90,9 @@ class AuthController extends Controller
                 'address' => $user->vendor->address,
                 'status' => $user->vendor->status,
                 'rejection_reason' => $user->vendor->rejection_reason,
+                'bank_name' => $user->vendor->bank_name,
+                'bank_account_number' => $user->vendor->bank_account_number,
+                'bank_account_holder' => $user->vendor->bank_account_holder,
             ];
         }
 

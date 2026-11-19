@@ -11,10 +11,12 @@ import {
     Trash2,
     Calendar,
     FileText,
+    CreditCard,
 } from "lucide-react";
 import api from "../../api/axios";
 import { useDialog } from "../../context/DialogContext";
 import { formatRupiah } from "../../utils/formatters";
+import VendorPayoutModal from "../../components/invoice/VendorPayoutModal";
 
 export default function VendorJobOffers() {
     const { showAlert, showConfirm, showToast } = useDialog();
@@ -27,6 +29,61 @@ export default function VendorJobOffers() {
     const [progressNotes, setProgressNotes] = useState({});
     const [progressPhotos, setProgressPhotos] = useState({});
     const [activeTab, setActiveTab] = useState("all"); // 'all' | 'offers' | 'active'
+
+    // Payout & Invoice Modal
+    const [selectedPayoutJob, setSelectedPayoutJob] = useState(null);
+
+    // Rekening Pencairan Bank Vendor
+    const [bankName, setBankName] = useState("");
+    const [bankAccountNumber, setBankAccountNumber] = useState("");
+    const [bankAccountHolder, setBankAccountHolder] = useState("");
+    const [savingBank, setSavingBank] = useState(false);
+    const [isBankEditing, setIsBankEditing] = useState(false);
+
+    // Mengambil profil vendor untuk rekening bank
+    const fetchVendorProfile = async () => {
+        try {
+            const res = await api.get("/user");
+            const v = res.data?.user?.vendor;
+            if (v) {
+                setBankName(v.bank_name || "");
+                setBankAccountNumber(v.bank_account_number || "");
+                setBankAccountHolder(v.bank_account_holder || "");
+                if (!v.bank_account_number) {
+                    setIsBankEditing(true);
+                }
+            }
+        } catch (e) {
+            console.error("Gagal memuat profil rekening vendor:", e);
+        }
+    };
+
+    const handleSaveBank = async (e) => {
+        e.preventDefault();
+        if (!bankName || !bankAccountNumber || !bankAccountHolder) {
+            showToast("Semua informasi rekening bank wajib diisi.", "error");
+            return;
+        }
+
+        setSavingBank(true);
+        try {
+            await api.put("/vendor/bank-account", {
+                bank_name: bankName,
+                bank_account_number: bankAccountNumber,
+                bank_account_holder: bankAccountHolder,
+            });
+            showToast("Informasi rekening pencairan honor berhasil disimpan!", "success");
+            setIsBankEditing(false);
+        } catch (err) {
+            showAlert({
+                title: "Gagal Menyimpan Rekening",
+                message: err.response?.data?.message || "Terjadi kesalahan saat menyimpan rekening.",
+                type: "danger",
+            });
+        } finally {
+            setSavingBank(false);
+        }
+    };
 
     // Mengambil tawaran pekerjaan dan pekerjaan aktif.
     const fetchJobs = async () => {
@@ -53,6 +110,7 @@ export default function VendorJobOffers() {
 
     useEffect(() => {
         fetchJobs();
+        fetchVendorProfile();
     }, []);
 
     // Menerima atau menolak tawaran pekerjaan.
@@ -234,6 +292,124 @@ export default function VendorJobOffers() {
                         <Briefcase className="w-6 h-6 text-[#224436]" />
                     </div>
                 </div>
+            </div>
+
+            {/* Kartu Informasi Rekening Pencairan Honor Vendor */}
+            <div className="bg-white rounded-2xl border border-[#E8E2D7] p-5 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8E2D7]">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#FAF6F0] text-[#1D4A54] border border-[#E8E2D7] flex items-center justify-center font-bold shrink-0">
+                            <CreditCard className="w-5 h-5 text-[#1D4A54]" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-extrabold text-[#2F3931]">
+                                Rekening Pencairan Honor Vendor
+                            </h3>
+                            <p className="text-[11px] text-[#738075]">
+                                Rekening resmi yang digunakan tim EO EVENTO untuk mentransfer pelunasan honor pekerjaan jasa Anda.
+                            </p>
+                        </div>
+                    </div>
+
+                    {!isBankEditing && (
+                        <button
+                            type="button"
+                            onClick={() => setIsBankEditing(true)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#BCD4C9] bg-white hover:bg-[#FAF6F0] text-xs font-bold text-[#1D4A54] transition cursor-pointer self-start sm:self-auto"
+                        >
+                            Ubah Rekening
+                        </button>
+                    )}
+                </div>
+
+                {isBankEditing ? (
+                    <form onSubmit={handleSaveBank} className="mt-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label className="block text-[11px] font-bold text-[#2F3931] mb-1">
+                                    Nama Bank <span className="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Misal: BCA, Mandiri, BRI, BNI"
+                                    value={bankName}
+                                    onChange={(e) => setBankName(e.target.value)}
+                                    className="w-full text-xs rounded-xl border border-[#E8E2D7] p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#99CDD8]"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[11px] font-bold text-[#2F3931] mb-1">
+                                    Nomor Rekening <span className="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Nomor rekening bank"
+                                    value={bankAccountNumber}
+                                    onChange={(e) => setBankAccountNumber(e.target.value)}
+                                    className="w-full text-xs rounded-xl border border-[#E8E2D7] p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#99CDD8]"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[11px] font-bold text-[#2F3931] mb-1">
+                                    Nama Pemilik Rekening <span className="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Atas nama sesuai buku tabungan"
+                                    value={bankAccountHolder}
+                                    onChange={(e) => setBankAccountHolder(e.target.value)}
+                                    className="w-full text-xs rounded-xl border border-[#E8E2D7] p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#99CDD8]"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-3.5 flex items-center justify-end gap-2">
+                            {bankAccountNumber && (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsBankEditing(false)}
+                                    className="px-3.5 py-1.5 rounded-xl border border-[#E8E2D7] bg-white text-xs font-bold text-[#738075] hover:bg-[#FAF6F0] transition cursor-pointer"
+                                >
+                                    Batal
+                                </button>
+                            )}
+                            <button
+                                type="submit"
+                                disabled={savingBank}
+                                className="px-4 py-1.5 rounded-xl bg-[#1D4A54] hover:bg-[#15343A] text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                            >
+                                {savingBank ? "Menyimpan..." : "Simpan Rekening"}
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    <div className="mt-3.5 flex flex-wrap items-center gap-x-8 gap-y-2 text-xs">
+                        {bankAccountNumber ? (
+                            <>
+                                <div>
+                                    <span className="text-[10px] text-[#738075] block font-semibold">Bank:</span>
+                                    <strong className="text-sm font-bold text-[#2F3931]">{bankName}</strong>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] text-[#738075] block font-semibold">Nomor Rekening:</span>
+                                    <strong className="text-sm font-bold text-[#2F3931] font-mono tracking-wider">{bankAccountNumber}</strong>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] text-[#738075] block font-semibold">Atas Nama:</span>
+                                    <strong className="text-sm font-bold text-[#2F3931]">{bankAccountHolder}</strong>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="flex items-center gap-2 text-amber-800 text-xs">
+                                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                                <span>Rekening bank belum diatur. Klik "Ubah Rekening" untuk mengisi rekening bank agar honor pengerjaan acara dapat dicairkan oleh EO.</span>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Error Message */}
@@ -437,6 +613,42 @@ export default function VendorJobOffers() {
                                                 )}
                                             </div>
 
+                                            {/* Bar Status Honorarium & Dokumen Invoice/Voucher */}
+                                            <div className="bg-[#FAF6F0] p-4 rounded-xl border border-[#E8E2D7] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                <div>
+                                                    <span className="text-[10px] text-[#738075] font-bold uppercase tracking-wider block">
+                                                        Status Pencairan Honor Tim EO:
+                                                    </span>
+                                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                        {job.payout_status === "paid" ? (
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]">
+                                                                <Check className="w-3.5 h-3.5" />
+                                                                <span>Honor Lunas Dicairkan ({formatRupiah(job.payout_nominal || job.package_price || 0)})</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2]">
+                                                                <Clock className="w-3.5 h-3.5" />
+                                                                <span>Honor Menunggu Pencairan ({formatRupiah(job.package_price || job.locked_price || 0)})</span>
+                                                            </span>
+                                                        )}
+                                                        {job.payout_receipt_number && (
+                                                            <span className="text-[11px] text-[#738075] font-mono font-medium">
+                                                                • Ref: {job.payout_receipt_number}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSelectedPayoutJob(job)}
+                                                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-[#FAF6F0] text-[#1D4A54] border border-[#BCD4C9] text-xs font-bold shadow-2xs transition cursor-pointer shrink-0"
+                                                >
+                                                    <FileText className="w-3.5 h-3.5" />
+                                                    <span>{job.payout_status === "paid" ? "Lihat Voucher & Bukti Transfer" : "Lihat Invoice Vendor ke EO"}</span>
+                                                </button>
+                                            </div>
+
                                             {/* Riwayat Progres yang Pernah Diunggah */}
                                             <div>
                                                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#738075] mb-2.5">
@@ -565,6 +777,15 @@ export default function VendorJobOffers() {
                         </section>
                     )}
                 </>
+            )}
+
+            {/* Modal Payout & Invoice Vendor */}
+            {selectedPayoutJob && (
+                <VendorPayoutModal
+                    assignmentId={selectedPayoutJob.id}
+                    isEo={false}
+                    onClose={() => setSelectedPayoutJob(null)}
+                />
             )}
         </div>
     );

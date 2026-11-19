@@ -121,8 +121,10 @@ class PaymentController extends Controller
         $user = $request->user();
 
         if ($request->action === 'approve') {
+            $receiptNumber = sprintf('RCP/EVN/%s/%04d-%s', now()->format('Ym'), $payment->id, strtoupper($payment->payment_type));
             $payment->update([
                 'status' => 'paid',
+                'receipt_number' => $receiptNumber,
                 'verified_by' => $user->id,
                 'verified_at' => now(),
                 'rejection_note' => null,
