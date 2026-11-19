@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RescheduleEventRequest;
 use App\Http\Resources\EventInspectorResource;
+use App\Mail\CancellationApprovedMail;
 use App\Models\Event;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class EventInspectorController extends Controller
 {
@@ -107,6 +109,23 @@ class EventInspectorController extends Controller
             'vendorAssignments.vendor:id,business_name,category',
             'payments',
         ]);
+
+        $daysUntilEvent = $event->event_date
+            ? (int) now()->startOfDay()->diffInDays($event->event_date, false)
+            : 0;
+        $forfeitDays = (int) config('evento.cancellation_dp_forfeit_days', 30);
+        $isDpForfeited = $event->event_date ? ($daysUntilEvent <= $forfeitDays) : false;
+
+        $clientEmail = $event->client?->email;
+        if ($clientEmail) {
+            Mail::to($clientEmail)->queue(
+                new CancellationApprovedMail(
+                    event: $event,
+                    isDpForfeited: $isDpForfeited,
+                    reviewNote: $reason,
+                )
+            );
+        }
 
         return response()->json([
             'message' => 'Acara berhasil dibatalkan.',

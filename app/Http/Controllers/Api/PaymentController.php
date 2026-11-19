@@ -45,6 +45,12 @@ class PaymentController extends Controller
             ], 403);
         }
 
+        if (in_array($payment->event->kanban_status, ['cancelled', 'rejected'], true)) {
+            return response()->json([
+                'message' => 'Tidak dapat mengunggah bukti bayar untuk acara yang sudah dibatalkan atau ditolak.',
+            ], 422);
+        }
+
         if ($payment->status !== 'unpaid') {
             return response()->json([
                 'message' => 'Bukti transfer sudah diunggah atau sudah diverifikasi.',
@@ -74,6 +80,12 @@ class PaymentController extends Controller
         VerifyPaymentRequest $request,
         Payment $payment
     ): JsonResponse {
+        if (in_array($payment->event->kanban_status, ['cancelled', 'rejected'], true)) {
+            return response()->json([
+                'message' => 'Tidak dapat memverifikasi pembayaran untuk acara yang sudah dibatalkan atau ditolak.',
+            ], 422);
+        }
+
         if ($payment->status !== 'pending_verification') {
             return response()->json([
                 'message' => 'Pembayaran ini belum dalam status menunggu verifikasi.',

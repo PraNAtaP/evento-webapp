@@ -105,9 +105,9 @@ class RescheduleEventRequest extends FormRequest
                     $startDate = Carbon::parse($eventDateInput)->format('Y-m-d');
                     $endDate = $endDateInput ? Carbon::parse($endDateInput)->format('Y-m-d') : $startDate;
 
-                    // Cek konflik tanggal dengan acara aktif lain (kecualikan event ini sendiri dan yang ditolak)
+                    // Cek konflik tanggal dengan acara aktif lain (kecualikan event ini sendiri, ditolak, dan dibatalkan)
                     $hasConflict = Event::where('id', '!=', $event->id)
-                        ->where('kanban_status', '!=', 'rejected')
+                        ->whereNotIn('kanban_status', ['rejected', 'cancelled'])
                         ->where(function ($query) use ($startDate, $endDate) {
                             $query->where('event_date', '<=', $endDate)
                                 ->where(function ($sub) use ($startDate) {

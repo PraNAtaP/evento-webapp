@@ -164,27 +164,36 @@ class KanbanTransitionService
         $event->kanban_status = 'awaiting_dp';
         $event->save();
 
-        // Buat tagihan DP dan Pelunasan otomatis jika belum dibuat
-        $hasDpPayment = $event->payments()->where('payment_type', 'dp')->exists();
+        // Buat tagihan DP dan Pelunasan otomatis atau perbarui nominal jika terjadi revisi penawaran
+        $dpPercent = (float) ($event->dp_percentage ?? config('evento.dp_percentage', 30.0));
+        $dpNominal = round(($quotationTotal * $dpPercent) / 100);
+        $pelunasanNominal = max(0, $quotationTotal - $dpNominal);
 
-        if (! $hasDpPayment) {
-            $dpPercent = (float) ($event->dp_percentage ?? config('evento.dp_percentage', 30.0));
-            $dpNominal = round(($quotationTotal * $dpPercent) / 100);
-            $pelunasanNominal = max(0, $quotationTotal - $dpNominal);
-
+        $dpPayment = $event->payments()->where('payment_type', 'dp')->first();
+        if (! $dpPayment) {
             Payment::create([
                 'event_id' => $event->id,
                 'payment_type' => 'dp',
                 'nominal' => $dpNominal,
                 'status' => 'unpaid',
             ]);
+        } elseif ($dpPayment->status === 'unpaid') {
+            $dpPayment->update(['nominal' => $dpNominal]);
+        }
 
+        $pelunasanPayment = $event->payments()->where('payment_type', 'pelunasan')->first();
+        if (! $pelunasanPayment) {
             Payment::create([
                 'event_id' => $event->id,
                 'payment_type' => 'pelunasan',
                 'nominal' => $pelunasanNominal,
                 'status' => 'unpaid',
             ]);
+        } elseif ($pelunasanPayment->status === 'unpaid') {
+            $actualPelunasan = ($dpPayment && $dpPayment->status === 'paid')
+                ? max(0, $quotationTotal - (float) $dpPayment->nominal)
+                : $pelunasanNominal;
+            $pelunasanPayment->update(['nominal' => $actualPelunasan]);
         }
     }
 

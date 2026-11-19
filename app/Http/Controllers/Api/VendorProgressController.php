@@ -31,6 +31,9 @@ class VendorProgressController extends Controller
         ])
             ->where('vendor_id', $vendor->id)
             ->where('eo_offer_status', 'accepted')
+            ->whereHas('event', function ($q) {
+                $q->whereNotIn('kanban_status', ['cancelled', 'rejected', 'done']);
+            })
             ->latest()
             ->get();
 
@@ -62,6 +65,13 @@ class VendorProgressController extends Controller
             return response()->json([
                 'message' => 'Pekerjaan aktif tidak ditemukan.',
             ], 404);
+        }
+
+        // Acara yang sudah selesai, dibatalkan, atau ditolak tidak dapat diisi progres.
+        if (in_array($assignment->event->kanban_status, ['cancelled', 'rejected', 'done'], true)) {
+            return response()->json([
+                'message' => 'Tidak dapat memperbarui progres untuk acara yang sudah selesai, dibatalkan, atau ditolak.',
+            ], 422);
         }
 
         // Validasi catatan progress dan foto.
