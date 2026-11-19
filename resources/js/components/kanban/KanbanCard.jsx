@@ -8,7 +8,7 @@ import {
 
 export default function KanbanCard({ card, onSelectCard }) {
     const eventName = card.event_name || card.namaEvent || card.title || "Acara Tanpa Judul";
-    const clientName = card.client?.name || card.namaKlien || card.clientName || "-";
+    const clientName = card.manual_client_name || card.client?.name || card.namaKlien || card.clientName || "-";
     const rawCategory = card.category || card.kategori || "wedding";
     const categoryLabel = CATEGORY_LABELS[rawCategory] || rawCategory;
     const kanbanStatus = card.kanban_status || card.status || "request";

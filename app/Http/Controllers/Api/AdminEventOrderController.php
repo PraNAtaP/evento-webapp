@@ -3,23 +3,38 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderRejectedMail;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class AdminEventOrderController extends Controller
 {
     /**
-     * Mengambil daftar pesanan acara klien yang masuk (status request atau rejected).
+     * Mengambil daftar pesanan acara klien yang masuk (termasuk input manual dari Smart Calendar EO).
+     * Diurutkan berdasarkan updated_at terbaru agar reschedule atau pesanan terbaru langsung terlihat di atas.
      */
     public function index(Request $request): JsonResponse
     {
         $query = Event::with(['client:id,name,email,role'])
+            ->orderByDesc('updated_at')
             ->orderByDesc('created_at');
 
-        if ($request->has('status') && in_array($request->query('status'), ['request', 'drafting_quotation', 'rejected', 'all'], true)) {
+        if ($request->has('status') && in_array($request->query('status'), ['request', 'accepted', 'rejected', 'cancellation_requests', 'all'], true)) {
             $status = $request->query('status');
-            if ($status !== 'all') {
+            if ($status === 'accepted') {
+                // Tampilkan semua pesanan yang sudah diterima EO (mulai dari drafting_quotation hingga done)
+                $query->whereIn('kanban_status', [
+                    'drafting_quotation',
+                    'client_review',
+                    'awaiting_dp',
+                    'on_progress',
+                    'done',
+                ]);
+            } elseif ($status === 'cancellation_requests') {
+                $query->where('cancellation_request_status', 'pending');
+            } elseif ($status !== 'all') {
                 $query->where('kanban_status', $status);
             }
         } else {
@@ -69,10 +84,18 @@ class AdminEventOrderController extends Controller
             'reason' => ['nullable', 'string', 'max:500'],
         ]);
 
+        $reason = $validated['reason'] ?? 'Pesanan ditolak oleh Event Organizer.';
+
         $event->update([
             'kanban_status' => 'rejected',
-            'rejection_reason' => $validated['reason'] ?? 'Pesanan ditolak oleh Event Organizer.',
+            'rejection_reason' => $reason,
         ]);
+
+        $event->load('client');
+        $clientEmail = $event->client?->email;
+        if ($clientEmail) {
+            Mail::to($clientEmail)->queue(new OrderRejectedMail($event, $reason));
+        }
 
         return response()->json([
             'message' => 'Pesanan acara berhasil ditolak.',

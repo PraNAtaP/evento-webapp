@@ -26,6 +26,9 @@ class Event extends Model
      */
     protected $fillable = [
         'client_id',
+        'booked_by_eo',
+        'manual_client_name',
+        'manual_client_contact',
         'event_name',
         'category',
         'guest_count',
@@ -42,9 +45,18 @@ class Event extends Model
         'end_date',
         'kanban_status',
         'rejection_reason',
+        'cancellation_reason',
         'revision_note',
         'revision_requested_at',
         'completed_at',
+        'cancelled_at',
+        'cancellation_request_reason',
+        'cancellation_requested_at',
+        'cancellation_request_status',
+        'cancellation_review_note',
+        'cancellation_reviewed_at',
+        'terms_accepted_at',
+        'terms_version',
     ];
 
     /**
@@ -85,12 +97,17 @@ class Event extends Model
             'end_date' => 'date:Y-m-d',
             'is_multi_day' => 'boolean',
             'has_own_venue' => 'boolean',
+            'booked_by_eo' => 'boolean',
             'guest_count' => 'integer',
             'estimated_budget' => 'decimal:2',
             'agreed_price' => 'decimal:2',
             'dp_percentage' => 'decimal:2',
             'revision_requested_at' => 'datetime',
+            'cancellation_requested_at' => 'datetime',
+            'cancellation_reviewed_at' => 'datetime',
             'completed_at' => 'datetime',
+            'cancelled_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
             'lat' => 'float',
             'lng' => 'float',
         ];

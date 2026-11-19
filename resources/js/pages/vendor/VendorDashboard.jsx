@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Clock, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useDialog } from "../../context/DialogContext";
 import api from "../../api/axios";
 
 export default function VendorDashboard() {
     const { user } = useAuth();
+    const { showConfirm, showAlert, showToast } = useDialog();
     const [selectedImage, setSelectedImage] = useState(null);
     const [packages, setPackages] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -29,17 +32,29 @@ export default function VendorDashboard() {
 
     // Menghapus paket
     const handleDelete = async (id) => {
-        if (!confirm("Yakin ingin menghapus paket ini?")) {
+        const confirmed = await showConfirm({
+            title: "Hapus Paket Jasa?",
+            message: "Yakin ingin menghapus paket ini? Tindakan ini tidak dapat dibatalkan.",
+            isDanger: true,
+            confirmText: "Ya, Hapus",
+            cancelText: "Batal",
+        });
+
+        if (!confirmed) {
             return;
         }
 
         try {
             await api.delete(`/vendor/packages/${id}`);
-            alert("Paket berhasil dihapus");
+            showToast("Paket berhasil dihapus", "success");
             await fetchPackages();
         } catch (error) {
             console.error("Gagal menghapus paket:", error);
-            alert("Gagal menghapus paket");
+            showAlert({
+                title: "Gagal Menghapus",
+                message: error.response?.data?.message || "Gagal menghapus paket.",
+                type: "danger",
+            });
         }
     };
 
@@ -97,8 +112,8 @@ export default function VendorDashboard() {
             {user?.vendor?.status === "pending" && (
                 <div className="bg-[#FDE8D3]/70 border border-[#E8CEB2] rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#FDE8D3] border border-[#E8CEB2] text-[#63482B] flex items-center justify-center font-bold text-xl shrink-0">
-                            ⏳
+                        <div className="w-10 h-10 rounded-xl bg-[#FDE8D3] border border-[#E8CEB2] text-[#63482B] flex items-center justify-center font-bold shrink-0">
+                            <Clock className="w-5 h-5 text-[#63482B]" />
                         </div>
                         <div>
                             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2]">
@@ -118,8 +133,8 @@ export default function VendorDashboard() {
             {user?.vendor?.status === "rejected" && (
                 <div className="bg-red-50 border border-red-200 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-bold text-xl shrink-0">
-                            ✕
+                        <div className="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-bold shrink-0">
+                            <X className="w-5 h-5 text-red-700 stroke-[2.5]" />
                         </div>
                         <div>
                             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">
@@ -364,10 +379,10 @@ export default function VendorDashboard() {
                         <button
                             type="button"
                             onClick={() => setSelectedImage(null)}
-                            className="absolute -top-3 -right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xl font-bold text-gray-700 shadow cursor-pointer"
+                            className="absolute -top-3 -right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xl font-bold text-[#2F3931] hover:text-black border border-[#E8E2D7] shadow cursor-pointer"
                             aria-label="Tutup foto"
                         >
-                            ×
+                            &times;
                         </button>
 
                         <img

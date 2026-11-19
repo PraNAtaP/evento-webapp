@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'note',
     'photo_url',
     'photo_public_id',
+    'is_visible_to_client',
 ])]
 class ProgressLog extends Model
 {

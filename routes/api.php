@@ -2,17 +2,25 @@
 
 use App\Http\Controllers\Api\AdminAccountController;
 use App\Http\Controllers\Api\AdminActionItemController;
+use App\Http\Controllers\Api\AdminCalendarBookingController;
+use App\Http\Controllers\Api\AdminClientController;
 use App\Http\Controllers\Api\AdminEventOrderController;
 use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\CancellationRequestController;
 use App\Http\Controllers\Api\ClientEventController;
+use App\Http\Controllers\Api\CustomerRegistrationController;
+use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\EventCategoryController;
 use App\Http\Controllers\Api\EventInspectorController;
 use App\Http\Controllers\Api\EventSummaryController;
 use App\Http\Controllers\Api\EventVendorController;
+use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ProgressApprovalController;
 use App\Http\Controllers\Api\VendorCatalogController;
 use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\VendorJobController;
@@ -23,7 +31,24 @@ use App\Http\Controllers\SeasonController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
+Route::post('/register', [CustomerRegistrationController::class, 'register'])->name('api.register');
+Route::post('/register/client', [CustomerRegistrationController::class, 'register'])->name('api.register.client');
 Route::post('/register/vendor', [VendorRegistrationController::class, 'register'])->name('api.register.vendor');
+
+// Lupa Password & Reset Password
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+    ->middleware('throttle:5,1')
+    ->name('api.password.email');
+Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])
+    ->middleware('throttle:5,1')
+    ->name('api.password.update');
+
+// Verifikasi Email
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->name('api.verification.verify');
+Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+    ->middleware('throttle:6,1')
+    ->name('api.verification.send');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me'])->name('api.me');
@@ -48,6 +73,12 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.vendors.index');
         Route::get('/vendors/{slug}', [VendorController::class, 'show'])
             ->name('api.vendors.show');
+
+        // Review Progress Vendor (EO)
+        Route::get('/admin/progress-logs', [ProgressApprovalController::class, 'index'])
+            ->name('api.admin.progress-logs.index');
+        Route::patch('/admin/progress-logs/{progressLog}/visibility', [ProgressApprovalController::class, 'toggleVisibility'])
+            ->name('api.admin.progress-logs.visibility');
     });
 
     // Modul Master & Operasional EO
@@ -66,8 +97,22 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.admin.orders.index');
         Route::patch('/admin/orders/{event}/accept', [AdminEventOrderController::class, 'accept'])
             ->name('api.admin.orders.accept');
+
+        // Review Permintaan Pembatalan Acara (EO)
+        Route::get('/admin/cancellation-requests', [CancellationRequestController::class, 'index'])
+            ->name('api.admin.cancellation-requests.index');
+        Route::patch('/admin/cancellation-requests/{event}/approve', [CancellationRequestController::class, 'approve'])
+            ->name('api.admin.cancellation-requests.approve');
+        Route::patch('/admin/cancellation-requests/{event}/reject', [CancellationRequestController::class, 'reject'])
+            ->name('api.admin.cancellation-requests.reject');
         Route::patch('/admin/orders/{event}/reject', [AdminEventOrderController::class, 'reject'])
             ->name('api.admin.orders.reject');
+
+        // Smart Calendar EO (Manual Booking & Read-Only Tanggal Terisi)
+        Route::get('/admin/smart-calendar', [AdminCalendarBookingController::class, 'index'])
+            ->name('api.admin.smart-calendar.index');
+        Route::post('/admin/smart-calendar/bookings', [AdminCalendarBookingController::class, 'store'])
+            ->name('api.admin.smart-calendar.store');
 
         // Master Data Kategori Acara (EO CRUD)
         Route::get('/admin/event-categories', [EventCategoryController::class, 'adminIndex'])
@@ -93,6 +138,25 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/admin/admins/{user}', [AdminAccountController::class, 'destroy'])
             ->name('api.admin.admins.destroy');
 
+        // Manajemen Akun Client (EO)
+        Route::get('/admin/clients', [AdminClientController::class, 'index'])
+            ->name('api.admin.clients.index');
+
+        // Daftar Client yang sudah dihapus sementara
+        Route::get('/admin/clients/deleted', [AdminClientController::class, 'deletedIndex'])
+            ->name('api.admin.clients.deleted');
+
+        // Memulihkan akun Client maksimal 14 hari sejak dihapus
+        Route::post('/admin/clients/{id}/restore', [AdminClientController::class, 'restore'])
+            ->name('api.admin.clients.restore');
+
+        Route::get('/admin/clients/{user}', [AdminClientController::class, 'show'])
+            ->name('api.admin.clients.show');
+        Route::put('/admin/clients/{user}', [AdminClientController::class, 'update'])
+            ->name('api.admin.clients.update');
+        Route::delete('/admin/clients/{user}', [AdminClientController::class, 'destroy'])
+            ->name('api.admin.clients.destroy');
+
         // Manajemen & Review Pendaftaran Vendor (EO)
         Route::get('/admin/vendors', [AdminVendorController::class, 'index'])
             ->name('api.admin.vendors.index');
@@ -103,9 +167,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/admin/vendors/{vendor}/reject', [AdminVendorController::class, 'reject'])
             ->name('api.admin.vendors.reject');
 
-        // Board Inspector (read-only detail event)
+        // Board Inspector (detail event, reschedule, dan pembatalan acara oleh EO)
         Route::get('/events/{event}', [EventInspectorController::class, 'show'])
             ->name('api.events.show');
+        Route::patch('/events/{event}/reschedule', [EventInspectorController::class, 'reschedule'])
+            ->name('api.events.reschedule');
+        Route::post('/events/{event}/cancel', [EventInspectorController::class, 'cancel'])
+            ->name('api.events.cancel');
 
         // Section Vendor di Board Inspector
         Route::get('/events/{event}/vendor-catalog', [VendorCatalogController::class, 'index'])
@@ -118,13 +186,17 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.events.vendors.destroy');
         Route::post('/events/{event}/send-quotation', [EventVendorController::class, 'sendQuotation'])
             ->name('api.events.send-quotation');
+
+        // Pencairan Honorarium Vendor oleh EO (Payout / Settlement)
+        Route::post('/admin/vendor-assignments/{assignment}/payout', [InvoiceController::class, 'disburseVendorPayout'])
+            ->name('api.admin.vendor-assignments.payout');
     });
 
     // Booking Acara (Modul Klien - Dian)
     Route::get('/bookings/booked-dates', [BookingController::class, 'bookedDates'])
         ->name('api.bookings.booked-dates');
     Route::post('/bookings', [BookingController::class, 'store'])
-        ->middleware('role:client')
+        ->middleware(['role:client', 'verified'])
         ->name('api.bookings.store');
 
     // Event & Review Penawaran (Modul Klien)
@@ -133,10 +205,22 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.client.events.index');
         Route::get('/client/events/{event}', [ClientEventController::class, 'show'])
             ->name('api.client.events.show');
-        Route::post('/client/events/{event}/approve-quotation', [ClientEventController::class, 'approveQuotation'])
-            ->name('api.client.events.approve-quotation');
-        Route::post('/client/events/{event}/request-revision', [ClientEventController::class, 'requestRevision'])
-            ->name('api.client.events.request-revision');
+
+        // Aksi perubahan status / transaksi (Wajib Email Terverifikasi)
+        Route::middleware('verified')->group(function () {
+            Route::post('/client/events/{event}/approve-quotation', [ClientEventController::class, 'approveQuotation'])
+                ->name('api.client.events.approve-quotation');
+            Route::post('/client/events/{event}/request-revision', [ClientEventController::class, 'requestRevision'])
+                ->name('api.client.events.request-revision');
+
+            // Permintaan Pembatalan Acara (Klien)
+            Route::get('/client/events/{event}/cancellation-request/policy', [CancellationRequestController::class, 'policy'])
+                ->name('api.client.events.cancellation-request.policy');
+            Route::post('/client/events/{event}/cancellation-request', [CancellationRequestController::class, 'request'])
+                ->name('api.client.events.cancellation-request.store');
+            Route::delete('/client/events/{event}/cancellation-request', [CancellationRequestController::class, 'withdraw'])
+                ->name('api.client.events.cancellation-request.withdraw');
+        });
     });
 
     // Modul Vendor Packages (Agnes)
@@ -165,6 +249,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/vendor/active-jobs/{assignment}/progress', [VendorProgressController::class, 'store'])
             ->name('api.vendor.active-jobs.progress.store');
+
+        Route::put('/vendor/bank-account', [InvoiceController::class, 'updateVendorBankAccount'])
+            ->name('api.vendor.bank-account.update');
     });
 
     // Modul Payment Tracking (Nety)
@@ -174,4 +261,10 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('api.payments.upload-proof');
     Route::patch('/payments/{payment}/verify', [PaymentController::class, 'verify'])
         ->name('api.payments.verify');
+
+    // Modul Dokumen Invoice & Kuitansi / Nota Pembayaran Resmi (Klien, EO, & Vendor)
+    Route::get('/payments/{payment}/invoice', [InvoiceController::class, 'clientInvoice'])
+        ->name('api.payments.invoice');
+    Route::get('/vendor-assignments/{assignment}/invoice', [InvoiceController::class, 'vendorInvoice'])
+        ->name('api.vendor-assignments.invoice');
 });

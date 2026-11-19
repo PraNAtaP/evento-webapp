@@ -41,7 +41,7 @@ function StatusMessage({ children, onRetry }) {
                 <button
                     type="button"
                     onClick={onRetry}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors"
+                    className="px-4 py-2 bg-[#2F3931] hover:bg-[#2F3931]/90 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
                 >
                     Coba lagi
                 </button>
@@ -202,7 +202,7 @@ function VendorStep({ eventId, active, onSelect }) {
                                         type="button"
                                         disabled={!hasPackages}
                                         onClick={() => onSelect(vendor)}
-                                        className="w-full flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition-colors hover:border-blue-300 hover:bg-blue-50/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-slate-200 disabled:hover:bg-white"
+                                        className="w-full flex items-start gap-3 rounded-xl border border-[#E8E2D7] bg-white p-3 text-left transition-colors hover:border-[#657166] hover:bg-[#FAF6F0] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-[#E8E2D7] disabled:hover:bg-white cursor-pointer"
                                     >
                                         <Avatar name={vendor.business_name} imageUrl={vendor.image_url} />
                                         <span className="min-w-0 flex-1">
@@ -245,7 +245,7 @@ function VendorStep({ eventId, active, onSelect }) {
                             type="button"
                             onClick={loadMore}
                             disabled={loadingMore}
-                            className="px-4 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors disabled:opacity-50"
+                            className="px-4 py-2 text-xs font-semibold text-[#1D4A54] hover:bg-[#99CDD8]/20 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
                         >
                             {loadingMore ? "Memuat..." : "Muat lebih banyak"}
                         </button>
@@ -317,7 +317,7 @@ function PackageStep({ eventId, vendor, active, onSelect, onBack }) {
                                     type="button"
                                     disabled={pkg.is_attached}
                                     onClick={() => onSelect(pkg)}
-                                    className="w-full flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition-colors hover:border-blue-300 hover:bg-blue-50/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-slate-200 disabled:hover:bg-white"
+                                    className="w-full flex items-start gap-3 rounded-xl border border-[#E8E2D7] bg-white p-3 text-left transition-colors hover:border-[#657166] hover:bg-[#FAF6F0] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-[#E8E2D7] disabled:hover:bg-white cursor-pointer"
                                 >
                                     {pkg.image_url && (
                                         <img
@@ -479,7 +479,7 @@ function FormStep({ eventId, vendor, pkg, active, onBack, onAdded }) {
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-xs transition-colors disabled:opacity-60"
+                        className="w-full px-4 py-2.5 bg-[#2F3931] hover:bg-[#2F3931]/90 text-white font-semibold text-sm rounded-xl shadow-xs transition-colors disabled:opacity-60 cursor-pointer"
                     >
                         {submitting ? "Menyimpan..." : "Simpan"}
                     </button>

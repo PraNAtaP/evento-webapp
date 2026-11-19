@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ClipboardList, X } from "lucide-react";
 import api from "../../api/axios";
 import { formatEventDate, formatRupiah } from "../../data/kanbanData";
 
@@ -79,7 +80,7 @@ export default function ClientQuotationsSection() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E8E2D7]">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[#FAF6F0] text-[#657166] border border-[#E8E2D7] flex items-center justify-center font-bold text-base shrink-0">
-                        📋
+                        <ClipboardList className="w-5 h-5 text-[#657166]" />
                     </div>
                     <div>
                         <h2 className="text-base font-bold text-[#2F3931]">
@@ -110,7 +111,7 @@ export default function ClientQuotationsSection() {
                         onClick={() => setActionMessage(null)}
                         className="text-slate-400 hover:text-slate-600 font-bold ml-2 cursor-pointer"
                     >
-                        ✕
+                        <X className="w-4 h-4" />
                     </button>
                 </div>
             )}

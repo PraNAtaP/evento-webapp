@@ -1,10 +1,13 @@
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
+import { useDialog } from "../../context/DialogContext";
 
 export default function VendorPackageForm() {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const { showAlert, showToast } = useDialog();
 
     // Jika ada id berarti mode edit
     const isEdit = Boolean(id);
@@ -53,7 +56,12 @@ export default function VendorPackageForm() {
                 );
 
                 if (!packageData) {
-                    alert("Paket tidak ditemukan.");
+                    await showAlert({
+                        title: "Paket Tidak Ditemukan",
+                        message: "Data paket tidak ditemukan atau telah dihapus.",
+                        type: "warning",
+                    });
+                    navigate("/vendor/dashboard");
                     return;
                 }
 
@@ -97,7 +105,11 @@ export default function VendorPackageForm() {
                     error
                 );
 
-                alert("Gagal mengambil data paket.");
+                await showAlert({
+                    title: "Gagal Mengambil Data",
+                    message: "Terjadi kesalahan saat mengambil data paket.",
+                    type: "danger",
+                });
             }
         };
 
@@ -228,7 +240,7 @@ export default function VendorPackageForm() {
                     }
                 );
 
-                alert("Paket berhasil diperbarui");
+                showToast("Paket berhasil diperbarui", "success");
             } else {
                 // Tambah paket baru
                 await api.post("/vendor/packages", formData, {
@@ -237,11 +249,11 @@ export default function VendorPackageForm() {
                     },
                 });
 
-                alert("Paket berhasil ditambahkan");
+                showToast("Paket berhasil ditambahkan", "success");
             }
 
             // Setelah berhasil, kembali ke Dashboard
-            window.location.href = "/vendor/dashboard";
+            navigate("/vendor/dashboard");
         } catch (error) {
             console.error(
                 "Gagal menyimpan paket:",
@@ -252,44 +264,38 @@ export default function VendorPackageForm() {
 
             const errors = error.response?.data?.errors;
 
+            let errorMsg = "Gagal menyimpan paket. Silakan coba lagi.";
             if (errors) {
                 const messages = Object.values(errors).flat();
-                alert(messages.join("\n"));
+                errorMsg = messages.join("\n");
             } else if (error.response?.status === 500) {
-                alert(
-                    "Terjadi kesalahan pada server. Silakan coba lagi."
-                );
+                errorMsg = "Terjadi kesalahan pada server. Silakan coba lagi.";
             } else if (error.response?.data?.message) {
-                alert(error.response.data.message);
+                errorMsg = error.response.data.message;
             } else if (error.request) {
-                alert(
-                    "Koneksi bermasalah atau server tidak merespons. Silakan coba lagi."
-                );
-            } else {
-                alert(
-                    "Gagal menyimpan paket. Silakan coba lagi."
-                );
+                errorMsg = "Koneksi bermasalah atau server tidak merespons. Silakan coba lagi.";
             }
+
+            await showAlert({
+                title: "Gagal Menyimpan Paket",
+                message: errorMsg,
+                type: "danger",
+            });
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-[#FAF6F0] py-8 px-4 text-[#2F3931]">
-            <div className="max-w-4xl mx-auto">
-
-                <div className="bg-white rounded-2xl p-6 md:p-8 border border-[#E8E2D7] shadow-xs">
-
-                    {/* Tombol Kembali */}
-                    <div className="mb-6">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                window.location.href = "/vendor/dashboard";
-                            }}
-                            className="inline-flex items-center gap-2 bg-[#FAF6F0] hover:bg-[#F2ECE3] text-[#2F3931] font-semibold px-4 py-2 rounded-xl text-xs border border-[#E8E2D7] transition shadow-2xs cursor-pointer"
-                        >
+        <div className="max-w-4xl mx-auto space-y-6">
+            <div className="bg-white rounded-2xl p-6 md:p-8 border border-[#E8E2D7] shadow-xs">
+                {/* Tombol Kembali */}
+                <div className="mb-6">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/vendor/dashboard")}
+                        className="inline-flex items-center gap-2 bg-[#FAF6F0] hover:bg-[#F2ECE3] text-[#2F3931] font-semibold px-4 py-2 rounded-xl text-xs border border-[#E8E2D7] transition shadow-2xs cursor-pointer"
+                    >
                             {/* Icon Back */}
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -560,12 +566,11 @@ export default function VendorPackageForm() {
                                 {/* Tombol Close */}
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        setSelectedImage(null)
-                                    }
-                                    className="absolute -top-3 -right-3 bg-white text-gray-600 hover:text-gray-900 w-8 h-8 rounded-full shadow flex items-center justify-center text-lg font-bold"
+                                    onClick={() => setSelectedImage(null)}
+                                    className="absolute -top-3 -right-3 bg-white text-[#2F3931] hover:text-black w-8 h-8 rounded-full shadow border border-[#E8E2D7] flex items-center justify-center text-lg font-bold cursor-pointer"
+                                    aria-label="Tutup foto"
                                 >
-                                    ×
+                                    &times;
                                 </button>
 
                                 {/* Foto */}
@@ -578,7 +583,6 @@ export default function VendorPackageForm() {
                         </div>
                     )}
                 </div>
-            </div>
         </div>
     );
 }

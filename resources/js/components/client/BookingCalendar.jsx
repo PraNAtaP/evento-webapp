@@ -111,6 +111,8 @@ export const checkRangeOverlap = (start, end, bookedList) => {
  * @param {Array<string>} [props.bookedDates] - Array tanggal terisi ["YYYY-MM-DD"]
  * @param {boolean} [props.selectRange] - Aktifkan mode rentang multi-hari
  * @param {string} [props.category] - Kategori aktif (wedding, seminar, birthday)
+ * @param {boolean} [props.eoMode] - Mode EO: tidak ada batas H-min dan tanggal terblokir dapat diklik untuk read-only detail
+ * @param {function(string):void} [props.onBookedDateClick] - Callback saat tanggal terisi diklik pada mode EO
  * @param {function(string):void} [props.onRangeConflict] - Callback saat rentang menabrak tanggal terisi
  * @param {function(string):void} [props.onEmergencyBookingNotice] - Callback saat user mencoba memilih tanggal < H-min
  */
@@ -121,6 +123,8 @@ export default function BookingCalendar({
     bookedDates = [],
     selectRange = false,
     category = "wedding",
+    eoMode = false,
+    onBookedDateClick,
     onRangeConflict,
     onEmergencyBookingNotice,
 }) {
@@ -147,6 +151,29 @@ export default function BookingCalendar({
 
     const handleDateChange = (newVal) => {
         setRangeWarning("");
+
+        // Jika mode EO dan user mengklik tanggal yang terisi (booked), buka detail read-only dan batalkan perubahan form tanggal
+        if (eoMode) {
+            if (!Array.isArray(newVal) && newVal instanceof Date) {
+                const ymd = formatDateToYMD(newVal);
+                if (bookedDates.includes(ymd)) {
+                    if (onBookedDateClick) onBookedDateClick(ymd);
+                    return;
+                }
+            } else if (Array.isArray(newVal)) {
+                const [s, e] = newVal;
+                const sYmd = s ? formatDateToYMD(s) : "";
+                const eYmd = e ? formatDateToYMD(e) : "";
+                if (sYmd && bookedDates.includes(sYmd)) {
+                    if (onBookedDateClick) onBookedDateClick(sYmd);
+                    return;
+                }
+                if (eYmd && bookedDates.includes(eYmd)) {
+                    if (onBookedDateClick) onBookedDateClick(eYmd);
+                    return;
+                }
+            }
+        }
 
         // Jika dalam mode rentang hari (selectRange)
         if (selectRange && Array.isArray(newVal)) {
@@ -182,6 +209,7 @@ export default function BookingCalendar({
 
     // Helper periksa apakah tanggal berada di bawah batas waktu persiapan H-min
     const isBelowLeadTime = (date) => {
+        if (eoMode) return false;
         const check = new Date(date);
         check.setHours(0, 0, 0, 0);
         const limit = new Date(minDate);
@@ -189,13 +217,26 @@ export default function BookingCalendar({
         return check < limit;
     };
 
+    // Helper periksa tanggal sudah lewat hari ini (mode EO tidak boleh memesan tanggal kemarin)
+    const isPastDate = (date) => {
+        const check = new Date(date);
+        check.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return check < today;
+    };
+
     // Nonaktifkan tanggal yang sudah terisi di database atau di bawah batas minimal kategori
+    // Khusus eoMode: tanggal yang terisi (bookedDates) tetap diizinkan klik (tidak diberi HTML disabled) agar memicu event read-only
     const isTileDisabled = ({ date, view }) => {
         if (view === "month") {
-            if (isBelowLeadTime(date)) {
+            const dateStr = formatDateToYMD(date);
+            if (eoMode && bookedDates.includes(dateStr)) {
+                return false;
+            }
+            if (isBelowLeadTime(date) || isPastDate(date)) {
                 return true;
             }
-            const dateStr = formatDateToYMD(date);
             return bookedDates.includes(dateStr);
         }
         return false;
@@ -258,6 +299,16 @@ export default function BookingCalendar({
         } else if (tile.classList.contains("react-calendar__tile--booked")) {
             e.preventDefault();
             e.stopPropagation();
+
+            const meta = tile.querySelector(".calendar-tile-meta");
+            const clickedDateStr = meta?.getAttribute("data-date") || "";
+
+            if (eoMode && onBookedDateClick && clickedDateStr) {
+                setRangeWarning("");
+                onBookedDateClick(clickedDateStr);
+                return;
+            }
+
             setRangeWarning("Tanggal ini sudah terisi dan tidak dapat dipilih.");
         }
     };
@@ -272,25 +323,33 @@ export default function BookingCalendar({
     };
 
     return (
-        <div className="evento-calendar-wrapper flex flex-col gap-4">
+        <div className={`evento-calendar-wrapper flex flex-col gap-4 ${eoMode ? "eo-calendar-mode" : ""}`}>
             <div className="bg-white rounded-2xl border border-[#E8E2D7] p-4 sm:p-6 shadow-xs">
                 {/* Header Kalender & Badge Batas Waktu Kategori */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 pb-3 border-b border-[#E8E2D7]">
                     <div>
                         <h3 className="text-base font-bold text-[#2F3931]">
-                            Kalender Pemesanan Acara
+                            {eoMode ? "Smart Calendar Event Organizer" : "Kalender Pemesanan Acara"}
                         </h3>
                         <p className="text-xs text-[#738075] mt-0.5">
-                            {selectRange
-                                ? "Mode Rentang Hari: Klik tanggal mulai, lalu klik tanggal selesai acara."
-                                : "Gunakan tombol navigasi panah untuk berpindah bulan atau tahun."}
+                            {eoMode
+                                ? "Pilih tanggal kosong untuk input acara mendadak, atau klik tanggal terisi (hijau tua) untuk melihat detail acara."
+                                : selectRange
+                                    ? "Mode Rentang Hari: Klik tanggal mulai, lalu klik tanggal selesai acara."
+                                    : "Gunakan tombol navigasi panah untuk berpindah bulan atau tahun."}
                         </p>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 text-[11px] font-bold bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2] rounded-full">
-                            {catConfig.label}: {catConfig.badgeText}
-                        </span>
+                        {eoMode ? (
+                            <span className="px-3 py-1 text-[11px] font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9] rounded-full">
+                                Mode EO: Bebas Batas H-Min
+                            </span>
+                        ) : (
+                            <span className="px-3 py-1 text-[11px] font-bold bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2] rounded-full">
+                                {catConfig.label}: {catConfig.badgeText}
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -392,11 +451,19 @@ export default function BookingCalendar({
                         value={activeDate}
                         onChange={handleDateChange}
                         locale="id-ID"
-                        minDate={minDate}
+                        minDate={eoMode ? undefined : minDate}
                         selectRange={selectRange}
                         tileDisabled={isTileDisabled}
                         tileClassName={getTileClassName}
                         tileContent={getTileContent}
+                        onClickDay={(date) => {
+                            if (eoMode) {
+                                const ymd = formatDateToYMD(date);
+                                if (bookedDates.includes(ymd) && onBookedDateClick) {
+                                    onBookedDateClick(ymd);
+                                }
+                            }
+                        }}
                         prev2Label="«"
                         prevLabel="‹"
                         nextLabel="›"

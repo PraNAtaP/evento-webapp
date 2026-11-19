@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Http\Controllers\Api\EventInspectorController;
 use App\Models\Event;
+use App\Models\EventVendorAssignment;
 use App\Models\User;
+use App\Models\VendorPackage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -23,7 +25,11 @@ class BoardInspectorTest extends TestCase
         'id',
         'event_name',
         'category',
+        'kanban_status',
+        'can_reschedule',
+        'can_cancel',
         'client_name',
+        'booked_by_eo',
         'event_date',
         'end_date',
         'is_multi_day',
@@ -33,6 +39,13 @@ class BoardInspectorTest extends TestCase
         'lng',
         'guest_count',
         'estimated_budget',
+        'cancellation_reason',
+        'cancelled_at',
+        'cancellation_request_reason',
+        'cancellation_requested_at',
+        'cancellation_request_status',
+        'cancellation_review_note',
+        'cancellation_reviewed_at',
         'created_at',
         'updated_at',
         'show_vendor_section',
@@ -85,7 +98,7 @@ class BoardInspectorTest extends TestCase
             ->assertOk()
             ->json('data');
 
-        foreach (['adm4', 'location_name', 'agreed_price', 'kanban_status', 'status', 'budget', 'client_id'] as $forbidden) {
+        foreach (['adm4', 'location_name', 'agreed_price', 'status', 'budget', 'client_id'] as $forbidden) {
             $this->assertArrayNotHasKey($forbidden, $data);
         }
     }
@@ -205,5 +218,99 @@ class BoardInspectorTest extends TestCase
 
         $this->assertTrue($loaded->relationLoaded('client'));
         $this->assertSame(['id', 'name'], array_keys($loaded->client->getAttributes()));
+    }
+
+    public function test_eo_can_cancel_event_with_reason_and_frees_vendors_and_calendar_dates(): void
+    {
+        $eo = User::factory()->eo()->create();
+        $client = User::factory()->client()->create();
+        $event = Event::factory()->create([
+            'client_id' => $client->id,
+            'event_date' => '2027-06-15',
+            'kanban_status' => 'drafting_quotation',
+        ]);
+
+        $package = VendorPackage::factory()->create();
+        $assignment = EventVendorAssignment::create([
+            'event_id' => $event->id,
+            'vendor_id' => $package->vendor_id,
+            'package_id' => $package->id,
+            'package_name' => $package->package_name,
+            'package_price' => $package->price,
+            'locked_price' => $package->price,
+            'eo_offer_status' => 'accepted',
+            'client_approval' => 'pending',
+        ]);
+
+        // Verifikasi bahwa tanggal terdaftar di booked-dates sebelum dibatalkan
+        $this->actingAs($client, 'sanctum')
+            ->getJson('/api/bookings/booked-dates')
+            ->assertOk()
+            ->assertJsonFragment(['2027-06-15']);
+
+        // EO membatalkan acara
+        $response = $this->actingAs($eo, 'sanctum')
+            ->postJson("/api/events/{$event->id}/cancel", [
+                'reason' => 'Klien membatalkan acara karena kendala keluarga.',
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('message', 'Acara berhasil dibatalkan.')
+            ->assertJsonPath('data.kanban_status', 'cancelled')
+            ->assertJsonPath('data.cancellation_reason', 'Klien membatalkan acara karena kendala keluarga.');
+
+        // Status di DB berubah menjadi cancelled
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'kanban_status' => 'cancelled',
+            'cancellation_reason' => 'Klien membatalkan acara karena kendala keluarga.',
+        ]);
+
+        // Status vendor assignments menjadi cancelled
+        $this->assertDatabaseHas('event_vendor_assignments', [
+            'id' => $assignment->id,
+            'eo_offer_status' => 'cancelled',
+        ]);
+
+        // Tanggal acara tidak lagi terblokir di booked-dates
+        $bookedDates = $this->actingAs($client, 'sanctum')
+            ->getJson('/api/bookings/booked-dates')
+            ->assertOk()
+            ->json();
+
+        $this->assertNotContains('2027-06-15', $bookedDates);
+    }
+
+    public function test_cancel_event_requires_cancellation_reason(): void
+    {
+        $eo = User::factory()->eo()->create();
+        $event = Event::factory()->create([
+            'kanban_status' => 'drafting_quotation',
+        ]);
+
+        $response = $this->actingAs($eo, 'sanctum')
+            ->postJson("/api/events/{$event->id}/cancel", [
+                'reason' => '',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['reason']);
+    }
+
+    public function test_non_eo_cannot_cancel_event(): void
+    {
+        $client = User::factory()->client()->create();
+        $event = Event::factory()->create();
+
+        $this->actingAs($client, 'sanctum')
+            ->postJson("/api/events/{$event->id}/cancel", [
+                'reason' => 'Upaya pembatalan tidak sah',
+            ])
+            ->assertForbidden();
+
+        $this->postJson("/api/events/{$event->id}/cancel", [
+            'reason' => 'Upaya pembatalan guest',
+        ])
+            ->assertForbidden();
     }
 }

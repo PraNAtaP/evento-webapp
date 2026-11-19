@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\EventVendorAssignment;
 use App\Models\ProgressLog;
-use Illuminate\Http\Request;
+use Cloudinary\Uploader;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class VendorProgressController extends Controller
 {
@@ -30,6 +31,9 @@ class VendorProgressController extends Controller
         ])
             ->where('vendor_id', $vendor->id)
             ->where('eo_offer_status', 'accepted')
+            ->whereHas('event', function ($q) {
+                $q->whereNotIn('kanban_status', ['cancelled', 'rejected', 'done']);
+            })
             ->latest()
             ->get();
 
@@ -63,6 +67,13 @@ class VendorProgressController extends Controller
             ], 404);
         }
 
+        // Acara yang sudah selesai, dibatalkan, atau ditolak tidak dapat diisi progres.
+        if (in_array($assignment->event->kanban_status, ['cancelled', 'rejected', 'done'], true)) {
+            return response()->json([
+                'message' => 'Tidak dapat memperbarui progres untuk acara yang sudah selesai, dibatalkan, atau ditolak.',
+            ], 422);
+        }
+
         // Validasi catatan progress dan foto.
         $validated = $request->validate([
             'note' => ['required', 'string', 'max:2000'],
@@ -79,7 +90,7 @@ class VendorProgressController extends Controller
         if ($request->hasFile('photo')) {
             \Cloudinary::config();
 
-            $upload = \Cloudinary\Uploader::upload(
+            $upload = Uploader::upload(
                 $request->file('photo')->getRealPath(),
                 [
                     'folder' => 'evento/progress',

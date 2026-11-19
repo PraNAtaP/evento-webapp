@@ -1,7 +1,8 @@
-    import { useState } from 'react';
-    import { useQuery, useQueryClient } from '@tanstack/react-query';
-    import { useNavigate } from 'react-router-dom';
-    import api from '../../api/axios';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { ClipboardList } from 'lucide-react';
+import api from '../../api/axios';
     import EventOfferCard from '../../components/offer/EventOfferCard';
     import RevisionModal from '../../components/offer/RevisionModal';
 
@@ -40,8 +41,8 @@
 
         {reviewEvents.length === 0 ? (
             <div className="bg-white border border-[#E8E2D7] rounded-2xl p-8 text-center shadow-xs">
-                <div className="w-12 h-12 mx-auto rounded-full bg-[#FAF6F0] text-[#657166] flex items-center justify-center font-bold text-xl mb-3 border border-[#E8E2D7]">
-                    📋
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#FAF6F0] text-[#657166] flex items-center justify-center font-bold mb-3 border border-[#E8E2D7]">
+                    <ClipboardList className="w-6 h-6 text-[#657166]" />
                 </div>
                 <h3 className="text-sm font-bold text-[#2F3931]">
                     Tidak Ada Penawaran Menunggu Review

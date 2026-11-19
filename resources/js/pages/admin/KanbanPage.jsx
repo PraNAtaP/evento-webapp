@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { X } from "lucide-react";
 import api from "../../api/axios";
 import KanbanBoard from "../../components/kanban/KanbanBoard";
 import BoardInspector from "../../components/kanban/BoardInspector";
@@ -8,6 +10,7 @@ import {
 } from "../../data/kanbanData";
 
 export default function KanbanPage() {
+    const queryClient = useQueryClient();
     const isExplicitDummy =
         import.meta.env.DEV && import.meta.env.VITE_USE_DUMMY_KANBAN === "true";
 
@@ -144,7 +147,7 @@ export default function KanbanPage() {
             categoryValue.toLowerCase() === selectedCategory.toLowerCase();
 
         const title = evt.event_name || evt.namaEvent || evt.title || "";
-        const client = evt.client?.name || evt.namaKlien || evt.clientName || "";
+        const client = evt.manual_client_name || evt.client?.name || evt.namaKlien || evt.clientName || "";
         const location = evt.venue || evt.lokasi || evt.location || "";
 
         const query = searchQuery.toLowerCase();
@@ -163,6 +166,10 @@ export default function KanbanPage() {
                 String(evt.id) === String(updatedEvent.id) ? updatedEvent : evt
             )
         );
+        // Sinkronkan cache Pesanan Masuk, Smart Calendar EO, dan tanggal terblokir klien
+        queryClient.invalidateQueries(["admin-event-orders"]);
+        queryClient.invalidateQueries(["admin-smart-calendar"]);
+        queryClient.invalidateQueries(["booked-dates"]);
     };
 
     return (
@@ -202,7 +209,7 @@ export default function KanbanPage() {
                         onClick={() => setActionError(null)}
                         className="text-rose-500 hover:text-rose-700 font-bold"
                     >
-                        ✕
+                        <X className="w-4 h-4" />
                     </button>
                 </div>
             )}
@@ -270,11 +277,11 @@ export default function KanbanPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                     </div>
-                    <h3 className="text-base font-bold text-slate-800">Gagal Memuat Papan Kanban</h3>
-                    <p className="text-xs text-slate-500 max-w-md">{fetchError}</p>
+                    <h3 className="text-base font-bold text-[#2F3931]">Gagal Memuat Papan Kanban</h3>
+                    <p className="text-xs text-[#738075] max-w-md">{fetchError}</p>
                     <button
                         onClick={fetchEvents}
-                        className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors"
+                        className="mt-2 px-4 py-2 bg-[#2F3931] hover:bg-[#2F3931]/90 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
                     >
                         Coba Lagi
                     </button>
@@ -292,11 +299,13 @@ export default function KanbanPage() {
                 </div>
             )}
 
-            {/* Board Inspector (read-only detail event) */}
+            {/* Board Inspector (detail event, reschedule tanggal, & pembatalan acara) */}
             <BoardInspector
                 eventId={selectedEventId}
                 onClose={() => setSelectedEventId(null)}
                 onQuotationSent={handleEventUpdated}
+                onEventRescheduled={handleEventUpdated}
+                onEventCancelled={handleEventUpdated}
             />
 
             {/* Modal Input Persentase DP saat kirim penawaran ke klien */}
@@ -316,16 +325,16 @@ export default function KanbanPage() {
                                 onClick={() => setDpModalData(null)}
                                 className="text-slate-400 hover:text-slate-600 font-bold text-sm"
                             >
-                                ✕
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 
                         <div className="space-y-4 text-xs">
-                            <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-xl space-y-1">
-                                <span className="text-slate-500 text-[11px] font-medium block">
+                            <div className="p-3 bg-[#FAF6F0] border border-[#E8E2D7] rounded-xl space-y-1">
+                                <span className="text-[#738075] text-[11px] font-medium block">
                                     Total Nilai Penawaran Vendor:
                                 </span>
-                                <span className="text-base font-black text-slate-900">
+                                <span className="text-base font-black text-[#2F3931]">
                                     Rp{" "}
                                     {Number(
                                         dpModalData.event?.agreed_price ||
@@ -337,7 +346,7 @@ export default function KanbanPage() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                <label className="block text-xs font-semibold text-[#2F3931] mb-1">
                                     Persentase Uang Muka (DP)
                                 </label>
                                 <div className="flex items-center gap-2">
@@ -353,10 +362,10 @@ export default function KanbanPage() {
                                                 dpPercentage: e.target.value,
                                             })
                                         }
-                                        className="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                        className="w-24 px-3 py-2 bg-[#FAF6F0] border border-[#E8E2D7] rounded-xl font-bold text-[#2F3931] focus:outline-none focus:ring-2 focus:ring-[#657166]/20 focus:border-[#657166]"
                                     />
-                                    <span className="font-bold text-slate-600">%</span>
-                                    <span className="text-[11px] text-slate-400">
+                                    <span className="font-bold text-[#2F3931]">%</span>
+                                    <span className="text-[11px] text-[#738075]">
                                         (Batas validasi: 10% - 100%)
                                     </span>
                                 </div>
@@ -375,20 +384,20 @@ export default function KanbanPage() {
                                 const pelunasan = total - dpAmount;
 
                                 return (
-                                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-                                        <div className="p-2.5 bg-slate-50 rounded-xl">
-                                            <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+                                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#E8E2D7]">
+                                        <div className="p-2.5 bg-[#FAF6F0] rounded-xl border border-[#E8E2D7]">
+                                            <span className="text-[10px] text-[#738075] uppercase tracking-wider block">
                                                 Nominal DP
                                             </span>
-                                            <span className="text-xs font-bold text-blue-600">
+                                            <span className="text-xs font-bold text-[#1D4A54]">
                                                 Rp {dpAmount.toLocaleString("id-ID")}
                                             </span>
                                         </div>
-                                        <div className="p-2.5 bg-slate-50 rounded-xl">
-                                            <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+                                        <div className="p-2.5 bg-[#FAF6F0] rounded-xl border border-[#E8E2D7]">
+                                            <span className="text-[10px] text-[#738075] uppercase tracking-wider block">
                                                 Sisa Pelunasan
                                             </span>
-                                            <span className="text-xs font-bold text-slate-700">
+                                            <span className="text-xs font-bold text-[#2F3931]">
                                                 Rp {pelunasan.toLocaleString("id-ID")}
                                             </span>
                                         </div>
@@ -401,14 +410,14 @@ export default function KanbanPage() {
                             <button
                                 type="button"
                                 onClick={() => setDpModalData(null)}
-                                className="px-4 py-2 border border-slate-200 text-slate-600 font-semibold text-xs rounded-xl hover:bg-slate-50 transition-colors"
+                                className="px-4 py-2 border border-[#E8E2D7] text-[#556056] font-semibold text-xs rounded-xl hover:bg-[#FAF6F0] transition-colors cursor-pointer"
                             >
                                 Batal
                             </button>
                             <button
                                 type="button"
                                 onClick={handleConfirmDpModal}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+                                className="px-4 py-2 bg-[#2F3931] hover:bg-[#2F3931]/90 text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
                             >
                                 Kirim Penawaran
                             </button>

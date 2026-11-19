@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 
@@ -241,7 +242,11 @@ export default function AdminAccountPage() {
                     }`}
                 >
                     <span>
-                        {toastMessage.type === "error" ? "⚠️" : "✅"}
+                        {toastMessage.type === "error" ? (
+                            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                        ) : (
+                            <CheckCircle2 className="w-4 h-4 text-[#2F3931] shrink-0" />
+                        )}
                     </span>
                     <span>{toastMessage.message}</span>
                     <button

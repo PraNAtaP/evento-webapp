@@ -42,6 +42,13 @@ class KanbanTransitionService
             ]);
         }
 
+        // 0. Validasi permohonan pembatalan klien yang masih pending
+        if ($event->cancellation_request_status === 'pending') {
+            throw ValidationException::withMessages([
+                'target_status' => ['Tidak dapat memindahkan status acara. Klien telah mengajukan permohonan pembatalan yang sedang menunggu konfirmasi EO.'],
+            ]);
+        }
+
         // 1. Kasus khusus revisi penawaran: client_review -> drafting_quotation
         if ($currentStatus === 'client_review' && $targetStatus === 'drafting_quotation') {
             $this->handleRevisionTransition($event, $options['revision_note'] ?? null);
@@ -164,27 +171,36 @@ class KanbanTransitionService
         $event->kanban_status = 'awaiting_dp';
         $event->save();
 
-        // Buat tagihan DP dan Pelunasan otomatis jika belum dibuat
-        $hasDpPayment = $event->payments()->where('payment_type', 'dp')->exists();
+        // Buat tagihan DP dan Pelunasan otomatis atau perbarui nominal jika terjadi revisi penawaran
+        $dpPercent = (float) ($event->dp_percentage ?? config('evento.dp_percentage', 30.0));
+        $dpNominal = round(($quotationTotal * $dpPercent) / 100);
+        $pelunasanNominal = max(0, $quotationTotal - $dpNominal);
 
-        if (! $hasDpPayment) {
-            $dpPercent = (float) ($event->dp_percentage ?? config('evento.dp_percentage', 30.0));
-            $dpNominal = round(($quotationTotal * $dpPercent) / 100);
-            $pelunasanNominal = max(0, $quotationTotal - $dpNominal);
-
+        $dpPayment = $event->payments()->where('payment_type', 'dp')->first();
+        if (! $dpPayment) {
             Payment::create([
                 'event_id' => $event->id,
                 'payment_type' => 'dp',
                 'nominal' => $dpNominal,
                 'status' => 'unpaid',
             ]);
+        } elseif ($dpPayment->status === 'unpaid') {
+            $dpPayment->update(['nominal' => $dpNominal]);
+        }
 
+        $pelunasanPayment = $event->payments()->where('payment_type', 'pelunasan')->first();
+        if (! $pelunasanPayment) {
             Payment::create([
                 'event_id' => $event->id,
                 'payment_type' => 'pelunasan',
                 'nominal' => $pelunasanNominal,
                 'status' => 'unpaid',
             ]);
+        } elseif ($pelunasanPayment->status === 'unpaid') {
+            $actualPelunasan = ($dpPayment && $dpPayment->status === 'paid')
+                ? max(0, $quotationTotal - (float) $dpPayment->nominal)
+                : $pelunasanNominal;
+            $pelunasanPayment->update(['nominal' => $actualPelunasan]);
         }
     }
 

@@ -100,6 +100,11 @@ class StoreBookingRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
+            // 0. Validasi Email Terverifikasi
+            if ($this->user() && ! $this->user()->hasVerifiedEmail()) {
+                $validator->errors()->add('email', 'Alamat email Anda belum diverifikasi. Harap verifikasi email Anda terlebih dahulu sebelum mengajukan acara.');
+            }
+
             $category = $this->input('category');
             $eventDateInput = $this->input('event_date');
             $isMultiDay = (bool) $this->input('is_multi_day', false);
@@ -160,19 +165,20 @@ class StoreBookingRequest extends FormRequest
                     $startDate = Carbon::parse($eventDateInput)->format('Y-m-d');
                     $endDate = $endDateInput ? Carbon::parse($endDateInput)->format('Y-m-d') : $startDate;
 
-                    // Cek apakah ada acara lain yang overlap dengan rentang [startDate, endDate]
-                    $hasConflict = Event::where(function ($query) use ($startDate, $endDate) {
-                        $query->where('event_date', '<=', $endDate)
-                            ->where(function ($sub) use ($startDate) {
-                                $sub->where(function ($q1) use ($startDate) {
-                                    $q1->whereNotNull('end_date')
-                                        ->where('end_date', '>=', $startDate);
-                                })->orWhere(function ($q2) use ($startDate) {
-                                    $q2->whereNull('end_date')
-                                        ->where('event_date', '>=', $startDate);
+                    // Cek apakah ada acara lain yang overlap dengan rentang [startDate, endDate] (kecualikan yang rejected atau cancelled)
+                    $hasConflict = Event::whereNotIn('kanban_status', ['rejected', 'cancelled'])
+                        ->where(function ($query) use ($startDate, $endDate) {
+                            $query->where('event_date', '<=', $endDate)
+                                ->where(function ($sub) use ($startDate) {
+                                    $sub->where(function ($q1) use ($startDate) {
+                                        $q1->whereNotNull('end_date')
+                                            ->where('end_date', '>=', $startDate);
+                                    })->orWhere(function ($q2) use ($startDate) {
+                                        $q2->whereNull('end_date')
+                                            ->where('event_date', '>=', $startDate);
+                                    });
                                 });
-                            });
-                    })->exists();
+                        })->exists();
 
                     if ($hasConflict) {
                         $validator->errors()->add('event_date', 'Tanggal sudah terisi');

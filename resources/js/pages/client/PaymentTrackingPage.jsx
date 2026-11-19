@@ -29,7 +29,7 @@
     // Filter data berdasarkan tab yang aktif
     const filteredPayments = data?.filter((p) => 
         p.payment_type === activeTab && 
-        ['awaiting_dp', 'on_progress', 'done'].includes(p.event?.kanban_status)
+        ['awaiting_dp', 'on_progress', 'done', 'cancelled'].includes(p.event?.kanban_status)
     ) || [];
 
     return (

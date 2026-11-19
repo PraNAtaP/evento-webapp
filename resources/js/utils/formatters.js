@@ -86,6 +86,26 @@ export function formatNumber(value) {
     return numberFormatter.format(number);
 }
 
+/**
+ * Mengubah string input nominal angka mentah menjadi format ribuan Indonesia (titik).
+ * Contoh: "5000000" -> "5.000.000", "50.000.000abc" -> "50.000.000".
+ */
+export function formatCurrencyInput(value) {
+    if (value === null || value === undefined || value === "") return "";
+    const digitsOnly = String(value).replace(/\D/g, "");
+    if (!digitsOnly) return "";
+    return Number(digitsOnly).toLocaleString("id-ID");
+}
+
+/**
+ * Mengambil nilai angka mentah (string digit tanpa titik) dari string berformat ribuan.
+ * Contoh: "5.000.000" -> "5000000".
+ */
+export function parseCurrencyInput(formattedValue) {
+    if (formattedValue === null || formattedValue === undefined) return "";
+    return String(formattedValue).replace(/\D/g, "");
+}
+
 /** URL Google Maps bila lat dan lng keduanya ada, selain itu null. */
 export function buildMapsUrl(lat, lng) {
     const isMissing = (v) => v === null || v === undefined || v === "" || !Number.isFinite(Number(v));

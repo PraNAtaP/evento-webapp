@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Zap, Clock, Camera, Info, FileText, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 
@@ -136,15 +137,20 @@ export default function VendorRegister() {
                     <button
                         type="button"
                         onClick={handleQuickFill}
-                        className="text-[11px] font-semibold text-[#657166] hover:text-[#556056] bg-white px-2.5 py-1 rounded-lg border border-[#E8E2D7] shadow-2xs hover:bg-[#FAF6F0] transition-all"
+                        className="text-[11px] font-semibold text-[#657166] hover:text-[#556056] bg-white px-2.5 py-1 rounded-lg border border-[#E8E2D7] shadow-2xs hover:bg-[#FAF6F0] transition-all inline-flex items-center gap-1.5"
                     >
-                        ⚡ Isi Contoh Otomatis
+                        <Zap className="w-3 h-3 text-amber-600" />
+                        <span>Isi Contoh Otomatis</span>
                     </button>
                 </div>
 
                 <div className="text-center">
-                    <Link to="/" className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#F3C3B2] border border-[#E8CEB2] shadow-xs mb-3 hover:scale-105 transition-transform">
-                        <span className="text-[#55271C] font-black text-2xl tracking-tighter">E</span>
+                    <Link to="/" className="inline-block mb-3 hover:opacity-90 transition-opacity">
+                        <img
+                            src="/logo.png"
+                            alt="EVENTO"
+                            className="h-14 w-auto mx-auto object-contain"
+                        />
                     </Link>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2F3931] tracking-tight">
                         Pendaftaran Mitra Vendor <span className="text-[#657166]">EVENTO</span>
@@ -158,8 +164,8 @@ export default function VendorRegister() {
             {/* Sukses Modal / Card View */}
             {registrationSuccess ? (
                 <div className="w-full max-w-xl bg-white rounded-3xl p-8 border border-[#E8E2D7] shadow-sm text-center animate-fade-in">
-                    <div className="w-16 h-16 rounded-full bg-[#DAEBE3] border border-[#B6C2AA] text-[#33422A] flex items-center justify-center mx-auto text-3xl mb-4">
-                        ⏳
+                    <div className="w-16 h-16 rounded-full bg-[#DAEBE3] border border-[#B6C2AA] text-[#33422A] flex items-center justify-center mx-auto mb-4">
+                        <Clock className="w-8 h-8 text-[#33422A]" />
                     </div>
                     <span className="inline-block px-3 py-1 bg-[#DAEBE3] text-[#33422A] text-xs font-bold rounded-full mb-2">
                         Pendaftaran Berhasil Diajukan
@@ -382,7 +388,7 @@ export default function VendorRegister() {
                                         Media Sosial Bisnis / Portofolio (Instagram / TikTok / Web) <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
-                                        <span className="absolute left-3.5 top-2.5 text-[#738075] text-xs">📸</span>
+                                        <Camera className="w-3.5 h-3.5 absolute left-3.5 top-3 text-[#738075]" />
                                         <input
                                             type="text"
                                             name="social_media"
@@ -466,7 +472,7 @@ export default function VendorRegister() {
 
                         {/* Catatan Alur Verifikasi */}
                         <div className="p-3.5 bg-[#FAF6F0] rounded-2xl border border-[#E8E2D7] flex items-start gap-2.5 text-[11px] text-[#738075]">
-                            <span className="text-base shrink-0">ℹ️</span>
+                            <Info className="w-4 h-4 text-[#738075] shrink-0 mt-0.5" />
                             <span>
                                 Setelah formulir dikirim, tim Event Organizer (EO) EVENTO akan memverifikasi data usaha dan media sosial Anda. Notifikasi aktivasi akun akan dikirimkan ke email terdaftar via SMTP saat disetujui.
                             </span>
@@ -509,7 +515,7 @@ export default function VendorRegister() {
                     <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 border border-[#E8E2D7] shadow-xl max-h-[85vh] flex flex-col">
                         <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D7]">
                             <div className="flex items-center gap-2">
-                                <span className="text-xl">📜</span>
+                                <FileText className="w-5 h-5 text-[#657166]" />
                                 <h3 className="text-sm font-extrabold text-[#2F3931]">
                                     Syarat & Ketentuan Kemitraan Vendor
                                 </h3>
@@ -519,7 +525,7 @@ export default function VendorRegister() {
                                 onClick={() => setShowTermsModal(false)}
                                 className="w-7 h-7 rounded-full bg-[#FAF6F0] hover:bg-[#E8E2D7] text-[#738075] text-xs flex items-center justify-center cursor-pointer transition"
                             >
-                                ✕
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 

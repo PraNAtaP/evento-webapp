@@ -8,12 +8,13 @@ import {
 } from "../../utils/vendorHelpers";
 import VendorPickerModal from "./VendorPickerModal";
 import SendQuotationModal from "./SendQuotationModal";
+import VendorPayoutModal from "../invoice/VendorPayoutModal";
 
 function getErrorMessage(err, fallback) {
     return err.response?.data?.errors?.event?.[0] || err.response?.data?.message || fallback;
 }
 
-function VendorRow({ row, canManage, isConfirming, isRemoving, error, onAskRemove, onCancelRemove, onRemove }) {
+function VendorRow({ row, canManage, isConfirming, isRemoving, error, onAskRemove, onCancelRemove, onRemove, onOpenPayout }) {
     const statusMeta = getOfferStatusMeta(row.offer_status);
     const isRejected = row.offer_status === "rejected";
     const negotiated = isNegotiatedPrice(row.price, row.package_price);
@@ -55,6 +56,25 @@ function VendorRow({ row, canManage, isConfirming, isRemoving, error, onAskRemov
                 <p className="mt-1 text-xs text-rose-600 break-words">
                     Alasan ditolak: {orDash(row.rejection_reason)}
                 </p>
+            )}
+
+            {row.offer_status === "accepted" && (
+                <div className="mt-2.5 pt-2 border-t border-[#E8E2D7] flex items-center justify-between">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                        row.payout_status === 'paid' 
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+                            : 'bg-amber-50 text-amber-800 border-amber-200'
+                    }`}>
+                        {row.payout_status === 'paid' ? 'Honor Lunas' : 'Honor Belum Dicairkan'}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => onOpenPayout && onOpenPayout(row.id)}
+                        className="text-[11px] font-bold text-[#1D4A54] hover:text-[#2F3931] hover:underline transition cursor-pointer"
+                    >
+                        {row.payout_status === 'paid' ? 'Lihat Voucher Kas' : 'Bayar Honor Vendor →'}
+                    </button>
+                </div>
             )}
 
             {error && (
@@ -112,6 +132,7 @@ function VendorRow({ row, canManage, isConfirming, isRemoving, error, onAskRemov
 export default function InspectorVendorSection({ event, onChanged, onPickerToggle, onQuotationSent }) {
     const [pickerOpen, setPickerOpen] = useState(false);
     const [sendModalOpen, setSendModalOpen] = useState(false);
+    const [activePayoutAssignmentId, setActivePayoutAssignmentId] = useState(null);
     const [confirmId, setConfirmId] = useState(null);
     const [removingId, setRemovingId] = useState(null);
     const [rowErrors, setRowErrors] = useState({});
@@ -241,6 +262,7 @@ export default function InspectorVendorSection({ event, onChanged, onPickerToggl
                                 setRowErrors((errors) => ({ ...errors, [row.id]: null }));
                             }}
                             onRemove={() => handleRemove(row)}
+                            onOpenPayout={setActivePayoutAssignmentId}
                         />
                     ))}
                 </ul>
@@ -298,6 +320,18 @@ export default function InspectorVendorSection({ event, onChanged, onPickerToggl
                     event={event}
                     onClose={handleCloseSendModal}
                     onSent={handleQuotationSent}
+                />
+            )}
+
+            {activePayoutAssignmentId && (
+                <VendorPayoutModal
+                    assignmentId={activePayoutAssignmentId}
+                    isEo={true}
+                    onClose={() => setActivePayoutAssignmentId(null)}
+                    onSuccess={() => {
+                        setActivePayoutAssignmentId(null);
+                        onChanged?.();
+                    }}
                 />
             )}
         </section>

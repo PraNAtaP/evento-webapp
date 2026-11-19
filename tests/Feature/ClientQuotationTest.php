@@ -89,7 +89,9 @@ class ClientQuotationTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->client1, 'sanctum')
-            ->postJson("/api/client/events/{$event->id}/approve-quotation");
+            ->postJson("/api/client/events/{$event->id}/approve-quotation", [
+                'terms_accepted' => true,
+            ]);
 
         $response->assertOk();
         $event->refresh();
@@ -174,5 +176,48 @@ class ClientQuotationTest extends TestCase
             ->postJson("/api/client/events/{$eventClient2->id}/approve-quotation");
 
         $response->assertForbidden();
+    }
+
+    public function test_vendor_identity_is_masked_before_dp_and_unmasked_after_dp(): void
+    {
+        // 1. Sebelum DP: vendor masked
+        $eventBeforeDp = Event::factory()->clientReview()->create([
+            'client_id' => $this->client1->id,
+        ]);
+        EventVendorAssignment::create([
+            'event_id' => $eventBeforeDp->id,
+            'vendor_id' => $this->vendor->id,
+            'package_id' => $this->package->id,
+            'eo_offer_status' => 'accepted',
+            'client_approval' => 'pending',
+            'locked_price' => 20000000,
+        ]);
+
+        $respBefore = $this->actingAs($this->client1, 'sanctum')
+            ->getJson("/api/client/events/{$eventBeforeDp->id}");
+        $respBefore->assertOk()
+            ->assertJsonPath('event.is_vendor_unmasked', false)
+            ->assertJsonPath('event.vendor_assignments.0.vendor.business_name', 'Mitra Photography EO')
+            ->assertJsonPath('event.vendor_assignments.0.vendor.contact_number', null);
+
+        // 2. Sesudah DP (on_progress): vendor unmasked dengan profil asli
+        $eventAfterDp = Event::factory()->onProgress()->create([
+            'client_id' => $this->client1->id,
+        ]);
+        EventVendorAssignment::create([
+            'event_id' => $eventAfterDp->id,
+            'vendor_id' => $this->vendor->id,
+            'package_id' => $this->package->id,
+            'eo_offer_status' => 'accepted',
+            'client_approval' => 'approved',
+            'locked_price' => 20000000,
+        ]);
+
+        $respAfter = $this->actingAs($this->client1, 'sanctum')
+            ->getJson("/api/client/events/{$eventAfterDp->id}");
+        $respAfter->assertOk()
+            ->assertJsonPath('event.is_vendor_unmasked', true)
+            ->assertJsonPath('event.vendor_assignments.0.vendor.business_name', 'Foto Megah')
+            ->assertJsonPath('event.vendor_assignments.0.vendor.contact_number', '08123456789');
     }
 }

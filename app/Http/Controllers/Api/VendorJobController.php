@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\EventVendorAssignment;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class VendorJobController extends Controller
 {
@@ -28,6 +28,9 @@ class VendorJobController extends Controller
         ])
             ->where('vendor_id', $vendor->id)
             ->where('eo_offer_status', 'pending')
+            ->whereHas('event', function ($q) {
+                $q->whereNotIn('kanban_status', ['cancelled', 'rejected', 'done']);
+            })
             ->latest()
             ->get();
 
@@ -62,6 +65,13 @@ class VendorJobController extends Controller
         if ($assignment->eo_offer_status !== 'pending') {
             return response()->json([
                 'message' => 'Tawaran pekerjaan sudah direspons.',
+            ], 422);
+        }
+
+        // Acara yang sudah dibatalkan, ditolak, atau selesai tidak dapat direspons.
+        if (in_array($assignment->event->kanban_status, ['cancelled', 'rejected', 'done'], true)) {
+            return response()->json([
+                'message' => 'Tidak dapat merespons tawaran untuk acara yang sudah dibatalkan, ditolak, atau selesai.',
             ], 422);
         }
 

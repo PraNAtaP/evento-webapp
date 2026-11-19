@@ -1,21 +1,38 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Coins } from "lucide-react";
 import api from "../../api/axios";
+import { useDialog } from "../../context/DialogContext";
 import { CATEGORY_LABELS } from "../../data/kanbanData";
-import { formatRupiah, formatNumber } from "../../utils/formatters";
+import { formatDateTime, formatNumber, formatRupiah } from "../../utils/formatters";
 
 export default function EventOrdersPage() {
     const queryClient = useQueryClient();
+    const { confirm: showConfirm } = useDialog();
     const [statusFilter, setStatusFilter] = useState("request");
     const [page, setPage] = useState(1);
     const [rejectModalData, setRejectModalData] = useState(null);
     const [rejectionReason, setRejectionReason] = useState("");
+    const [approveCancelModalData, setApproveCancelModalData] = useState(null);
+    const [approveCancelNote, setApproveCancelNote] = useState("");
+    const [rejectCancelModalData, setRejectCancelModalData] = useState(null);
+    const [rejectCancelNote, setRejectCancelNote] = useState("");
+    const [rejectCancelError, setRejectCancelError] = useState("");
     const [toast, setToast] = useState(null);
 
     const showToast = (message, type = "success") => {
         setToast({ message, type });
         setTimeout(() => setToast(null), 4000);
     };
+
+    // 0. Fetch jumlah permohonan pembatalan yang pending untuk badge
+    const { data: cancelReqCount = 0 } = useQuery({
+        queryKey: ["admin-cancellation-requests-count"],
+        queryFn: async () => {
+            const res = await api.get("/admin/cancellation-requests");
+            return res.data.events?.length || 0;
+        },
+    });
 
     // 1. Fetch data pesanan acara
     const {
@@ -68,8 +85,55 @@ export default function EventOrdersPage() {
         },
     });
 
-    const handleAccept = (order) => {
-        if (confirm(`Yakin ingin menerima pesanan acara "${order.event_name}" dari ${order.client?.name || "Klien"}?`)) {
+    // 4. Mutasi Setujui Permintaan Pembatalan
+    const approveCancelMutation = useMutation({
+        mutationFn: async ({ eventId, review_note }) => {
+            const res = await api.patch(`/admin/cancellation-requests/${eventId}/approve`, { review_note });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries(["admin-event-orders"]);
+            queryClient.invalidateQueries(["admin-cancellation-requests-count"]);
+            queryClient.invalidateQueries(["admin-kanban"]);
+            setApproveCancelModalData(null);
+            setApproveCancelNote("");
+            showToast(data.message || "Pembatalan acara disetujui. Notifikasi telah dikirim ke klien.");
+        },
+        onError: (err) => {
+            showToast(err.response?.data?.message || "Gagal menyetujui pembatalan.", "error");
+        },
+    });
+
+    // 5. Mutasi Tolak Permintaan Pembatalan
+    const rejectCancelMutation = useMutation({
+        mutationFn: async ({ eventId, review_note }) => {
+            const res = await api.patch(`/admin/cancellation-requests/${eventId}/reject`, { review_note });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries(["admin-event-orders"]);
+            queryClient.invalidateQueries(["admin-cancellation-requests-count"]);
+            queryClient.invalidateQueries(["admin-kanban"]);
+            setRejectCancelModalData(null);
+            setRejectCancelNote("");
+            setRejectCancelError("");
+            showToast(data.message || "Permintaan pembatalan ditolak. Notifikasi telah dikirim ke klien.");
+        },
+        onError: (err) => {
+            const msg = err.response?.data?.errors?.review_note?.[0] || err.response?.data?.message || "Gagal menolak pembatalan.";
+            setRejectCancelError(msg);
+        },
+    });
+
+    const handleAccept = async (order) => {
+        const displayClient = order.manual_client_name || order.client?.name || "Klien";
+        const yakin = await showConfirm({
+            title: "Terima Pesanan Acara?",
+            message: `Yakin ingin menerima pesanan acara "${order.event_name}" dari ${displayClient}? Acara akan diteruskan ke tahap penyusunan penawaran.`,
+            confirmText: "Ya, Terima Pesanan",
+            type: "info",
+        });
+        if (yakin) {
             acceptMutation.mutate(order.id);
         }
     };
@@ -104,6 +168,16 @@ export default function EventOrdersPage() {
             return `${start} - ${end}`;
         }
         return start;
+    };
+
+    const getDaysUntil = (dateStr) => {
+        if (!dateStr) return null;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const eventD = new Date(dateStr);
+        eventD.setHours(0, 0, 0, 0);
+        const diffTime = eventD - today;
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
 
     return (
@@ -150,11 +224,30 @@ export default function EventOrdersPage() {
                     <button
                         type="button"
                         onClick={() => {
-                            setStatusFilter("drafting_quotation");
+                            setStatusFilter("cancellation_requests");
+                            setPage(1);
+                        }}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                            statusFilter === "cancellation_requests"
+                                ? "bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs"
+                                : "text-[#738075] hover:text-[#2F3931]"
+                        }`}
+                    >
+                        <span>Permintaan Batal</span>
+                        {cancelReqCount > 0 && (
+                            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white leading-none">
+                                {cancelReqCount}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setStatusFilter("accepted");
                             setPage(1);
                         }}
                         className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                            statusFilter === "drafting_quotation"
+                            statusFilter === "accepted"
                                 ? "bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]"
                                 : "text-[#738075] hover:text-[#2F3931]"
                         }`}
@@ -227,9 +320,15 @@ export default function EventOrdersPage() {
                                 <tr className="border-b border-[#E8E2D7] bg-[#FAF6F0]/70 text-[11px] font-bold uppercase tracking-wider text-[#738075]">
                                     <th className="py-3 px-4">Nama Acara & Kategori</th>
                                     <th className="py-3 px-4">Klien Pemesan</th>
-                                    <th className="py-3 px-4">Tanggal Pelaksanaan</th>
-                                    <th className="py-3 px-4">Estimasi Tamu & Budget</th>
-                                    <th className="py-3 px-4">Status</th>
+                                    <th className="py-3 px-4">
+                                        {statusFilter === "cancellation_requests" ? "Tanggal & Status DP" : "Tanggal Pelaksanaan"}
+                                    </th>
+                                    <th className="py-3 px-4">
+                                        {statusFilter === "cancellation_requests" ? "Alasan Pembatalan Klien" : "Estimasi Tamu & Budget"}
+                                    </th>
+                                    <th className="py-3 px-4">
+                                        {statusFilter === "cancellation_requests" ? "Tahap Acara" : "Status"}
+                                    </th>
                                     <th className="py-3 px-4 text-center">Aksi Keputusan</th>
                                 </tr>
                             </thead>
@@ -237,73 +336,180 @@ export default function EventOrdersPage() {
                                 {orders.map((order) => {
                                     const catLabel = CATEGORY_LABELS[order.category] || order.category || "Wedding";
                                     const isPending = order.kanban_status === "request";
+                                    const isCancelReq = statusFilter === "cancellation_requests";
+                                    const daysUntil = getDaysUntil(order.event_date);
 
                                     return (
                                         <tr key={order.id} className="hover:bg-[#FAF6F0]/40 transition-colors">
                                             <td className="py-3.5 px-4">
                                                 <div className="font-bold text-[#2F3931]">{order.event_name}</div>
-                                                <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#CFD8C4]/50 text-[#2D3A28] border border-[#B6C2AA]">
-                                                    {catLabel}
-                                                </span>
+                                                <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                                                    <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#CFD8C4]/50 text-[#2D3A28] border border-[#B6C2AA]">
+                                                        {catLabel}
+                                                    </span>
+                                                    {order.booked_by_eo && (
+                                                        <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#99CDD8]/30 text-[#1D4A54] border border-[#86BAC5]">
+                                                            Input EO
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
 
                                             <td className="py-3.5 px-4">
                                                 <div className="font-semibold text-[#2F3931]">
-                                                    {order.client?.name || "-"}
+                                                    {order.manual_client_name || order.client?.name || "-"}
                                                 </div>
                                                 <div className="text-[11px] text-[#738075]">
-                                                    {order.client?.email || "-"}
+                                                    {order.manual_client_contact || order.client?.email || "-"}
                                                 </div>
                                             </td>
 
+                                            {/* Kolom 3: Tanggal Pelaksanaan & Status DP jika Pembatalan */}
                                             <td className="py-3.5 px-4 text-[#2F3931] font-medium">
-                                                {formatDateRange(order)}
-                                                {order.venue && (
-                                                    <div className="text-[11px] text-[#738075] truncate max-w-xs mt-0.5">
-                                                        📍 {order.venue}
-                                                    </div>
+                                                <div>{formatDateRange(order)}</div>
+                                                {isCancelReq ? (
+                                                    daysUntil !== null && (
+                                                        <div className="mt-1">
+                                                            {daysUntil <= 30 ? (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                                                                    <AlertTriangle className="w-3 h-3 shrink-0" />
+                                                                    <span>DP Hangus (H-{daysUntil})</span>
+                                                                </span>
+                                                            ) : (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                                                                    <Coins className="w-3 h-3 shrink-0" />
+                                                                    <span>DP Berpotensi Kembali ({daysUntil} hari lagi)</span>
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )
+                                                ) : (
+                                                    <>
+                                                        {order.venue && (
+                                                            <div className="text-[11px] text-[#738075] truncate max-w-xs mt-0.5">
+                                                                {order.venue}
+                                                            </div>
+                                                        )}
+                                                        {order.updated_at && (
+                                                            <div className="text-[10px] text-[#738075] mt-1">
+                                                                Diupdate: {formatDateTime(order.updated_at)}
+                                                            </div>
+                                                        )}
+                                                    </>
                                                 )}
                                             </td>
 
+                                            {/* Kolom 4: Estimasi Tamu/Budget ATAU Alasan Pembatalan */}
                                             <td className="py-3.5 px-4">
-                                                <div className="text-[#2F3931] font-medium">
-                                                    {formatNumber(order.guest_count)} tamu
-                                                </div>
-                                                <div className="text-[11px] font-bold text-[#1D4A54]">
-                                                    {formatRupiah(order.estimated_budget ?? order.budget)}
-                                                </div>
-                                            </td>
-
-                                            <td className="py-3.5 px-4">
-                                                {order.kanban_status === "request" && (
-                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#99CDD8]/30 text-[#1D4A54] border border-[#86BAC5]">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#1D4A54]"></span>
-                                                        Menunggu Review
-                                                    </span>
-                                                )}
-                                                {order.kanban_status === "rejected" && (
-                                                    <div>
-                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                                            Ditolak
-                                                        </span>
-                                                        {order.rejection_reason && (
-                                                            <p className="text-[10px] text-rose-600 mt-1 italic max-w-xs">
-                                                                &ldquo;{order.rejection_reason}&rdquo;
+                                                {isCancelReq ? (
+                                                    <div className="max-w-xs">
+                                                        <p className="text-xs text-[#2F3931] font-semibold bg-[#FAF6F0] p-2.5 rounded-xl border border-[#E8E2D7] leading-relaxed">
+                                                            &ldquo;{order.cancellation_request_reason || "-"}&rdquo;
+                                                        </p>
+                                                        {order.cancellation_requested_at && (
+                                                            <p className="text-[10px] text-[#738075] mt-1">
+                                                                Diajukan: {formatDateTime(order.cancellation_requested_at)}
                                                             </p>
                                                         )}
                                                     </div>
-                                                )}
-                                                {order.kanban_status !== "request" && order.kanban_status !== "rejected" && (
-                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#224436]"></span>
-                                                        Diterima ({order.kanban_status})
-                                                    </span>
+                                                ) : (
+                                                    <>
+                                                        <div className="text-[#2F3931] font-medium">
+                                                            {formatNumber(order.guest_count)} tamu
+                                                        </div>
+                                                        <div className="text-[11px] font-bold text-[#1D4A54]">
+                                                            {formatRupiah(order.estimated_budget ?? order.budget)}
+                                                        </div>
+                                                    </>
                                                 )}
                                             </td>
 
+                                            {/* Kolom 5: Status */}
+                                            <td className="py-3.5 px-4">
+                                                {isCancelReq ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#224436]"></span>
+                                                        {order.kanban_status}
+                                                    </span>
+                                                ) : (
+                                                    <>
+                                                        {order.kanban_status === "request" && (
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#99CDD8]/30 text-[#1D4A54] border border-[#86BAC5]">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-[#1D4A54]"></span>
+                                                                Menunggu Review
+                                                            </span>
+                                                        )}
+                                                        {order.kanban_status === "rejected" && (
+                                                            <div>
+                                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                                                    Ditolak
+                                                                </span>
+                                                                {order.rejection_reason && (
+                                                                    <p className="text-[10px] text-rose-600 mt-1 italic max-w-xs">
+                                                                        &ldquo;{order.rejection_reason}&rdquo;
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {order.kanban_status === "cancelled" && (
+                                                            <div>
+                                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                                                                    Dibatalkan
+                                                                </span>
+                                                                {order.cancellation_reason && (
+                                                                    <p className="text-[10px] text-rose-700 mt-1 italic max-w-xs">
+                                                                        &ldquo;{order.cancellation_reason}&rdquo;
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {order.kanban_status !== "request" && order.kanban_status !== "rejected" && order.kanban_status !== "cancelled" && (
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-[#224436]"></span>
+                                                                Diterima ({order.kanban_status})
+                                                            </span>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </td>
+
+                                            {/* Kolom 6: Aksi */}
                                             <td className="py-3.5 px-4 text-center">
-                                                {isPending ? (
+                                                {isCancelReq ? (
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setApproveCancelModalData(order);
+                                                                setApproveCancelNote("");
+                                                            }}
+                                                            disabled={approveCancelMutation.isPending || rejectCancelMutation.isPending}
+                                                            className="px-3 py-1.5 bg-[#DAEBE3] hover:bg-[#c6dfd4] text-[#224436] font-bold rounded-xl border border-[#BCD4C9] transition shadow-2xs cursor-pointer text-xs flex items-center gap-1 disabled:opacity-50"
+                                                        >
+                                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            <span>Setujui Batal</span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setRejectCancelModalData(order);
+                                                                setRejectCancelNote("");
+                                                                setRejectCancelError("");
+                                                            }}
+                                                            disabled={approveCancelMutation.isPending || rejectCancelMutation.isPending}
+                                                            className="px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-700 font-bold rounded-xl border border-rose-200 transition shadow-2xs cursor-pointer text-xs flex items-center gap-1 disabled:opacity-50"
+                                                        >
+                                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                            <span>Tolak Batal</span>
+                                                        </button>
+                                                    </div>
+                                                ) : isPending ? (
                                                     <div className="flex items-center justify-center gap-2">
                                                         {/* Tombol Terima */}
                                                         <button
@@ -393,7 +599,7 @@ export default function EventOrdersPage() {
 
                         <form onSubmit={handleConfirmReject} className="mt-4 flex flex-col gap-3">
                             <p className="text-xs text-[#556056] leading-relaxed">
-                                Anda akan menolak pesanan acara <strong className="text-[#2F3931]">{rejectModalData.event_name}</strong> dari klien <strong className="text-[#2F3931]">{rejectModalData.client?.name}</strong>.
+                                Anda akan menolak pesanan acara <strong className="text-[#2F3931]">{rejectModalData.event_name}</strong> dari klien <strong className="text-[#2F3931]">{rejectModalData.manual_client_name || rejectModalData.client?.name}</strong>.
                             </p>
 
                             <div>
@@ -426,6 +632,170 @@ export default function EventOrdersPage() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Setujui Pembatalan Acara */}
+            {approveCancelModalData && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
+                    <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8E2D7] shadow-xl">
+                        <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D7]">
+                            <h3 className="text-sm font-extrabold text-[#2F3931]">
+                                Setujui Pembatalan Acara
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={() => setApproveCancelModalData(null)}
+                                className="text-[#738075] hover:text-[#2F3931] font-bold text-base"
+                            >
+                                &times;
+                            </button>
+                        </div>
+
+                        <div className="mt-4 flex flex-col gap-3">
+                            <div className="bg-[#FAF6F0] rounded-xl p-3 border border-[#E8E2D7] text-xs">
+                                <p className="text-[#738075]">Acara:</p>
+                                <p className="font-bold text-[#2F3931]">{approveCancelModalData.event_name}</p>
+                                <p className="text-[#738075] mt-1">Klien: {approveCancelModalData.client?.name || approveCancelModalData.manual_client_name}</p>
+                                <p className="text-[#738075] mt-1">Alasan Klien: &ldquo;{approveCancelModalData.cancellation_request_reason}&rdquo;</p>
+                            </div>
+
+                            {/* Info DP */}
+                            {(() => {
+                                const days = getDaysUntil(approveCancelModalData.event_date);
+                                if (days === null) return null;
+                                return days <= 30 ? (
+                                    <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-900">
+                                        <p className="font-bold flex items-center gap-1.5">
+                                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                            <span>Informasi DP Hangus (H-{days})</span>
+                                        </p>
+                                        <p className="text-[11px] mt-0.5 leading-relaxed">
+                                            Karena acara kurang dari 30 hari lagi, uang Down Payment (DP) tidak dikembalikan ke klien (hangus).
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-3 text-xs text-emerald-900">
+                                        <p className="font-bold flex items-center gap-1.5">
+                                            <Coins className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                            <span>DP Berpotensi Dikembalikan ({days} hari lagi)</span>
+                                        </p>
+                                        <p className="text-[11px] mt-0.5 leading-relaxed">
+                                            Acara masih lebih dari 30 hari lagi. Sistem akan memberitahukan klien bahwa proses refund DP akan ditindaklanjuti.
+                                        </p>
+                                    </div>
+                                );
+                            })()}
+
+                            <div>
+                                <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
+                                    Catatan untuk Klien (Opsional, dikirim ke Gmail)
+                                </label>
+                                <textarea
+                                    rows="3"
+                                    value={approveCancelNote}
+                                    onChange={(e) => setApproveCancelNote(e.target.value)}
+                                    placeholder="Contoh: Permintaan pembatalan telah kami terima. Tim kami akan menghubungi Anda terkait refund..."
+                                    className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl p-3 text-xs text-[#2F3931] placeholder-[#738075] focus:outline-none focus:ring-2 focus:ring-[#99CDD8]"
+                                />
+                            </div>
+
+                            <div className="pt-3 border-t border-[#E8E2D7] flex items-center justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setApproveCancelModalData(null)}
+                                    className="px-4 py-2 rounded-xl text-xs font-bold border border-[#E8E2D7] text-[#738075] hover:bg-[#FAF6F0]"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={approveCancelMutation.isPending}
+                                    onClick={() => {
+                                        approveCancelMutation.mutate({
+                                            eventId: approveCancelModalData.id,
+                                            review_note: approveCancelNote.trim() || null,
+                                        });
+                                    }}
+                                    className="px-4 py-2 rounded-xl text-xs font-bold bg-[#224436] hover:bg-[#1b362b] text-white shadow-xs transition disabled:opacity-50 cursor-pointer"
+                                >
+                                    {approveCancelMutation.isPending ? "Memproses..." : "Ya, Setujui Pembatalan"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Tolak Pembatalan Acara */}
+            {rejectCancelModalData && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
+                    <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8E2D7] shadow-xl">
+                        <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D7]">
+                            <h3 className="text-sm font-extrabold text-[#2F3931]">
+                                Tolak Permintaan Pembatalan
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={() => setRejectCancelModalData(null)}
+                                className="text-[#738075] hover:text-[#2F3931] font-bold text-base"
+                            >
+                                &times;
+                            </button>
+                        </div>
+
+                        <div className="mt-4 flex flex-col gap-3">
+                            <p className="text-xs text-[#556056] leading-relaxed">
+                                Anda akan menolak permintaan pembatalan acara <strong className="text-[#2F3931]">{rejectCancelModalData.event_name}</strong>. Acara akan tetap berjalan sesuai jadwal.
+                            </p>
+
+                            <div>
+                                <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
+                                    Alasan Penolakan <span className="text-rose-500">*</span> (Wajib, minimal 5 karakter, dikirim ke Gmail klien)
+                                </label>
+                                <textarea
+                                    rows="3"
+                                    value={rejectCancelNote}
+                                    onChange={(e) => {
+                                        setRejectCancelNote(e.target.value);
+                                        setRejectCancelError("");
+                                    }}
+                                    placeholder="Contoh: Maaf, persiapan panggung dan vendor sudah 80% siap sehingga acara tidak dapat dibatalkan..."
+                                    className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl p-3 text-xs text-[#2F3931] placeholder-[#738075] focus:outline-none focus:ring-2 focus:ring-[#99CDD8]"
+                                />
+                                {rejectCancelError && (
+                                    <p className="text-[11px] text-rose-600 font-semibold mt-1">{rejectCancelError}</p>
+                                )}
+                            </div>
+
+                            <div className="pt-3 border-t border-[#E8E2D7] flex items-center justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setRejectCancelModalData(null)}
+                                    className="px-4 py-2 rounded-xl text-xs font-bold border border-[#E8E2D7] text-[#738075] hover:bg-[#FAF6F0]"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={rejectCancelMutation.isPending || !rejectCancelNote.trim() || rejectCancelNote.trim().length < 5}
+                                    onClick={() => {
+                                        if (rejectCancelNote.trim().length < 5) {
+                                            setRejectCancelError("Catatan penolakan minimal 5 karakter.");
+                                            return;
+                                        }
+                                        rejectCancelMutation.mutate({
+                                            eventId: rejectCancelModalData.id,
+                                            review_note: rejectCancelNote.trim(),
+                                        });
+                                    }}
+                                    className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white shadow-xs transition cursor-pointer"
+                                >
+                                    {rejectCancelMutation.isPending ? "Memproses..." : "Konfirmasi Tolak Pembatalan"}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

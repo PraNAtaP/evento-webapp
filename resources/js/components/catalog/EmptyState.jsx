@@ -1,4 +1,5 @@
 import React from "react";
+import { Search } from "lucide-react";
 
 export default function EmptyState({
     title = "Data Tidak Ditemukan",
@@ -11,8 +12,8 @@ export default function EmptyState({
         <div
             className={`p-10 bg-white rounded-2xl border border-[#E8E2D7] text-center shadow-xs flex flex-col items-center justify-center gap-3 ${className}`}
         >
-            <div className="w-12 h-12 rounded-2xl bg-[#FAF6F0] text-[#657166] border border-[#E8E2D7] flex items-center justify-center font-bold text-xl">
-                🔍
+            <div className="w-12 h-12 rounded-2xl bg-[#FAF6F0] text-[#657166] border border-[#E8E2D7] flex items-center justify-center font-bold">
+                <Search className="w-5 h-5 text-[#657166]" />
             </div>
             <div>
                 <h3 className="text-sm font-bold text-[#2F3931]">{title}</h3>

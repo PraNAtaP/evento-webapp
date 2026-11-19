@@ -12,7 +12,7 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
-     * Handle an incoming authentication request.
+     * Menangani proses login pengguna.
      */
     public function login(Request $request): JsonResponse
     {
@@ -23,7 +23,16 @@ class AuthController extends Controller
 
         $user = User::where('email', $validated['email'])->first();
 
-        if (! $user || ! Hash::check($validated['password'], $user->password)) {
+        // Memeriksa apakah akun Client sudah dihapus.
+        $clientDeleted = $user
+            && $user->role === 'client'
+            && $user->deleted_at !== null;
+
+        if (
+            ! $user
+            || $clientDeleted
+            || ! Hash::check($validated['password'], $user->password)
+        ) {
             throw ValidationException::withMessages([
                 'email' => ['Email atau password yang Anda masukkan salah.'],
             ]);
@@ -32,6 +41,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $vendorData = null;
+
         if ($user->vendor) {
             $vendorData = [
                 'id' => $user->vendor->id,
@@ -41,6 +51,9 @@ class AuthController extends Controller
                 'address' => $user->vendor->address,
                 'status' => $user->vendor->status,
                 'rejection_reason' => $user->vendor->rejection_reason,
+                'bank_name' => $user->vendor->bank_name,
+                'bank_account_number' => $user->vendor->bank_account_number,
+                'bank_account_holder' => $user->vendor->bank_account_holder,
             ];
         }
 
@@ -52,19 +65,22 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'email_verified_at' => $user->email_verified_at,
+                'is_email_verified' => $user->hasVerifiedEmail(),
                 'vendor' => $vendorData,
             ],
         ]);
     }
 
     /**
-     * Get the authenticated User.
+     * Mendapatkan data pengguna yang sedang login.
      */
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
 
         $vendorData = null;
+
         if ($user->vendor) {
             $vendorData = [
                 'id' => $user->vendor->id,
@@ -74,6 +90,9 @@ class AuthController extends Controller
                 'address' => $user->vendor->address,
                 'status' => $user->vendor->status,
                 'rejection_reason' => $user->vendor->rejection_reason,
+                'bank_name' => $user->vendor->bank_name,
+                'bank_account_number' => $user->vendor->bank_account_number,
+                'bank_account_holder' => $user->vendor->bank_account_holder,
             ];
         }
 
@@ -83,13 +102,15 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'email_verified_at' => $user->email_verified_at,
+                'is_email_verified' => $user->hasVerifiedEmail(),
                 'vendor' => $vendorData,
             ],
         ]);
     }
 
     /**
-     * Log the user out of the application.
+     * Menangani proses logout pengguna.
      */
     public function logout(Request $request): JsonResponse
     {

@@ -89,10 +89,10 @@ class EventSummaryController extends Controller
             ? round(($grossMargin / $recognizedRevenue) * 100, 1)
             : 0.0;
 
-        // 4. Baris Kedua: Uang Muka Diterima (akumulatif acara belum done & bukan rejected)
+        // 4. Baris Kedua: Uang Muka Diterima (akumulatif acara aktif: belum selesai, tidak ditolak, dan tidak dibatalkan)
         $deferredRevenue = (float) Payment::where('status', 'paid')
             ->whereHas('event', function ($query) {
-                $query->whereNotIn('kanban_status', ['done', 'rejected']);
+                $query->whereNotIn('kanban_status', ['done', 'rejected', 'cancelled']);
             })
             ->sum('nominal');
 
@@ -103,7 +103,7 @@ class EventSummaryController extends Controller
             ->sum('nominal');
 
         // 5. Piutang / Sisa Tagihan (agreed_price - pembayaran paid untuk seluruh acara aktif)
-        $activeEventsWithPayments = Event::whereNotIn('kanban_status', ['done', 'rejected'])
+        $activeEventsWithPayments = Event::whereNotIn('kanban_status', ['done', 'rejected', 'cancelled'])
             ->whereNotNull('agreed_price')
             ->where('agreed_price', '>', 0)
             ->with(['payments' => function ($query) {
@@ -129,8 +129,8 @@ class EventSummaryController extends Controller
                 return max(0.0, (float) $event->agreed_price - $paid);
             });
 
-        // 6. Jumlah Acara Aktif (belum done dan bukan rejected)
-        $activeEventsCount = Event::whereNotIn('kanban_status', ['done', 'rejected'])->count();
+        // 6. Jumlah Acara Aktif (belum done, bukan rejected, dan bukan cancelled)
+        $activeEventsCount = Event::whereNotIn('kanban_status', ['done', 'rejected', 'cancelled'])->count();
 
         // 7. Diagram Pendapatan Bulanan: 6 bulan ke belakang dari bulan terpilih
         $monthlyChart = [];
@@ -168,9 +168,34 @@ class EventSummaryController extends Controller
             'done' => Event::where('kanban_status', 'done')->count(),
         ];
 
+        // Acara aktif terdekat yang belum selesai dan tidak dibatalkan
+        $nearestEvent = Event::where('event_date', '>=', now()->toDateString())
+            ->whereNotIn('kanban_status', ['cancelled', 'rejected', 'done'])
+            ->orderBy('event_date', 'asc')
+            ->first();
+
+        $upcomingEvent = null;
+        if ($nearestEvent) {
+            $eventDate = Carbon::parse($nearestEvent->event_date)->startOfDay();
+            $today = now()->startOfDay();
+            $daysDiff = (int) $today->diffInDays($eventDate, false);
+
+            $upcomingEvent = [
+                'id' => $nearestEvent->id,
+                'name' => $nearestEvent->event_name,
+                'category' => $nearestEvent->category,
+                'event_date' => $nearestEvent->event_date,
+                'venue' => $nearestEvent->venue,
+                'days_diff' => $daysDiff,
+                'badge' => $daysDiff === 0 ? 'Hari Ini' : ($daysDiff > 0 ? "H-{$daysDiff} Acara" : 'Berlalu'),
+                'status' => $nearestEvent->kanban_status,
+            ];
+        }
+
         return response()->json([
             'selected_month' => $selectedMonth,
             'selected_month_label' => $selectedMonthLabel,
+            'upcoming_event' => $upcomingEvent,
             'financial' => [
                 'recognized_revenue' => $recognizedRevenue,
                 'previous_month_recognized_revenue' => $prevRecognizedRevenue,

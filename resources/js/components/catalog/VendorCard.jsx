@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { MapPin } from "lucide-react";
 
 export default function VendorCard({ vendor }) {
     const [imageError, setImageError] = useState(false);
@@ -49,7 +50,7 @@ export default function VendorCard({ vendor }) {
 
                     {vendor.address && (
                         <p className="text-[11px] text-[#738075] truncate mt-0.5 flex items-center gap-1">
-                            <span>📍</span>
+                            <MapPin className="w-3.5 h-3.5 text-[#738075] shrink-0" />
                             <span>{vendor.address}</span>
                         </p>
                     )}

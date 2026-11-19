@@ -1,11 +1,24 @@
-    const STAGES = [
-    { key: 'request', label: 'Pengajuan', desc: 'Acara sedang diajukan', icon: '📝' },
-    { key: 'drafting_quotation', label: 'Penyusunan Penawaran', desc: 'EO sedang menyusun penawaran', icon: '📋' },
-    { key: 'client_review', label: 'Review Klien', desc: 'Menunggu persetujuan Anda', icon: '🔍' },
-    { key: 'awaiting_dp', label: 'Menunggu DP', desc: 'Menunggu pembayaran DP', icon: '💳' },
-    { key: 'on_progress', label: 'Acara Berlangsung', desc: 'Acara sedang dipersiapkan dan dijalankan', icon: '🎪' }, // ← Ubah Label
-    { key: 'done', label: 'Selesai', desc: 'Acara telah selesai', icon: '🎉' },
-    ];
+import {
+    Calendar,
+    Clock,
+    Check,
+    RefreshCw,
+    FileText,
+    ClipboardList,
+    Search,
+    CreditCard,
+    Sparkles,
+    Trophy,
+} from "lucide-react";
+
+const STAGES = [
+    { key: 'request', label: 'Pengajuan', desc: 'Acara sedang diajukan', Icon: FileText },
+    { key: 'drafting_quotation', label: 'Penyusunan Penawaran', desc: 'EO sedang menyusun penawaran', Icon: ClipboardList },
+    { key: 'client_review', label: 'Review Klien', desc: 'Menunggu persetujuan Anda', Icon: Search },
+    { key: 'awaiting_dp', label: 'Menunggu DP', desc: 'Menunggu pembayaran DP', Icon: CreditCard },
+    { key: 'on_progress', label: 'Acara Berlangsung', desc: 'Acara sedang dipersiapkan dan dijalankan', Icon: Sparkles },
+    { key: 'done', label: 'Selesai', desc: 'Acara telah selesai', Icon: Trophy },
+];
 
     export default function ProgressTimeline({ event }) {
     const currentIndex = STAGES.findIndex((s) => s.key === event.kanban_status);
@@ -20,6 +33,15 @@
         });
     };
 
+    // Helper untuk handle URL lokal & Cloudinary
+    const getImageUrl = (path) => {
+        if (!path) return null;
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+        }
+        return `/storage/${path}`;
+    };
+
     return (
         <div className="bg-white rounded-2xl border border-[#E8E2D7] p-5 shadow-sm hover:shadow-md transition-shadow mb-4">
         {/* Header Kartu */}
@@ -29,14 +51,26 @@
                 {event.event_name === "-" ? "Acara Tanpa Nama" : event.event_name}
             </h3>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[11px] font-medium text-[#738075]">
-                <span className="flex items-center gap-1">📅 Pelaksanaan: {formatTanggal(event.event_date)}</span>
+                <span className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-[#738075]" />
+                    Pelaksanaan: {formatTanggal(event.event_date)}
+                </span>
                 <span className="hidden sm:inline">•</span>
-                <span className="flex items-center gap-1">🔄 Terakhir update: {formatTanggal(event.updated_at)}</span>
+                <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#738075]" />
+                    Terakhir update: {formatTanggal(event.updated_at)}
+                </span>
             </div>
             </div>
-            <span className="px-2.5 py-1 text-[11px] font-bold text-[#2F3931] bg-[#DAEBE3] rounded-md border border-[#CFD8C4] shrink-0 ml-2">
-            {STAGES[safeIndex]?.label}
-            </span>
+            {event.kanban_status === 'cancelled' ? (
+                <span className="px-2.5 py-1 text-[11px] font-bold text-rose-800 bg-rose-100 rounded-md border border-rose-300 shrink-0 ml-2">
+                    Dibatalkan
+                </span>
+            ) : (
+                <span className="px-2.5 py-1 text-[11px] font-bold text-[#2F3931] bg-[#DAEBE3] rounded-md border border-[#CFD8C4] shrink-0 ml-2">
+                    {STAGES[safeIndex]?.label}
+                </span>
+            )}
         </div>
 
         {/* Timeline Vertikal */}
@@ -52,7 +86,13 @@
                         isDone ? 'bg-[#657166] text-white' : isCurrent ? 'bg-[#99CDD8] text-[#2F3931] ring-4 ring-[#DAEBE3] scale-110 font-bold' : 'bg-[#F3F0EA] text-[#A8B2A4] border border-[#CFD8C4]'
                     }`}
                     >
-                    {isDone ? '✓' : isCurrent ? '●' : stage.icon}
+                    {isDone ? (
+                        <Check className="w-4 h-4 stroke-[2.5]" />
+                    ) : isCurrent ? (
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#2F3931]" />
+                    ) : (
+                        <stage.Icon className="w-3.5 h-3.5" />
+                    )}
                     </div>
                     {i < STAGES.length - 1 && (
                     <div className={`w-0.5 h-10 my-0.5 ${isDone ? 'bg-[#657166]' : 'bg-[#E8E2D7]'}`} />
@@ -71,8 +111,7 @@
             })}
         </div>
 
-        {/* SECTION BUKTI PROGRESS VENDOR (Revisi PM) */}
-        {/* Hanya muncul kalau status sudah masuk 'on_progress' atau 'done' DAN ada log-nya */}
+        {/* SECTION BUKTI PROGRESS VENDOR */}
         {event.vendor_assignments?.some(a => a.progress_logs?.length > 0) && (
             <div className="mt-6 pt-5 border-t border-[#E8E2D7]">
             <h4 className="text-xs uppercase font-bold tracking-wider text-[#738075] mb-4">
@@ -93,10 +132,10 @@
                     <div className="space-y-3">
                         {assignment.progress_logs.map((log) => (
                         <div key={log.id} className="flex flex-col sm:flex-row gap-3 bg-white p-3 rounded-lg border border-[#E8E2D7]">
-                            {/* Foto Bukti */}
+                            {/* Foto Bukti (FIXED) */}
                             {log.photo_url && (
                             <img 
-                                src={`/storage/${log.photo_url}`} 
+                                src={getImageUrl(log.photo_url)} 
                                 alt="Bukti Progress" 
                                 className="w-full sm:w-32 h-24 object-cover rounded-md border border-[#CFD8C4]"
                             />
@@ -120,9 +159,9 @@
             </div>
         )}
 
-        {/* Footer: Terakhir Update (Tetap dipertahankan sesuai revisi sebelumnya) */}
+        {/* Footer */}
         <div className="mt-4 pt-3 border-t border-[#E8E2D7] text-[11px] font-medium text-[#738075] flex items-center gap-1.5">
-            <span>🔄</span>
+            <RefreshCw className="w-3.5 h-3.5 text-[#738075]" />
             <span>Terakhir diperbarui: {formatTanggal(event.updated_at)}</span>
         </div>
         </div>

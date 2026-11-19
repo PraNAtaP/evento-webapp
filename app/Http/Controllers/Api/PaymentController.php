@@ -45,6 +45,25 @@ class PaymentController extends Controller
             ], 403);
         }
 
+        if (in_array($payment->event->kanban_status, ['cancelled', 'rejected'], true)) {
+            return response()->json([
+                'message' => 'Tidak dapat mengunggah bukti bayar untuk acara yang sudah dibatalkan atau ditolak.',
+            ], 422);
+        }
+
+        if ($payment->payment_type === 'pelunasan') {
+            $isDpPaid = $payment->event->payments()
+                ->where('payment_type', 'dp')
+                ->where('status', 'paid')
+                ->exists();
+
+            if (! $isDpPaid) {
+                return response()->json([
+                    'message' => 'Uang muka (DP) harus dilunasi dan diverifikasi terlebih dahulu sebelum mengunggah bukti pelunasan.',
+                ], 422);
+            }
+        }
+
         if ($payment->status !== 'unpaid') {
             return response()->json([
                 'message' => 'Bukti transfer sudah diunggah atau sudah diverifikasi.',
@@ -74,6 +93,25 @@ class PaymentController extends Controller
         VerifyPaymentRequest $request,
         Payment $payment
     ): JsonResponse {
+        if (in_array($payment->event->kanban_status, ['cancelled', 'rejected'], true)) {
+            return response()->json([
+                'message' => 'Tidak dapat memverifikasi pembayaran untuk acara yang sudah dibatalkan atau ditolak.',
+            ], 422);
+        }
+
+        if ($payment->payment_type === 'pelunasan' && $request->action === 'approve') {
+            $isDpPaid = $payment->event->payments()
+                ->where('payment_type', 'dp')
+                ->where('status', 'paid')
+                ->exists();
+
+            if (! $isDpPaid) {
+                return response()->json([
+                    'message' => 'Tidak dapat memverifikasi pelunasan karena pembayaran DP belum lunas.',
+                ], 422);
+            }
+        }
+
         if ($payment->status !== 'pending_verification') {
             return response()->json([
                 'message' => 'Pembayaran ini belum dalam status menunggu verifikasi.',
@@ -83,8 +121,10 @@ class PaymentController extends Controller
         $user = $request->user();
 
         if ($request->action === 'approve') {
+            $receiptNumber = sprintf('RCP/EVN/%s/%04d-%s', now()->format('Ym'), $payment->id, strtoupper($payment->payment_type));
             $payment->update([
                 'status' => 'paid',
+                'receipt_number' => $receiptNumber,
                 'verified_by' => $user->id,
                 'verified_at' => now(),
                 'rejection_note' => null,

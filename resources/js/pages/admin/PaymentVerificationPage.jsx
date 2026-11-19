@@ -1,11 +1,19 @@
-    import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-    import { useNavigate } from 'react-router-dom';
-    import api from '../../api/axios';
-    import PaymentCard from '../../components/payment/PaymentCard';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import api from '../../api/axios';
+import PaymentCard from '../../components/payment/PaymentCard';
+import Toast from '../../components/ui/Toast'; // Import Toast
+import RejectionModal from '../../components/ui/RejectionModal'; // Import Modal Reject
 
 export default function PaymentVerificationPage() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+
+    // State untuk Toast dan Modal Reject
+    const [toast, setToast] = useState({ type: 'success', message: '' });
+    const [rejectModalOpen, setRejectModalOpen] = useState(false);
+    const [selectedPayment, setSelectedPayment] = useState(null);
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['payments'],
@@ -24,26 +32,30 @@ export default function PaymentVerificationPage() {
             return res.data;
         },
         onSuccess: (data) => {
-            alert(data.message);
+            setToast({ type: 'success', message: data.message });
             queryClient.invalidateQueries({ queryKey: ['payments'] });
         },
         onError: (err) => {
-            alert('Gagal: ' + (err.response?.data?.message || err.message));
+            setToast({ type: 'error', message: 'Gagal: ' + (err.response?.data?.message || err.message) });
         },
     });
 
     const handleVerify = (payment, action) => {
-        let rejectionNote = null;
-
         if (action === 'reject') {
-            rejectionNote = prompt('Alasan penolakan:');
-            if (!rejectionNote) return;
+            setSelectedPayment(payment);
+            setRejectModalOpen(true);
+        } else {
+            // Aksi Approve langsung eksekusi
+            verifyMutation.mutate({ paymentId: payment.id, action, rejectionNote: null });
         }
+    };
 
-        verifyMutation.mutate({
-            paymentId: payment.id,
-            action,
-            rejectionNote,
+    const handleConfirmReject = (note) => {
+        setRejectModalOpen(false);
+        verifyMutation.mutate({ 
+            paymentId: selectedPayment.id, 
+            action: 'reject', 
+            rejectionNote: note 
         });
     };
 
@@ -106,27 +118,28 @@ export default function PaymentVerificationPage() {
                 </div>
             )}
 
-        {/* Tombol Kembali di bawah */}
-        <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-blue-600 mt-6 transition-colors cursor-pointer"
-        >
-            <svg
-            width="16"
-            height="16"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
+            {/* Tombol Kembali di bawah */}
+            <button
+                onClick={() => navigate(-1)}
+                className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-blue-600 mt-6 transition-colors cursor-pointer"
             >
-            <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Kembali
+            </button>
+
+            {/* Komponen Toast & Modal */}
+            <Toast 
+                type={toast.type} 
+                message={toast.message} 
+                onClose={() => setToast({ ...toast, message: '' })} 
             />
-            </svg>
-            Kembali
-        </button>
+            <RejectionModal 
+                isOpen={rejectModalOpen} 
+                onConfirm={handleConfirmReject} 
+                onCancel={() => setRejectModalOpen(false)} 
+            />
         </div>
     );
 }

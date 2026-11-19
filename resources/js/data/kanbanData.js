@@ -172,16 +172,16 @@ export const getPaymentStatus = (agreedPrice = 0, paidAmount = 0) => {
         return {
             label: `DP Lunas (${percentage}%)`,
             percentage,
-            badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
-            dotColor: "bg-blue-500",
+            badgeClass: "bg-[#99CDD8]/30 text-[#1D4A54] border-[#85BAC5]",
+            dotColor: "bg-[#1D4A54]",
         };
     }
 
     return {
         label: `Termin (${percentage}%)`,
         percentage,
-        badgeClass: "bg-indigo-50 text-indigo-700 border-indigo-200",
-        dotColor: "bg-indigo-500",
+        badgeClass: "bg-[#DAEBE3] text-[#224436] border-[#BCD4C9]",
+        dotColor: "bg-[#506B59]",
     };
 };
 

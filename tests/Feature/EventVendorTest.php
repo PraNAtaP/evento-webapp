@@ -358,7 +358,7 @@ class EventVendorTest extends TestCase
 
             $this->assertSame($show, $data['show_vendor_section'], "show_vendor_section untuk {$status}");
             $this->assertSame($manage, $data['can_manage_vendors'], "can_manage_vendors untuk {$status}");
-            $this->assertArrayNotHasKey('kanban_status', $data);
+            $this->assertSame($status, $data['kanban_status']);
         }
     }
 

@@ -1,14 +1,20 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { DialogProvider } from "./context/DialogContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
 import VendorRegister from "./pages/auth/VendorRegister";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import EoSmartCalendarPage from "./pages/admin/EoSmartCalendarPage";
 import EventOrdersPage from "./pages/admin/EventOrdersPage";
 import EventCategoryPage from "./pages/admin/EventCategoryPage";
 import AdminAccountPage from "./pages/admin/AdminAccountPage";
+import AdminClientPage from "./pages/admin/AdminClientPage";
 import VendorRegistrationPage from "./pages/admin/VendorRegistrationPage";
 import KanbanPage from "./pages/admin/KanbanPage";
 import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
@@ -22,6 +28,7 @@ import PaymentTrackingPage from "./pages/client/PaymentTrackingPage";
 import OfferReviewPage from "./pages/client/OfferReviewPage";
 import VendorCatalogIndex from "./pages/vendors/VendorCatalogIndex";
 import VendorCatalogShow from "./pages/vendors/VendorCatalogShow";
+import ProgressApprovalPage from './pages/admin/ProgressApprovalPage';
 
 const queryClient = new QueryClient();
 
@@ -53,11 +60,16 @@ export default function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <AuthProvider>
-                <BrowserRouter>
+                <DialogProvider>
+                    <BrowserRouter>
                     <Routes>
                         <Route path="/" element={<RootRedirect />} />
 
                         <Route path="/login" element={<Login />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/register/client" element={<Register />} />
                         <Route path="/register/vendor" element={<VendorRegister />} />
                         <Route path="/vendor/register" element={<VendorRegister />} />
 
@@ -75,6 +87,15 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["eo"]}>
                                         <EventOrdersPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/smart-calendar"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <EoSmartCalendarPage />
                                     </ProtectedRoute>
                                 }
                             />
@@ -127,12 +148,31 @@ export default function App() {
                                 }
                             />
 
+                            <Route
+                                path="/admin/progress-logs"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <ProgressApprovalPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                             {/* Rute Kelola Akun Admin untuk EO */}
                             <Route
                                 path="/admin/admins"
                                 element={
                                     <ProtectedRoute allowedRoles={["eo"]}>
                                         <AdminAccountPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Rute Kelola Akun Client untuk EO */}
+                            <Route
+                                path="/admin/clients"
+                                element={
+                                    <ProtectedRoute allowedRoles={["eo"]}>
+                                        <AdminClientPage />
                                     </ProtectedRoute>
                                 }
                             />
@@ -197,7 +237,7 @@ export default function App() {
                             <Route
                                 path="/client/booking"
                                 element={
-                                    <ProtectedRoute allowedRoles={["client"]}>
+                                    <ProtectedRoute allowedRoles={["client"]} requireVerified={true}>
                                         <ClientBookingPage />
                                     </ProtectedRoute>
                                 }
@@ -223,7 +263,7 @@ export default function App() {
                                 }
                             />
 
-                            {/* Rute Review Tawaran untuk Client */} 
+                            {/* Rute Review Tawaran untuk Client */}
                             <Route
                                 path="/client/offers"
                                 element={
@@ -250,15 +290,16 @@ export default function App() {
                                     </ProtectedRoute>
                                 }
                             />
-                            </Route>
+                        </Route>
 
-                            {/* Fallback */}
-                            <Route
-                                path="*"
-                                element={<Navigate to="/" replace />}
-                            />
+                        {/* Fallback */}
+                        <Route
+                            path="*"
+                            element={<Navigate to="/" replace />}
+                        />
                     </Routes>
                 </BrowserRouter>
+                </DialogProvider>
             </AuthProvider>
         </QueryClientProvider>
     );

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useDialog } from "../context/DialogContext";
 
 /**
  * Mapping rute ke judul halaman dan subjudul ramah pengguna
@@ -9,6 +10,10 @@ const ROUTE_TITLES = {
     "/admin/orders": {
         title: "Pesanan Acara Masuk",
         subtitle: "Tinjau dan proses persetujuan atau penolakan booking baru dari klien",
+    },
+    "/admin/smart-calendar": {
+        title: "Smart Calendar EO",
+        subtitle: "Input pesanan acara mendadak secara manual atau tinjau jadwal terisi",
     },
     "/admin/dashboard": {
         title: "Dashboard Analitik",
@@ -33,6 +38,10 @@ const ROUTE_TITLES = {
     "/admin/admins": {
         title: "Kelola Akun Admin",
         subtitle: "Daftar, buat akun baru, dan kelola kredensial tim admin EO",
+    },
+    "/admin/progress-logs": {
+        title: "Review Progress Vendor",
+        subtitle: "Tinjau dan bagikan update progress dari vendor ke klien",
     },
     "/vendor/dashboard": {
         title: "Kelola Paket Jasa",
@@ -74,6 +83,7 @@ const ROUTE_TITLES = {
 
 export default function Header({ onToggleSidebar }) {
     const { user, logout } = useAuth();
+    const { showAlert } = useDialog();
     const location = useLocation();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -210,7 +220,11 @@ export default function Header({ onToggleSidebar }) {
                                     type="button"
                                     onClick={() => {
                                         setIsDropdownOpen(false);
-                                        alert(`Profil: ${user?.name}\nEmail: ${user?.email}\nRole: ${user?.role?.toUpperCase()}`);
+                                        showAlert({
+                                            title: "Profil Pengguna",
+                                            message: `Nama: ${user?.name || "-"}\nEmail: ${user?.email || "-"}\nRole: ${user?.role ? user.role.toUpperCase() : "-"}`,
+                                            type: "info",
+                                        });
                                     }}
                                     className="w-full text-left px-4 py-2 hover:bg-[#FAF6F0] text-[#2F3931] font-semibold flex items-center gap-2.5 transition cursor-pointer"
                                 >
@@ -223,7 +237,11 @@ export default function Header({ onToggleSidebar }) {
                                     type="button"
                                     onClick={() => {
                                         setIsDropdownOpen(false);
-                                        alert("Pengaturan sistem & preferensi notifikasi.");
+                                        showAlert({
+                                            title: "Pengaturan Akun",
+                                            message: "Pengaturan sistem & preferensi notifikasi saat ini aktif secara default.",
+                                            type: "info",
+                                        });
                                     }}
                                     className="w-full text-left px-4 py-2 hover:bg-[#FAF6F0] text-[#2F3931] font-semibold flex items-center gap-2.5 transition cursor-pointer"
                                 >

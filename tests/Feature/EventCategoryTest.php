@@ -99,7 +99,10 @@ class EventCategoryTest extends TestCase
         ]);
 
         // Buat 2 event bertema wedding
-        Event::factory()->count(2)->create([
+        Event::factory()->count(2)->sequence(
+            ['event_date' => now()->addDays(70)->format('Y-m-d')],
+            ['event_date' => now()->addDays(71)->format('Y-m-d')],
+        )->create([
             'category' => 'wedding',
         ]);
 

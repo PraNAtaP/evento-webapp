@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\EventVendorAssignmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,10 +24,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'package_name',
     'package_price',
     'eo_offer_status',
+    'status',
     'client_approval',
     'locked_price',
     'notes',
     'rejection_reason',
+    'payout_status',
+    'payout_nominal',
+    'payout_at',
+    'payout_proof_url',
+    'payout_receipt_number',
+    'payout_note',
 ])]
 #[Hidden(['notes', 'package_price'])]
 class EventVendorAssignment extends Model
@@ -57,6 +65,17 @@ class EventVendorAssignment extends Model
     }
 
     /**
+     * Alias atribut status untuk kompatibilitas ke eo_offer_status.
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->eo_offer_status,
+            set: fn ($value) => ['eo_offer_status' => $value]
+        );
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -66,7 +85,37 @@ class EventVendorAssignment extends Model
         return [
             'locked_price' => 'decimal:2',
             'package_price' => 'decimal:2',
+            'payout_nominal' => 'decimal:2',
+            'payout_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Accessor nomor invoice tagihan vendor.
+     */
+    public function getVendorInvoiceNumberAttribute(): string
+    {
+        $ym = $this->created_at ? $this->created_at->format('Ym') : date('Ym');
+
+        return sprintf('INV/VND/%s/%04d', $ym, $this->id);
+    }
+
+    /**
+     * Accessor nomor voucher pencairan honor ke vendor.
+     */
+    public function getPayoutReceiptNumberAttribute(?string $value): ?string
+    {
+        if (! empty($value)) {
+            return $value;
+        }
+
+        if ($this->payout_status !== 'paid') {
+            return null;
+        }
+
+        $ym = $this->payout_at ? $this->payout_at->format('Ym') : date('Ym');
+
+        return sprintf('VCH/EVN/%s/%04d', $ym, $this->id);
     }
 
     /**
