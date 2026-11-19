@@ -168,9 +168,34 @@ class EventSummaryController extends Controller
             'done' => Event::where('kanban_status', 'done')->count(),
         ];
 
+        // Acara aktif terdekat yang belum selesai dan tidak dibatalkan
+        $nearestEvent = Event::where('event_date', '>=', now()->toDateString())
+            ->whereNotIn('kanban_status', ['cancelled', 'rejected', 'done'])
+            ->orderBy('event_date', 'asc')
+            ->first();
+
+        $upcomingEvent = null;
+        if ($nearestEvent) {
+            $eventDate = Carbon::parse($nearestEvent->event_date)->startOfDay();
+            $today = now()->startOfDay();
+            $daysDiff = (int) $today->diffInDays($eventDate, false);
+
+            $upcomingEvent = [
+                'id' => $nearestEvent->id,
+                'name' => $nearestEvent->event_name,
+                'category' => $nearestEvent->category,
+                'event_date' => $nearestEvent->event_date,
+                'venue' => $nearestEvent->venue,
+                'days_diff' => $daysDiff,
+                'badge' => $daysDiff === 0 ? 'Hari Ini' : ($daysDiff > 0 ? "H-{$daysDiff} Acara" : 'Berlalu'),
+                'status' => $nearestEvent->kanban_status,
+            ];
+        }
+
         return response()->json([
             'selected_month' => $selectedMonth,
             'selected_month_label' => $selectedMonthLabel,
+            'upcoming_event' => $upcomingEvent,
             'financial' => [
                 'recognized_revenue' => $recognizedRevenue,
                 'previous_month_recognized_revenue' => $prevRecognizedRevenue,

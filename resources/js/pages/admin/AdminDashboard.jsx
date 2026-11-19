@@ -373,27 +373,56 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Kolom Kanan: Cuaca BMKG & Performa Vendor (Sesuai Mockup 4) */}
+                {/* Kolom Kanan: Jadwal Acara Terdekat & Kesiapan */}
                 <div className="lg:col-span-4 flex flex-col gap-5">
-                    {/* Widget Cuaca BMKG Pastel Mint */}
+                    {/* Widget Acara Terdekat */}
                     <div className="bg-[#DAEBE3] rounded-2xl p-5 border border-[#CFD8C4] shadow-xs text-[#2F3931]">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#424C43]">
-                                Cuaca BMKG
+                                Acara Terdekat
                             </span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-[#2F3931]">
-                                H-3 Acara
-                            </span>
+                            {summary?.upcoming_event ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-[#2F3931] border border-[#B6C2AA]">
+                                    {summary.upcoming_event.badge}
+                                </span>
+                            ) : (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-[#738075]">
+                                    Tidak ada
+                                </span>
+                            )}
                         </div>
-                        <h4 className="text-sm font-bold text-[#2F3931]">
-                            Ulang Tahun Dimas
-                        </h4>
-                        <p className="text-xs text-[#556056] mt-1">
-                            Malang: hujan ringan, 21 sampai 27 derajat C.
-                        </p>
-                        <p className="text-[11px] text-[#424C43] font-medium mt-2 pt-2 border-t border-[#CFD8C4]/60">
-                            Disarankan menyiapkan tenda cadangan untuk area outdoor.
-                        </p>
+
+                        {summary?.upcoming_event ? (
+                            <>
+                                <h4 className="text-sm font-bold text-[#2F3931] truncate">
+                                    {summary.upcoming_event.name || "Acara Tanpa Nama"}
+                                </h4>
+                                <p className="text-xs text-[#556056] mt-1 leading-relaxed">
+                                    {new Date(summary.upcoming_event.event_date).toLocaleDateString("id-ID", {
+                                        weekday: "long",
+                                        day: "numeric",
+                                        month: "long",
+                                        year: "numeric",
+                                    })}
+                                    {summary.upcoming_event.venue && ` • ${summary.upcoming_event.venue}`}
+                                </p>
+                                <div className="mt-3 pt-2.5 border-t border-[#CFD8C4]/70 flex items-center justify-between text-[11px]">
+                                    <span className="text-[#424C43] font-medium">
+                                        Status: <strong className="capitalize">{summary.upcoming_event.status.replace("_", " ")}</strong>
+                                    </span>
+                                    <Link
+                                        to="/admin/kanban"
+                                        className="font-bold text-[#1D4A54] hover:underline"
+                                    >
+                                        Buka Kanban →
+                                    </Link>
+                                </div>
+                            </>
+                        ) : (
+                            <p className="text-xs text-[#556056] mt-1">
+                                Belum ada jadwal acara aktif terdekat dalam waktu dekat.
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>
