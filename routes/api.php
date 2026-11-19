@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\AdminEventOrderController;
 use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\CancellationRequestController;
 use App\Http\Controllers\Api\ClientEventController;
 use App\Http\Controllers\Api\CustomerRegistrationController;
 use App\Http\Controllers\Api\EmailVerificationController;
@@ -95,6 +96,14 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.admin.orders.index');
         Route::patch('/admin/orders/{event}/accept', [AdminEventOrderController::class, 'accept'])
             ->name('api.admin.orders.accept');
+
+        // Review Permintaan Pembatalan Acara (EO)
+        Route::get('/admin/cancellation-requests', [CancellationRequestController::class, 'index'])
+            ->name('api.admin.cancellation-requests.index');
+        Route::patch('/admin/cancellation-requests/{event}/approve', [CancellationRequestController::class, 'approve'])
+            ->name('api.admin.cancellation-requests.approve');
+        Route::patch('/admin/cancellation-requests/{event}/reject', [CancellationRequestController::class, 'reject'])
+            ->name('api.admin.cancellation-requests.reject');
         Route::patch('/admin/orders/{event}/reject', [AdminEventOrderController::class, 'reject'])
             ->name('api.admin.orders.reject');
 
@@ -195,6 +204,12 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.client.events.approve-quotation');
         Route::post('/client/events/{event}/request-revision', [ClientEventController::class, 'requestRevision'])
             ->name('api.client.events.request-revision');
+
+        // Permintaan Pembatalan Acara (Klien)
+        Route::post('/client/events/{event}/cancellation-request', [CancellationRequestController::class, 'request'])
+            ->name('api.client.events.cancellation-request.store');
+        Route::delete('/client/events/{event}/cancellation-request', [CancellationRequestController::class, 'withdraw'])
+            ->name('api.client.events.cancellation-request.withdraw');
     });
 
     // Modul Vendor Packages (Agnes)
