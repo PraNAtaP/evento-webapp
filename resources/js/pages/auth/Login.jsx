@@ -43,12 +43,6 @@ export default function Login() {
         }
     };
 
-    const handleQuickFill = (testEmail, testPassword) => {
-        setEmail(testEmail);
-        setPassword(testPassword);
-        setError("");
-    };
-
     return (
         <div className="min-h-screen bg-[#FAF6F0] flex flex-col justify-center items-center p-4">
             <div className="w-full max-w-md">
@@ -157,52 +151,8 @@ export default function Login() {
                         </button>
                     </form>
 
-                    {/* Quick Demo Fill Buttons */}
-                    <div className="mt-6 pt-5 border-t border-[#E8E2D7]">
-                        <p className="text-[11px] font-bold text-[#738075] uppercase tracking-wider mb-2.5 text-center">
-                            Akun Demo Cepat (1-Klik Isi)
-                        </p>
-                        <div className="flex flex-col gap-2">
-                            <button
-                                type="button"
-                                onClick={() => handleQuickFill("client@evento.test", "password")}
-                                className="w-full p-2.5 text-left text-xs bg-[#FDE8D3]/60 hover:bg-[#FDE8D3] border border-[#E8CEB2] text-[#5C3F22] rounded-xl transition cursor-pointer flex items-center justify-between"
-                            >
-                                <span className="font-bold flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-[#E5A872] inline-block"></span>
-                                    Klien / Pelanggan
-                                </span>
-                                <span className="text-[11px] opacity-80 font-mono">client@evento.test</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => handleQuickFill("eo@evento.test", "password")}
-                                className="w-full p-2.5 text-left text-xs bg-[#99CDD8]/30 hover:bg-[#99CDD8]/60 border border-[#85BAC5] text-[#1D4A54] rounded-xl transition cursor-pointer flex items-center justify-between"
-                            >
-                                <span className="font-bold flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-[#5BA0AF] inline-block"></span>
-                                    EO / Event Organizer
-                                </span>
-                                <span className="text-[11px] opacity-80 font-mono">eo@evento.test</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => handleQuickFill("vendor@evento.test", "password")}
-                                className="w-full p-2.5 text-left text-xs bg-[#CFD8C4]/60 hover:bg-[#CFD8C4] border border-[#BAC5AF] text-[#34402A] rounded-xl transition cursor-pointer flex items-center justify-between"
-                            >
-                                <span className="font-bold flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-[#7D9169] inline-block"></span>
-                                    Vendor Jasa
-                                </span>
-                                <span className="text-[11px] opacity-80 font-mono">vendor@evento.test</span>
-                            </button>
-                        </div>
-                    </div>
-
                     {/* Link ke Pendaftaran Customer & Vendor */}
-                    <div className="mt-4 pt-4 border-t border-[#E8E2D7] text-center space-y-2">
+                    <div className="mt-6 pt-5 border-t border-[#E8E2D7] text-center space-y-2">
                         <p className="text-xs text-[#738075]">
                             Belum punya akun Pelanggan?{" "}
                             <Link to="/register" className="font-bold text-[#657166] hover:underline">
