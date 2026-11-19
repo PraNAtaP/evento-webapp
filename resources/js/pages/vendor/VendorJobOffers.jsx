@@ -1,6 +1,20 @@
 import { useEffect, useState } from "react";
+import {
+    Briefcase,
+    Clock,
+    Check,
+    X,
+    RefreshCw,
+    Send,
+    AlertTriangle,
+    Image as ImageIcon,
+    Trash2,
+    Calendar,
+    FileText,
+} from "lucide-react";
 import api from "../../api/axios";
 import { useDialog } from "../../context/DialogContext";
+import { formatRupiah } from "../../utils/formatters";
 
 export default function VendorJobOffers() {
     const { showAlert, showConfirm, showToast } = useDialog();
@@ -12,6 +26,7 @@ export default function VendorJobOffers() {
     const [rejectionReasons, setRejectionReasons] = useState({});
     const [progressNotes, setProgressNotes] = useState({});
     const [progressPhotos, setProgressPhotos] = useState({});
+    const [activeTab, setActiveTab] = useState("all"); // 'all' | 'offers' | 'active'
 
     // Mengambil tawaran pekerjaan dan pekerjaan aktif.
     const fetchJobs = async () => {
@@ -47,7 +62,7 @@ export default function VendorJobOffers() {
         if (status === "rejected" && !reason) {
             await showAlert({
                 title: "Alasan Diperlukan",
-                message: "Alasan penolakan wajib diisi.",
+                message: "Alasan penolakan wajib diisi untuk memberi tahu tim EO.",
                 type: "warning",
             });
             return;
@@ -56,8 +71,8 @@ export default function VendorJobOffers() {
         const confirmed = await showConfirm({
             title: status === "accepted" ? "Terima Pekerjaan?" : "Tolak Tawaran Pekerjaan?",
             message: status === "accepted"
-                ? "Apakah Anda yakin ingin menerima tawaran pekerjaan ini?"
-                : "Apakah Anda yakin ingin menolak tawaran pekerjaan ini?",
+                ? "Apakah Anda yakin ingin menerima tawaran pekerjaan ini? Pekerjaan akan masuk ke daftar aktif Anda."
+                : "Apakah Anda yakin ingin menolak tawaran pekerjaan ini? Alasan akan dikirimkan ke tim EO.",
             confirmText: status === "accepted" ? "Ya, Terima" : "Ya, Tolak",
             cancelText: "Batal",
             isDanger: status === "rejected",
@@ -80,8 +95,8 @@ export default function VendorJobOffers() {
 
             showToast(
                 status === "accepted"
-                    ? "Tawaran berhasil diterima."
-                    : "Tawaran berhasil ditolak.",
+                    ? "Tawaran pekerjaan berhasil diterima!"
+                    : "Tawaran pekerjaan berhasil ditolak.",
                 "success"
             );
 
@@ -89,7 +104,7 @@ export default function VendorJobOffers() {
         } catch (err) {
             await showAlert({
                 title: "Gagal Memproses",
-                message: err.response?.data?.message || "Gagal memproses tawaran.",
+                message: err.response?.data?.message || "Gagal memproses tawaran pekerjaan.",
                 type: "danger",
             });
         }
@@ -103,7 +118,7 @@ export default function VendorJobOffers() {
         if (!note) {
             await showAlert({
                 title: "Catatan Kosong",
-                message: "Catatan progres wajib diisi sebelum menyimpan.",
+                message: "Catatan progres wajib diisi sebelum menyimpan update.",
                 type: "warning",
             });
             return;
@@ -122,7 +137,7 @@ export default function VendorJobOffers() {
                 formData
             );
 
-            showToast("Catatan progres berhasil ditambahkan.", "success");
+            showToast("Catatan progres berhasil disimpan dan dikirim ke EO.", "success");
 
             setProgressNotes((prev) => ({
                 ...prev,
@@ -144,225 +159,413 @@ export default function VendorJobOffers() {
         }
     };
 
-    if (loading) {
-        return <div className="p-6">Memuat data pekerjaan...</div>;
-    }
-
     return (
-        <div className="space-y-8 p-6">
-            <div>
-                <h1 className="text-2xl font-bold text-gray-800">
-                    Tawaran Pekerjaan
-                </h1>
-                <p className="mt-1 text-sm text-gray-500">
-                    Kelola tawaran dari EO dan pantau pekerjaan yang sedang berjalan.
-                </p>
+        <div className="max-w-5xl mx-auto space-y-6">
+            {/* Header Title & Breadcrumb */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <span className="inline-block text-[11px] font-bold text-[#33422A] bg-[#CFD8C4] px-3 py-0.5 rounded-full border border-[#B6C2AA] mb-1.5 uppercase">
+                        MODUL MITRA VENDOR
+                    </span>
+                    <h1 className="text-xl sm:text-2xl font-black text-[#2F3931] tracking-tight">
+                        Tawaran Pekerjaan & Progres Acara
+                    </h1>
+                    <p className="text-xs sm:text-sm text-[#738075] mt-1">
+                        Respon tawaran penugasan dari tim EO dan perbarui catatan pengerjaan acara aktif Anda.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={fetchJobs}
+                        disabled={loading}
+                        className="px-3.5 py-2.5 bg-white border border-[#E8E2D7] rounded-xl text-xs font-bold text-[#556056] hover:bg-[#FAF6F0] transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        title="Segarkan data"
+                    >
+                        <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                        <span>{loading ? "Memuat..." : "Segarkan"}</span>
+                    </button>
+                </div>
             </div>
 
+            {/* Metric Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div
+                    onClick={() => setActiveTab(activeTab === "offers" ? "all" : "offers")}
+                    className={`bg-white rounded-2xl p-5 border shadow-xs transition-all cursor-pointer flex items-center justify-between ${
+                        activeTab === "offers" ? "border-[#657166] ring-2 ring-[#657166]/20" : "border-[#E8E2D7] hover:border-[#CFD8C4]"
+                    }`}
+                >
+                    <div>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#738075]">
+                            Tawaran Menunggu Respon
+                        </span>
+                        <p className="text-2xl font-black text-amber-800 mt-1">
+                            {jobOffers.length}
+                        </p>
+                        <p className="text-[11px] text-[#738075] mt-0.5">
+                            Segera terima atau tolak tawaran dari EO
+                        </p>
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2] flex items-center justify-center font-bold">
+                        <Clock className="w-6 h-6 text-[#63482B]" />
+                    </div>
+                </div>
+
+                <div
+                    onClick={() => setActiveTab(activeTab === "active" ? "all" : "active")}
+                    className={`bg-white rounded-2xl p-5 border shadow-xs transition-all cursor-pointer flex items-center justify-between ${
+                        activeTab === "active" ? "border-[#657166] ring-2 ring-[#657166]/20" : "border-[#E8E2D7] hover:border-[#CFD8C4]"
+                    }`}
+                >
+                    <div>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#738075]">
+                            Pekerjaan Aktif Berjalan
+                        </span>
+                        <p className="text-2xl font-black text-emerald-800 mt-1">
+                            {activeJobs.length}
+                        </p>
+                        <p className="text-[11px] text-[#738075] mt-0.5">
+                            Acara sedang dipersiapkan dan butuh update log
+                        </p>
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9] flex items-center justify-center font-bold">
+                        <Briefcase className="w-6 h-6 text-[#224436]" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Error Message */}
             {error && (
-                <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700">
-                    {error}
+                <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-semibold flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                        <span>{error}</span>
+                    </div>
                     <button
+                        type="button"
                         onClick={fetchJobs}
-                        className="ml-3 font-semibold underline"
+                        className="underline font-bold text-rose-900 cursor-pointer"
                     >
                         Coba lagi
                     </button>
                 </div>
             )}
 
-            {/* Bagian 1: Tawaran dari EO */}
-            <section className="space-y-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                    Tawaran dari EO
-                </h2>
-
-                {jobOffers.length === 0 ? (
-                    <p className="rounded-lg border border-gray-200 p-4 text-gray-500">
-                        Belum ada tawaran pekerjaan.
-                    </p>
-                ) : (
-                    jobOffers.map((job) => (
+            {/* Loading Skeleton */}
+            {loading ? (
+                <div className="space-y-4">
+                    {Array.from({ length: 2 }).map((_, i) => (
                         <div
-                            key={job.id}
-                            className="space-y-3 rounded-xl border border-gray-200 bg-white p-5"
+                            key={i}
+                            className="bg-white rounded-2xl border border-[#E8E2D7] p-6 space-y-4 animate-pulse shadow-xs"
                         >
-                            <h3 className="font-semibold text-gray-800">
-                                {job.event?.event_name || "Nama event tidak tersedia"}
-                            </h3>
-
-                            <p className="text-sm text-gray-600">
-                                Paket: {job.package?.package_name || "Paket tidak tersedia"}
-                            </p>
-
-                            {job.package?.price != null && (
-                                <p className="text-sm text-gray-600">
-                                    Harga: Rp{" "}
-                                    {Number(job.package.price).toLocaleString("id-ID")}
-                                </p>
-                            )}
-
-                            <div>
-                                <label className="mb-1 block text-sm text-gray-700">
-                                    Alasan penolakan (wajib jika menolak)
-                                </label>
-                                <textarea
-                                    value={rejectionReasons[job.id] || ""}
-                                    onChange={(e) =>
-                                        setRejectionReasons((prev) => ({
-                                            ...prev,
-                                            [job.id]: e.target.value,
-                                        }))
-                                    }
-                                    rows={2}
-                                    placeholder="Tulis alasan jika tidak dapat menerima tawaran..."
-                                    className="w-full rounded-lg border border-gray-300 p-3 text-sm"
-                                />
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                                <button
-                                    onClick={() =>
-                                        handleResponse(job.id, "accepted")
-                                    }
-                                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-                                >
-                                    Terima Tawaran
-                                </button>
-
-                                <button
-                                    onClick={() =>
-                                        handleResponse(job.id, "rejected")
-                                    }
-                                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                                >
-                                    Tolak Tawaran
-                                </button>
-                            </div>
+                            <div className="h-5 w-48 bg-[#E8E2D7] rounded-md" />
+                            <div className="h-4 w-32 bg-[#E8E2D7]/60 rounded-md" />
+                            <div className="h-16 bg-[#FAF6F0] rounded-xl" />
                         </div>
-                    ))
-                )}
-            </section>
-
-            {/* Bagian 2: Pekerjaan aktif */}
-            <section className="space-y-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                    Pekerjaan Aktif
-                </h2>
-
-                {activeJobs.length === 0 ? (
-                    <p className="rounded-lg border border-gray-200 p-4 text-gray-500">
-                        Belum ada pekerjaan aktif.
-                    </p>
-                ) : (
-                    activeJobs.map((job) => (
-                        <div
-                            key={job.id}
-                            className="space-y-3 rounded-xl border border-gray-200 bg-white p-5"
-                        >
-                            <h3 className="font-semibold text-gray-800">
-                                {job.event?.event_name || "Nama event tidak tersedia"}
-                            </h3>
-
-                            <p className="text-sm text-gray-600">
-                                Paket: {job.package?.package_name || "Paket tidak tersedia"}
-                            </p>
-
-                            <div>
-                                <h4 className="mb-2 text-sm font-semibold text-gray-700">
-                                    Riwayat Progres
-                                </h4>
-
-                                {job.progress_logs?.length ? (
-                                    <ul className="list-disc space-y-3 pl-5 text-sm text-gray-600">
-                                        {job.progress_logs.map((log) => (
-                                            <li key={log.id}>
-                                                <p>{log.note}</p>
-
-                                                {log.photo_url && (
-                                                    <img
-                                                        src={log.photo_url}
-                                                        alt="Foto catatan progres"
-                                                        className="mt-2 max-h-64 w-auto rounded-lg border border-gray-200 object-cover"
-                                                    />
-                                                )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="text-sm text-gray-500">
-                                        Belum ada catatan progres.
-                                    </p>
-                                )}
+                    ))}
+                </div>
+            ) : (
+                <>
+                    {/* Bagian 1: Tawaran dari EO */}
+                    {(activeTab === "all" || activeTab === "offers") && (
+                        <section className="space-y-4">
+                            <div className="flex items-center justify-between pb-2 border-b border-[#E8E2D7]">
+                                <h2 className="text-base font-extrabold text-[#2F3931] flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-amber-700" />
+                                    <span>Tawaran Pekerjaan dari EO</span>
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2]">
+                                        {jobOffers.length}
+                                    </span>
+                                </h2>
                             </div>
 
-                            <div>
-                                <label className="mb-1 block text-sm text-gray-700">
-                                    Tambah catatan progres
-                                </label>
-                                <textarea
-                                    value={progressNotes[job.id] || ""}
-                                    onChange={(e) =>
-                                        setProgressNotes((prev) => ({
-                                            ...prev,
-                                            [job.id]: e.target.value,
-                                        }))
-                                    }
-                                    rows={2}
-                                    placeholder="Contoh: Persiapan perlengkapan sudah selesai..."
-                                    className="w-full rounded-lg border border-gray-300 p-3 text-sm"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="mb-1 block text-sm text-gray-700">
-                                    Tambahkan foto (opsional)
-                                </label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) =>
-                                        setProgressPhotos((prev) => ({
-                                            ...prev,
-                                            [job.id]: e.target.files?.[0] || null,
-                                        }))
-                                    }
-                                    className="w-full rounded-lg border border-gray-300 p-2 text-sm"
-                                />
-
-                                {progressPhotos[job.id] && (
-                                    <div className="mt-2">
-                                        <img
-                                            src={URL.createObjectURL(progressPhotos[job.id])}
-                                            alt="Preview foto progres"
-                                            className="max-h-48 w-auto rounded-lg border border-gray-200 object-cover"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setProgressPhotos((prev) => ({
-                                                    ...prev,
-                                                    [job.id]: null,
-                                                }))
-                                            }
-                                            className="mt-1 text-sm text-red-600 hover:underline"
-                                        >
-                                            Hapus foto
-                                        </button>
+                            {jobOffers.length === 0 ? (
+                                <div className="bg-white rounded-2xl border-2 border-dashed border-[#E8E2D7] p-8 text-center text-[#738075] shadow-xs">
+                                    <div className="w-12 h-12 rounded-2xl bg-[#FAF6F0] text-[#657166] border border-[#E8E2D7] flex items-center justify-center mx-auto mb-2">
+                                        <Briefcase className="w-6 h-6 text-[#738075]" />
                                     </div>
-                                )}
+                                    <p className="text-xs font-bold text-[#2F3931]">Belum ada tawaran pekerjaan baru</p>
+                                    <p className="text-[11px] text-[#738075] mt-0.5">
+                                        Ketika tim Event Organizer memilih paket Anda untuk penugasan acara, tawaran akan muncul di sini.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {jobOffers.map((job) => (
+                                        <div
+                                            key={job.id}
+                                            className="bg-white rounded-2xl border border-[#E8E2D7] p-5 shadow-xs space-y-4 hover:shadow-md transition-all"
+                                        >
+                                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-[#E8E2D7]">
+                                                <div>
+                                                    <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#CFD8C4]/60 text-[#2D3A28] border border-[#B6C2AA] mb-1">
+                                                        Tawaran Baru
+                                                    </span>
+                                                    <h3 className="font-black text-base text-[#2F3931] tracking-tight">
+                                                        {job.event?.event_name || "Nama acara tidak tersedia"}
+                                                    </h3>
+                                                    {job.event?.event_date && (
+                                                        <p className="text-[11px] text-[#738075] mt-0.5 flex items-center gap-1">
+                                                            <Calendar className="w-3.5 h-3.5" />
+                                                            <span>
+                                                                Pelaksanaan: {new Date(job.event.event_date).toLocaleDateString("id-ID", {
+                                                                    day: "numeric",
+                                                                    month: "long",
+                                                                    year: "numeric",
+                                                                })}
+                                                            </span>
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                <div className="sm:text-right bg-[#FAF6F0] p-2.5 rounded-xl border border-[#E8E2D7] shrink-0">
+                                                    <span className="text-[10px] text-[#738075] font-semibold block">Paket Ditugaskan:</span>
+                                                    <p className="text-xs font-bold text-[#2F3931]">
+                                                        {job.package?.package_name || "Paket Khusus"}
+                                                    </p>
+                                                    {job.package?.price != null && (
+                                                        <span className="text-xs font-black text-[#1D4A54] block mt-0.5">
+                                                            {formatRupiah(job.package.price)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Input Alasan Penolakan */}
+                                            <div>
+                                                <label className="mb-1.5 block text-xs font-bold text-[#2F3931]">
+                                                    Alasan Penolakan (Hanya wajib diisi jika Anda menolak tawaran)
+                                                </label>
+                                                <textarea
+                                                    value={rejectionReasons[job.id] || ""}
+                                                    onChange={(e) =>
+                                                        setRejectionReasons((prev) => ({
+                                                            ...prev,
+                                                            [job.id]: e.target.value,
+                                                        }))
+                                                    }
+                                                    rows={2}
+                                                    placeholder="Contoh: Jadwal bertabrakan dengan penugasan lain, kapasitas penuh..."
+                                                    className="w-full rounded-xl border border-[#E8E2D7] bg-[#FAF6F0]/60 p-3 text-xs text-[#2F3931] placeholder-[#98A29A] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition"
+                                                />
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-[#E8E2D7]/70">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleResponse(job.id, "accepted")}
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#657166] hover:bg-[#556056] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer border border-[#525C53]"
+                                                >
+                                                    <Check className="w-3.5 h-3.5" />
+                                                    <span>Terima Tawaran</span>
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleResponse(job.id, "rejected")}
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-700 hover:text-rose-800 text-xs font-bold border border-rose-200 transition-colors cursor-pointer"
+                                                >
+                                                    <X className="w-3.5 h-3.5" />
+                                                    <span>Tolak Tawaran</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
+
+                    {/* Bagian 2: Pekerjaan Aktif */}
+                    {(activeTab === "all" || activeTab === "active") && (
+                        <section className="space-y-4 pt-2">
+                            <div className="flex items-center justify-between pb-2 border-b border-[#E8E2D7]">
+                                <h2 className="text-base font-extrabold text-[#2F3931] flex items-center gap-2">
+                                    <Briefcase className="w-4 h-4 text-[#224436]" />
+                                    <span>Pekerjaan Aktif Berjalan</span>
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]">
+                                        {activeJobs.length}
+                                    </span>
+                                </h2>
                             </div>
 
-                            <button
-                                onClick={() => handleProgress(job.id)}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                            >
-                                Simpan Progres
-                            </button>
-                        </div>
-                    ))
-                )}
-            </section>
+                            {activeJobs.length === 0 ? (
+                                <div className="bg-white rounded-2xl border-2 border-dashed border-[#E8E2D7] p-8 text-center text-[#738075] shadow-xs">
+                                    <div className="w-12 h-12 rounded-2xl bg-[#FAF6F0] text-[#657166] border border-[#E8E2D7] flex items-center justify-center mx-auto mb-2">
+                                        <FileText className="w-6 h-6 text-[#738075]" />
+                                    </div>
+                                    <p className="text-xs font-bold text-[#2F3931]">Belum ada pekerjaan aktif</p>
+                                    <p className="text-[11px] text-[#738075] mt-0.5">
+                                        Pekerjaan yang Anda terima akan ditampilkan di sini untuk pengelolaan update progres kerja.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {activeJobs.map((job) => (
+                                        <div
+                                            key={job.id}
+                                            className="bg-white rounded-2xl border border-[#E8E2D7] p-5 shadow-xs space-y-5 hover:shadow-md transition-all"
+                                        >
+                                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-[#E8E2D7]">
+                                                <div>
+                                                    <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9] mb-1">
+                                                        Pekerjaan Aktif
+                                                    </span>
+                                                    <h3 className="font-black text-base text-[#2F3931] tracking-tight">
+                                                        {job.event?.event_name || "Nama acara tidak tersedia"}
+                                                    </h3>
+                                                    <p className="text-xs text-[#738075] mt-0.5">
+                                                        Paket: <strong className="text-[#2F3931]">{job.package?.package_name || "Paket Khusus"}</strong>
+                                                    </p>
+                                                </div>
+
+                                                {job.event?.event_date && (
+                                                    <div className="text-left sm:text-right bg-[#FAF6F0] p-2.5 rounded-xl border border-[#E8E2D7] text-xs">
+                                                        <span className="text-[10px] text-[#738075] font-semibold block">Tanggal Pelaksanaan:</span>
+                                                        <span className="font-bold text-[#2F3931]">
+                                                            {new Date(job.event.event_date).toLocaleDateString("id-ID", {
+                                                                day: "numeric",
+                                                                month: "long",
+                                                                year: "numeric",
+                                                            })}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Riwayat Progres yang Pernah Diunggah */}
+                                            <div>
+                                                <h4 className="text-xs font-bold uppercase tracking-wider text-[#738075] mb-2.5">
+                                                    Riwayat Catatan Progres ({job.progress_logs?.length || 0})
+                                                </h4>
+
+                                                {job.progress_logs?.length ? (
+                                                    <div className="space-y-3">
+                                                        {job.progress_logs.map((log) => (
+                                                            <div
+                                                                key={log.id}
+                                                                className="bg-[#FAF6F0]/70 rounded-xl p-3.5 border border-[#E8E2D7]/80 text-xs flex flex-col sm:flex-row sm:items-start justify-between gap-3"
+                                                            >
+                                                                <div className="space-y-1.5 flex-1 min-w-0">
+                                                                    <p className="text-[#2F3931] font-medium leading-relaxed whitespace-pre-line">
+                                                                        {log.note}
+                                                                    </p>
+                                                                    <span className="text-[10px] text-[#738075] block">
+                                                                        {new Date(log.created_at).toLocaleString("id-ID")}
+                                                                    </span>
+                                                                </div>
+
+                                                                {log.photo_url && (
+                                                                    <div className="shrink-0">
+                                                                        <img
+                                                                            src={log.photo_url}
+                                                                            alt="Dokumentasi progres"
+                                                                            className="h-24 w-32 rounded-lg object-cover border border-[#E8E2D7]"
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-xs text-[#738075] italic bg-[#FAF6F0]/40 p-3 rounded-xl border border-dashed border-[#E8E2D7]">
+                                                        Belum ada catatan progres yang disimpan untuk pekerjaan ini.
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Form Tambah Catatan Progres Baru */}
+                                            <div className="bg-[#FAF6F0]/50 rounded-2xl p-4 border border-[#E8E2D7] space-y-3">
+                                                <h4 className="text-xs font-bold text-[#2F3931]">
+                                                    Tambah Update Progres Pekerjaan
+                                                </h4>
+
+                                                <div>
+                                                    <label className="mb-1 block text-xs font-semibold text-[#556056]">
+                                                        Catatan Progres <span className="text-rose-500">*</span>
+                                                    </label>
+                                                    <textarea
+                                                        value={progressNotes[job.id] || ""}
+                                                        onChange={(e) =>
+                                                            setProgressNotes((prev) => ({
+                                                                ...prev,
+                                                                [job.id]: e.target.value,
+                                                            }))
+                                                        }
+                                                        rows={2}
+                                                        placeholder="Contoh: Persiapan bahan dan dekorasi sudah mencapai 70%..."
+                                                        className="w-full rounded-xl border border-[#E8E2D7] bg-white p-3 text-xs text-[#2F3931] placeholder-[#98A29A] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition"
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label className="mb-1 block text-xs font-semibold text-[#556056]">
+                                                        Foto Dokumentasi (Opsional)
+                                                    </label>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(e) =>
+                                                            setProgressPhotos((prev) => ({
+                                                                ...prev,
+                                                                [job.id]: e.target.files?.[0] || null,
+                                                            }))
+                                                        }
+                                                        className="w-full text-xs text-[#738075] file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#DAEBE3] file:text-[#224436] hover:file:bg-[#CFD8C4] cursor-pointer"
+                                                    />
+
+                                                    {progressPhotos[job.id] && (
+                                                        <div className="mt-2.5 flex items-start gap-3 bg-white p-2.5 rounded-xl border border-[#E8E2D7]">
+                                                            <img
+                                                                src={URL.createObjectURL(progressPhotos[job.id])}
+                                                                alt="Preview foto progres"
+                                                                className="h-20 w-28 rounded-lg object-cover border border-[#E8E2D7]"
+                                                            />
+                                                            <div>
+                                                                <p className="text-xs font-bold text-[#2F3931] truncate max-w-xs">
+                                                                    {progressPhotos[job.id].name}
+                                                                </p>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        setProgressPhotos((prev) => ({
+                                                                            ...prev,
+                                                                            [job.id]: null,
+                                                                        }))
+                                                                    }
+                                                                    className="mt-1 text-xs text-rose-600 hover:text-rose-800 font-bold flex items-center gap-1 cursor-pointer"
+                                                                >
+                                                                    <Trash2 className="w-3 h-3" />
+                                                                    <span>Hapus foto</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="pt-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleProgress(job.id)}
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1D4A54] hover:bg-[#15343A] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                                                    >
+                                                        <Send className="w-3.5 h-3.5" />
+                                                        <span>Simpan Progres & Beritahu EO</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
+                </>
+            )}
         </div>
     );
 }

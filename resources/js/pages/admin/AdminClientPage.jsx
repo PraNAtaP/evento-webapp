@@ -643,7 +643,7 @@ export default function AdminClientPage() {
                                                                     ? "Pulihkan akun Client"
                                                                     : "Masa pemulihan 14 hari telah habis"
                                                             }
-                                                            className="px-3 py-2 rounded-lg bg-[#506B59] text-white text-xs font-semibold hover:bg-[#3F5747] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition"
+                                                            className="px-3 py-2 rounded-lg bg-[#506B59] text-white text-xs font-semibold hover:bg-[#3F5747] disabled:bg-[#FAF6F0] disabled:text-[#738075]/60 disabled:border disabled:border-[#E8E2D7] disabled:cursor-not-allowed transition"
                                                         >
                                                             {restoreMutation.isPending
                                                                 ? "Memproses..."

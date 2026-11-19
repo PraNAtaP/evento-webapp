@@ -287,20 +287,15 @@ export default function VendorPackageForm() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FAF6F0] py-8 px-4 text-[#2F3931]">
-            <div className="max-w-4xl mx-auto">
-
-                <div className="bg-white rounded-2xl p-6 md:p-8 border border-[#E8E2D7] shadow-xs">
-
-                    {/* Tombol Kembali */}
-                    <div className="mb-6">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                window.location.href = "/vendor/dashboard";
-                            }}
-                            className="inline-flex items-center gap-2 bg-[#FAF6F0] hover:bg-[#F2ECE3] text-[#2F3931] font-semibold px-4 py-2 rounded-xl text-xs border border-[#E8E2D7] transition shadow-2xs cursor-pointer"
-                        >
+        <div className="max-w-4xl mx-auto space-y-6">
+            <div className="bg-white rounded-2xl p-6 md:p-8 border border-[#E8E2D7] shadow-xs">
+                {/* Tombol Kembali */}
+                <div className="mb-6">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/vendor/dashboard")}
+                        className="inline-flex items-center gap-2 bg-[#FAF6F0] hover:bg-[#F2ECE3] text-[#2F3931] font-semibold px-4 py-2 rounded-xl text-xs border border-[#E8E2D7] transition shadow-2xs cursor-pointer"
+                    >
                             {/* Icon Back */}
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -571,12 +566,11 @@ export default function VendorPackageForm() {
                                 {/* Tombol Close */}
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        setSelectedImage(null)
-                                    }
-                                    className="absolute -top-3 -right-3 bg-white text-gray-600 hover:text-gray-900 w-8 h-8 rounded-full shadow flex items-center justify-center text-lg font-bold"
+                                    onClick={() => setSelectedImage(null)}
+                                    className="absolute -top-3 -right-3 bg-white text-[#2F3931] hover:text-black w-8 h-8 rounded-full shadow border border-[#E8E2D7] flex items-center justify-center text-lg font-bold cursor-pointer"
+                                    aria-label="Tutup foto"
                                 >
-                                    ×
+                                    &times;
                                 </button>
 
                                 {/* Foto */}
@@ -589,7 +583,6 @@ export default function VendorPackageForm() {
                         </div>
                     )}
                 </div>
-            </div>
         </div>
     );
 }

@@ -379,10 +379,10 @@ export default function VendorDashboard() {
                         <button
                             type="button"
                             onClick={() => setSelectedImage(null)}
-                            className="absolute -top-3 -right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xl font-bold text-gray-700 shadow cursor-pointer"
+                            className="absolute -top-3 -right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xl font-bold text-[#2F3931] hover:text-black border border-[#E8E2D7] shadow cursor-pointer"
                             aria-label="Tutup foto"
                         >
-                            ×
+                            &times;
                         </button>
 
                         <img
