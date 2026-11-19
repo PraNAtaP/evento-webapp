@@ -21,21 +21,31 @@ class ClientEventController extends Controller
     public function index(Request $request): JsonResponse
     {
         $events = Event::with([
-            'vendorAssignments.package',
-            'vendorAssignments.vendor:id,business_name,category',
-            'vendorAssignments.progressLogs',
+            'vendorAssignments' => fn ($query) => $query->where('eo_offer_status', '!=', 'rejected'),
+            'vendorAssignments.package.images',
+            'vendorAssignments.vendor',
+            'vendorAssignments.progressLogs' => fn ($query) => $query->where('is_visible_to_client', true)->orderByDesc('created_at'),
             'payments',
         ])
             ->where('client_id', $request->user()->id)
             ->orderByDesc('created_at')
             ->get();
 
-        // Vendor Masking: Lindungi identitas vendor agar klien tidak melihat nama bisnis asli
+        // Vendor Masking: Buka identitas vendor hanya jika DP sudah dibayar / acara sudah masuk tahap on_progress / done
         $events->each(function ($event) {
-            $event->vendorAssignments->each(function ($assignment) {
-                if ($assignment->vendor) {
+            $isDpPaid = in_array($event->kanban_status, ['on_progress', 'done'], true)
+                || $event->payments->where('payment_type', 'dp')->where('status', 'paid')->isNotEmpty();
+
+            $event->is_vendor_unmasked = $isDpPaid;
+
+            $event->vendorAssignments->each(function ($assignment) use ($isDpPaid) {
+                if ($assignment->vendor && ! $isDpPaid) {
                     $categoryName = ucfirst($assignment->vendor->category ?? 'Layanan');
                     $assignment->vendor->business_name = "Mitra {$categoryName} EO";
+                    $assignment->vendor->contact_number = null;
+                    $assignment->vendor->social_media = null;
+                    $assignment->vendor->address = null;
+                    $assignment->vendor->description = null;
                 }
             });
         });
@@ -57,17 +67,26 @@ class ClientEventController extends Controller
         }
 
         $event->load([
-            'vendorAssignments.package',
-            'vendorAssignments.vendor:id,business_name,category',
-            'vendorAssignments.progressLogs',
+            'vendorAssignments' => fn ($query) => $query->where('eo_offer_status', '!=', 'rejected'),
+            'vendorAssignments.package.images',
+            'vendorAssignments.vendor',
+            'vendorAssignments.progressLogs' => fn ($query) => $query->where('is_visible_to_client', true)->orderByDesc('created_at'),
             'payments',
         ]);
 
-        // Vendor Masking: Lindungi identitas vendor agar klien tidak melihat nama bisnis asli
-        $event->vendorAssignments->each(function ($assignment) {
-            if ($assignment->vendor) {
+        $isDpPaid = in_array($event->kanban_status, ['on_progress', 'done'], true)
+            || $event->payments->where('payment_type', 'dp')->where('status', 'paid')->isNotEmpty();
+
+        $event->is_vendor_unmasked = $isDpPaid;
+
+        $event->vendorAssignments->each(function ($assignment) use ($isDpPaid) {
+            if ($assignment->vendor && ! $isDpPaid) {
                 $categoryName = ucfirst($assignment->vendor->category ?? 'Layanan');
                 $assignment->vendor->business_name = "Mitra {$categoryName} EO";
+                $assignment->vendor->contact_number = null;
+                $assignment->vendor->social_media = null;
+                $assignment->vendor->address = null;
+                $assignment->vendor->description = null;
             }
         });
 

@@ -24,6 +24,7 @@ class AdminActionItemController extends Controller
     {
         $counts = [
             'new_requests' => Event::where('kanban_status', 'request')->count(),
+            'cancellation_requests' => Event::where('cancellation_request_status', 'pending')->count(),
             'revision_requests' => Event::where('kanban_status', Event::VENDOR_MANAGEABLE_STATUS)
                 ->whereNotNull('revision_requested_at')
                 ->count(),
@@ -36,6 +37,7 @@ class AdminActionItemController extends Controller
 
         $items = [
             ['key' => 'new_requests', 'label' => 'Request acara baru', 'path' => '/admin/kanban'],
+            ['key' => 'cancellation_requests', 'label' => 'Permintaan pembatalan klien', 'path' => '/admin/orders?status=cancellation_requests'],
             ['key' => 'revision_requests', 'label' => 'Klien minta revisi penawaran', 'path' => '/admin/kanban'],
             ['key' => 'payments_pending', 'label' => 'Bukti bayar menunggu verifikasi', 'path' => '/admin/payments'],
             ['key' => 'vendor_registrations', 'label' => 'Pendaftar vendor menunggu', 'path' => '/admin/vendors'],

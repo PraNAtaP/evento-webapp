@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\EventVendorAssignment;
 use App\Models\ProgressLog;
-use Illuminate\Http\Request;
+use Cloudinary\Uploader;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class VendorProgressController extends Controller
 {
@@ -79,7 +80,7 @@ class VendorProgressController extends Controller
         if ($request->hasFile('photo')) {
             \Cloudinary::config();
 
-            $upload = \Cloudinary\Uploader::upload(
+            $upload = Uploader::upload(
                 $request->file('photo')->getRealPath(),
                 [
                     'folder' => 'evento/progress',

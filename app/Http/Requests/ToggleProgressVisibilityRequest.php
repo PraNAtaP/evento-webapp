@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ToggleProgressVisibilityRequest extends FormRequest
 {
-    
     public function authorize(): bool
     {
         return $this->user()?->role === 'eo';
@@ -23,7 +22,7 @@ class ToggleProgressVisibilityRequest extends FormRequest
     {
         return [
             'is_visible_to_client.required' => 'Status visibilitas wajib diisi.',
-            'is_visible_to_client.boolean'  => 'Status visibilitas harus true atau false.',
+            'is_visible_to_client.boolean' => 'Status visibilitas harus true atau false.',
         ];
     }
 }

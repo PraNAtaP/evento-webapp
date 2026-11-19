@@ -53,6 +53,13 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
     const [cancellationReasonInput, setCancellationReasonInput] = useState("");
     const [cancellationError, setCancellationError] = useState("");
 
+    // State untuk Review Permintaan Pembatalan dari Klien
+    const [isApproveCancelModalOpen, setIsApproveCancelModalOpen] = useState(false);
+    const [approveCancelNote, setApproveCancelNote] = useState("");
+    const [isRejectCancelModalOpen, setIsRejectCancelModalOpen] = useState(false);
+    const [rejectCancelNote, setRejectCancelNote] = useState("");
+    const [rejectCancelError, setRejectCancelError] = useState("");
+
     // true selama pemilih vendor / dialog kirim penawaran / modal batal terbuka: Esc/Tab ditangani modal itu
     const pickerOpenRef = useRef(false);
     const isCancelModalOpenRef = useRef(false);
@@ -91,6 +98,60 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                 err.response?.data?.message ||
                 "Gagal membatalkan acara.";
             setCancellationError(msg);
+        },
+    });
+
+    const approveCancelMutation = useMutation({
+        mutationFn: async (review_note) => {
+            const res = await api.patch(`/admin/cancellation-requests/${eventId}/approve`, { review_note });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            setIsApproveCancelModalOpen(false);
+            setApproveCancelNote("");
+            queryClient.invalidateQueries(["admin-kanban"]);
+            queryClient.invalidateQueries(["admin-smart-calendar"]);
+            queryClient.invalidateQueries(["admin-event-orders"]);
+            queryClient.invalidateQueries(["booked-dates"]);
+            queryClient.invalidateQueries(["client-events"]);
+            queryClient.invalidateQueries(["admin-cancellation-requests-count"]);
+            if (data?.event) {
+                setEvent((prev) => ({
+                    ...prev,
+                    ...data.event,
+                    kanban_status: "cancelled",
+                    cancellation_request_status: "approved",
+                }));
+                if (onEventCancelled) {
+                    onEventCancelled(data.event);
+                }
+            }
+        },
+    });
+
+    const rejectCancelMutation = useMutation({
+        mutationFn: async (review_note) => {
+            const res = await api.patch(`/admin/cancellation-requests/${eventId}/reject`, { review_note });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            setIsRejectCancelModalOpen(false);
+            setRejectCancelNote("");
+            setRejectCancelError("");
+            queryClient.invalidateQueries(["admin-kanban"]);
+            queryClient.invalidateQueries(["admin-cancellation-requests-count"]);
+            if (data?.event) {
+                setEvent((prev) => ({
+                    ...prev,
+                    ...data.event,
+                    cancellation_request_status: "rejected",
+                    cancellation_review_note: data.event.cancellation_review_note,
+                }));
+            }
+        },
+        onError: (err) => {
+            const msg = err.response?.data?.errors?.review_note?.[0] || err.response?.data?.message || "Gagal menolak pembatalan.";
+            setRejectCancelError(msg);
         },
     });
 
@@ -287,6 +348,84 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                                 Diminta pada {formatDateTime(event.revision_requested_at)}
                             </p>
                         )}
+                    </div>
+                )}
+
+                {/* Permintaan Pembatalan dari Klien */}
+                {event.cancellation_request_status === "pending" && (
+                    <div className="mt-4 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 text-amber-950 shadow-xs animate-fadeIn">
+                        <div className="flex items-start gap-3">
+                            <span className="w-8 h-8 rounded-xl bg-amber-200 text-amber-800 flex items-center justify-center font-bold text-sm shrink-0">
+                                ⚠️
+                            </span>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <h3 className="text-xs font-black uppercase tracking-wider text-amber-900">
+                                        Permintaan Pembatalan Klien
+                                    </h3>
+                                    {event.cancellation_requested_at && (
+                                        <span className="text-[10px] text-amber-700">
+                                            {formatDateTime(event.cancellation_requested_at)}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="mt-2 bg-white/90 border border-amber-200 rounded-xl p-3">
+                                    <p className="text-[11px] font-bold text-amber-900">Alasan Klien:</p>
+                                    <p className="text-xs text-amber-950 mt-0.5 leading-relaxed break-words font-medium">
+                                        &ldquo;{event.cancellation_request_reason}&rdquo;
+                                    </p>
+                                </div>
+
+                                {(() => {
+                                    if (!event.event_date) return null;
+                                    const today = new Date();
+                                    today.setHours(0, 0, 0, 0);
+                                    const evD = new Date(event.event_date);
+                                    evD.setHours(0, 0, 0, 0);
+                                    const days = Math.ceil((evD - today) / (1000 * 60 * 60 * 24));
+                                    return days <= 30 ? (
+                                        <p className="text-[11px] text-amber-800 mt-2 font-medium">
+                                            ⚠️ Sisa <strong>{days} hari (≤ 30 hari)</strong>: Uang DP akan <strong>hangus</strong> sesuai ketentuan jika pembatalan disetujui.
+                                        </p>
+                                    ) : (
+                                        <p className="text-[11px] text-emerald-800 mt-2 font-medium">
+                                            💰 Sisa <strong>{days} hari (&gt; 30 hari)</strong>: DP berpotensi dapat dikembalikan ke klien.
+                                        </p>
+                                    );
+                                })()}
+
+                                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-amber-200">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setApproveCancelNote("");
+                                            setIsApproveCancelModalOpen(true);
+                                        }}
+                                        className="px-3.5 py-1.5 bg-[#224436] hover:bg-[#1a352a] text-white text-xs font-bold rounded-xl transition shadow-2xs cursor-pointer"
+                                    >
+                                        Setujui Batal
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setRejectCancelNote("");
+                                            setRejectCancelError("");
+                                            setIsRejectCancelModalOpen(true);
+                                        }}
+                                        className="px-3.5 py-1.5 bg-white hover:bg-rose-50 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 transition shadow-2xs cursor-pointer"
+                                    >
+                                        Tolak Batal
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Notif jika sebelumnya pernah ditolak */}
+                {event.cancellation_request_status === "rejected" && event.kanban_status !== "cancelled" && (
+                    <div className="mt-4 rounded-xl border border-orange-200 bg-orange-50/80 px-4 py-3 text-orange-950 text-xs">
+                        <span className="font-bold">Permintaan Pembatalan Ditolak EO:</span> {event.cancellation_review_note}
                     </div>
                 )}
 
@@ -573,6 +712,133 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                                     )}
                                     <span>{cancelMutation.isPending ? "Membatalkan..." : "Ya, Batalkan Acara"}</span>
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal Setujui Permintaan Pembatalan Klien */}
+                {isApproveCancelModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn">
+                        <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8E2D7] shadow-xl text-left">
+                            <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D7]">
+                                <h3 className="text-sm font-extrabold text-[#2F3931]">
+                                    Setujui Pembatalan Acara
+                                </h3>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsApproveCancelModalOpen(false)}
+                                    className="text-[#738075] hover:text-[#2F3931] font-bold text-base"
+                                >
+                                    &times;
+                                </button>
+                            </div>
+
+                            <div className="mt-4 flex flex-col gap-3">
+                                <div className="bg-[#FAF6F0] rounded-xl p-3 border border-[#E8E2D7] text-xs">
+                                    <p className="font-bold text-[#2F3931]">{event.event_name}</p>
+                                    <p className="text-[#738075] mt-1">Alasan Klien: &ldquo;{event.cancellation_request_reason}&rdquo;</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
+                                        Catatan untuk Klien (Opsional, dikirim ke Gmail)
+                                    </label>
+                                    <textarea
+                                        rows="3"
+                                        value={approveCancelNote}
+                                        onChange={(e) => setApproveCancelNote(e.target.value)}
+                                        placeholder="Tuliskan catatan konfirmasi pembatalan..."
+                                        className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl p-3 text-xs text-[#2F3931] placeholder-[#738075] focus:outline-none focus:ring-2 focus:ring-[#99CDD8]"
+                                    />
+                                </div>
+
+                                <div className="pt-3 border-t border-[#E8E2D7] flex items-center justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsApproveCancelModalOpen(false)}
+                                        className="px-4 py-2 rounded-xl text-xs font-bold border border-[#E8E2D7] text-[#738075] hover:bg-[#FAF6F0]"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={approveCancelMutation.isPending}
+                                        onClick={() => approveCancelMutation.mutate(approveCancelNote.trim() || null)}
+                                        className="px-4 py-2 rounded-xl text-xs font-bold bg-[#224436] hover:bg-[#1a352a] text-white shadow-xs transition disabled:opacity-50 cursor-pointer"
+                                    >
+                                        {approveCancelMutation.isPending ? "Memproses..." : "Ya, Setujui Pembatalan"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal Tolak Permintaan Pembatalan Klien */}
+                {isRejectCancelModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn">
+                        <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-[#E8E2D7] shadow-xl text-left">
+                            <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D7]">
+                                <h3 className="text-sm font-extrabold text-[#2F3931]">
+                                    Tolak Permintaan Pembatalan
+                                </h3>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsRejectCancelModalOpen(false)}
+                                    className="text-[#738075] hover:text-[#2F3931] font-bold text-base"
+                                >
+                                    &times;
+                                </button>
+                            </div>
+
+                            <div className="mt-4 flex flex-col gap-3">
+                                <p className="text-xs text-[#556056] leading-relaxed">
+                                    Tolak permintaan pembatalan acara <strong className="text-[#2F3931]">{event.event_name}</strong>. Acara akan tetap berjalan.
+                                </p>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
+                                        Alasan Penolakan <span className="text-rose-500">*</span> (Wajib, minimal 5 karakter, dikirim ke Gmail klien)
+                                    </label>
+                                    <textarea
+                                        rows="3"
+                                        value={rejectCancelNote}
+                                        onChange={(e) => {
+                                            setRejectCancelNote(e.target.value);
+                                            setRejectCancelError("");
+                                        }}
+                                        placeholder="Contoh: Maaf, persiapan acara sudah berjalan dan tidak dapat dibatalkan..."
+                                        className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl p-3 text-xs text-[#2F3931] placeholder-[#738075] focus:outline-none focus:ring-2 focus:ring-[#99CDD8]"
+                                    />
+                                    {rejectCancelError && (
+                                        <p className="text-[11px] text-rose-600 font-semibold mt-1">{rejectCancelError}</p>
+                                    )}
+                                </div>
+
+                                <div className="pt-3 border-t border-[#E8E2D7] flex items-center justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsRejectCancelModalOpen(false)}
+                                        className="px-4 py-2 rounded-xl text-xs font-bold border border-[#E8E2D7] text-[#738075] hover:bg-[#FAF6F0]"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={rejectCancelMutation.isPending || !rejectCancelNote.trim() || rejectCancelNote.trim().length < 5}
+                                        onClick={() => {
+                                            if (rejectCancelNote.trim().length < 5) {
+                                                setRejectCancelError("Catatan penolakan minimal 5 karakter.");
+                                                return;
+                                            }
+                                            rejectCancelMutation.mutate(rejectCancelNote.trim());
+                                        }}
+                                        className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white shadow-xs transition cursor-pointer"
+                                    >
+                                        {rejectCancelMutation.isPending ? "Memproses..." : "Konfirmasi Tolak"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

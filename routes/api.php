@@ -206,6 +206,8 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.client.events.request-revision');
 
         // Permintaan Pembatalan Acara (Klien)
+        Route::get('/client/events/{event}/cancellation-request/policy', [CancellationRequestController::class, 'policy'])
+            ->name('api.client.events.cancellation-request.policy');
         Route::post('/client/events/{event}/cancellation-request', [CancellationRequestController::class, 'request'])
             ->name('api.client.events.cancellation-request.store');
         Route::delete('/client/events/{event}/cancellation-request', [CancellationRequestController::class, 'withdraw'])

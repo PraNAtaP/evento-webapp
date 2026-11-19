@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CancellationApprovedMail;
+use App\Mail\CancellationRejectedMail;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class CancellationRequestController extends Controller
@@ -21,9 +24,59 @@ class CancellationRequestController extends Controller
     ];
 
     /**
+     * Menghitung apakah DP akan hangus berdasarkan sisa hari menuju event_date.
+     * DP hangus jika sisa hari <= EVENTO_DP_FORFEIT_DAYS (default: 30 hari).
+     */
+    private function isDpForfeited(Event $event): bool
+    {
+        if (! $event->event_date) {
+            return false;
+        }
+
+        $daysUntilEvent = (int) now()->startOfDay()->diffInDays($event->event_date, false);
+        $forfeitDays = (int) config('evento.cancellation_dp_forfeit_days', 30);
+
+        return $daysUntilEvent <= $forfeitDays;
+    }
+
+    /**
+     * [KLIEN] Mendapatkan info kebijakan DP sebelum mengajukan pembatalan (preview).
+     * GET /client/events/{event}/cancellation-request/policy
+     */
+    public function policy(Request $request, Event $event): JsonResponse
+    {
+        if ($event->client_id !== $request->user()->id) {
+            return response()->json(['message' => 'Anda tidak memiliki hak akses ke acara ini.'], 403);
+        }
+
+        $forfeitDays = (int) config('evento.cancellation_dp_forfeit_days', 30);
+        $daysUntilEvent = $event->event_date
+            ? (int) now()->startOfDay()->diffInDays($event->event_date, false)
+            : null;
+
+        $isDpPaid = $event->payments()
+            ->where('payment_type', 'dp')
+            ->where('status', 'paid')
+            ->exists();
+
+        $isForfeited = $this->isDpForfeited($event);
+        $canCancel = in_array($event->kanban_status, self::CANCELLABLE_STATUSES, true)
+            && $event->cancellation_request_status !== 'pending';
+
+        return response()->json([
+            'can_cancel' => $canCancel,
+            'dp_forfeit_days' => $forfeitDays,
+            'days_until_event' => $daysUntilEvent,
+            'is_dp_paid' => $isDpPaid,
+            'is_dp_forfeited' => $isForfeited,
+            'forfeit_reason' => $isForfeited
+                ? "Acara kurang dari {$forfeitDays} hari lagi sehingga DP tidak dapat dikembalikan."
+                : null,
+        ]);
+    }
+
+    /**
      * [KLIEN] Mengajukan permintaan pembatalan acara.
-     * Hanya bisa dilakukan saat kanban_status bukan 'request', 'done', 'rejected', atau 'cancelled'.
-     * Serta belum ada permintaan pembatalan yang masih pending.
      */
     public function request(Request $request, Event $event): JsonResponse
     {
@@ -51,6 +104,8 @@ class CancellationRequestController extends Controller
             'reason.max' => 'Alasan pembatalan maksimal 1000 karakter.',
         ]);
 
+        $isForfeited = $this->isDpForfeited($event);
+
         $event->update([
             'cancellation_request_reason' => $validated['reason'],
             'cancellation_requested_at' => now(),
@@ -61,6 +116,7 @@ class CancellationRequestController extends Controller
 
         return response()->json([
             'message' => 'Permintaan pembatalan acara berhasil diajukan. Menunggu konfirmasi dari Event Organizer.',
+            'is_dp_forfeited' => $isForfeited,
             'event' => $event->fresh(),
         ]);
     }
@@ -102,7 +158,12 @@ class CancellationRequestController extends Controller
         $events = Event::with(['client:id,name,email'])
             ->where('cancellation_request_status', 'pending')
             ->orderByDesc('cancellation_requested_at')
-            ->get();
+            ->get()
+            ->map(function (Event $event) {
+                $event->is_dp_forfeited = $this->isDpForfeited($event);
+
+                return $event;
+            });
 
         return response()->json(['events' => $events]);
     }
@@ -122,6 +183,8 @@ class CancellationRequestController extends Controller
             'review_note' => ['nullable', 'string', 'max:500'],
         ]);
 
+        $isForfeited = $this->isDpForfeited($event);
+
         // Batalkan seluruh vendor assignment aktif
         $event->vendorAssignments()
             ->whereIn('eo_offer_status', ['pending', 'accepted'])
@@ -136,8 +199,21 @@ class CancellationRequestController extends Controller
             'cancellation_reviewed_at' => now(),
         ]);
 
+        // Kirim notifikasi email ke klien
+        $clientEmail = $event->client?->email;
+        if ($clientEmail) {
+            Mail::to($clientEmail)->queue(
+                new CancellationApprovedMail(
+                    event: $event->load('client'),
+                    isDpForfeited: $isForfeited,
+                    reviewNote: $validated['review_note'] ?? null,
+                )
+            );
+        }
+
         return response()->json([
-            'message' => 'Permintaan pembatalan disetujui. Acara telah dibatalkan.',
+            'message' => 'Permintaan pembatalan disetujui. Acara telah dibatalkan dan notifikasi dikirim ke klien.',
+            'is_dp_forfeited' => $isForfeited,
             'event' => $event->fresh(['client', 'vendorAssignments']),
         ]);
     }
@@ -166,8 +242,19 @@ class CancellationRequestController extends Controller
             'cancellation_reviewed_at' => now(),
         ]);
 
+        // Kirim notifikasi email ke klien
+        $clientEmail = $event->client?->email;
+        if ($clientEmail) {
+            Mail::to($clientEmail)->queue(
+                new CancellationRejectedMail(
+                    event: $event->load('client'),
+                    reviewNote: $validated['review_note'],
+                )
+            );
+        }
+
         return response()->json([
-            'message' => 'Permintaan pembatalan ditolak. Acara tetap berjalan.',
+            'message' => 'Permintaan pembatalan ditolak. Acara tetap berjalan dan notifikasi dikirim ke klien.',
             'event' => $event->fresh(['client']),
         ]);
     }

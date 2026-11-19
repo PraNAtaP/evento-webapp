@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\VendorPackage;
 use App\Models\VendorPackageImage;
+use Cloudinary\Uploader;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -70,7 +71,7 @@ class VendorPackageController extends Controller
         if ($request->hasFile('image')) {
             \Cloudinary::config();
 
-            $upload = \Cloudinary\Uploader::upload(
+            $upload = Uploader::upload(
                 $request->file('image')->getRealPath(),
                 [
                     'folder' => 'evento/packages',
@@ -89,7 +90,7 @@ class VendorPackageController extends Controller
             foreach ($request->file('images') as $image) {
                 \Cloudinary::config();
 
-                $upload = \Cloudinary\Uploader::upload(
+                $upload = Uploader::upload(
                     $image->getRealPath(),
                     [
                         'folder' => 'evento/packages',
@@ -167,7 +168,7 @@ class VendorPackageController extends Controller
             if ($oldImage->image_public_id) {
                 \Cloudinary::config();
 
-                \Cloudinary\Uploader::destroy(
+                Uploader::destroy(
                     $oldImage->image_public_id
                 );
             }
@@ -180,7 +181,7 @@ class VendorPackageController extends Controller
             if ($vendorPackage->image_public_id) {
                 \Cloudinary::config();
 
-                \Cloudinary\Uploader::destroy(
+                Uploader::destroy(
                     $vendorPackage->image_public_id
                 );
             }
@@ -190,20 +191,20 @@ class VendorPackageController extends Controller
                 'image_public_id' => null,
             ]);
         }
-        
+
         // Ganti foto utama hanya jika ada foto baru
         if ($request->hasFile('image')) {
             if ($vendorPackage->image_public_id) {
                 \Cloudinary::config();
 
-                \Cloudinary\Uploader::destroy(
+                Uploader::destroy(
                     $vendorPackage->image_public_id
                 );
             }
 
             \Cloudinary::config();
 
-            $upload = \Cloudinary\Uploader::upload(
+            $upload = Uploader::upload(
                 $request->file('image')->getRealPath(),
                 [
                     'folder' => 'evento/packages',
@@ -221,7 +222,7 @@ class VendorPackageController extends Controller
             foreach ($request->file('images') as $image) {
                 \Cloudinary::config();
 
-                $upload = \Cloudinary\Uploader::upload(
+                $upload = Uploader::upload(
                     $image->getRealPath(),
                     [
                         'folder' => 'evento/packages',

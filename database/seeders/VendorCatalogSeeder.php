@@ -513,4 +513,3 @@ class VendorCatalogSeeder extends Seeder
         }
     }
 }
-

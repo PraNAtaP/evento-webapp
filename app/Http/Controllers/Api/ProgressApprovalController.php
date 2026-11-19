@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ToggleProgressVisibilityRequest;
 use App\Models\ProgressLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Http\Requests\ToggleProgressVisibilityRequest;
 
 class ProgressApprovalController extends Controller
 {
@@ -14,10 +14,10 @@ class ProgressApprovalController extends Controller
     {
         $logs = ProgressLog::with([
             'assignment.event:id,event_name',
-            'assignment.vendor:id,business_name'
+            'assignment.vendor:id,business_name',
         ])
-        ->orderByDesc('created_at')
-        ->get();
+            ->orderByDesc('created_at')
+            ->get();
 
         return response()->json([
             'logs' => $logs,

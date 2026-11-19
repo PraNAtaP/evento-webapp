@@ -19,7 +19,7 @@ class AdminEventOrderController extends Controller
             ->orderByDesc('updated_at')
             ->orderByDesc('created_at');
 
-        if ($request->has('status') && in_array($request->query('status'), ['request', 'accepted', 'rejected', 'all'], true)) {
+        if ($request->has('status') && in_array($request->query('status'), ['request', 'accepted', 'rejected', 'cancellation_requests', 'all'], true)) {
             $status = $request->query('status');
             if ($status === 'accepted') {
                 // Tampilkan semua pesanan yang sudah diterima EO (mulai dari drafting_quotation hingga done)
@@ -30,6 +30,8 @@ class AdminEventOrderController extends Controller
                     'on_progress',
                     'done',
                 ]);
+            } elseif ($status === 'cancellation_requests') {
+                $query->where('cancellation_request_status', 'pending');
             } elseif ($status !== 'all') {
                 $query->where('kanban_status', $status);
             }
