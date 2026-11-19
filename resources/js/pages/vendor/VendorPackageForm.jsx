@@ -1,10 +1,13 @@
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
+import { useDialog } from "../../context/DialogContext";
 
 export default function VendorPackageForm() {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const { showAlert, showToast } = useDialog();
 
     // Jika ada id berarti mode edit
     const isEdit = Boolean(id);
@@ -53,7 +56,12 @@ export default function VendorPackageForm() {
                 );
 
                 if (!packageData) {
-                    alert("Paket tidak ditemukan.");
+                    await showAlert({
+                        title: "Paket Tidak Ditemukan",
+                        message: "Data paket tidak ditemukan atau telah dihapus.",
+                        type: "warning",
+                    });
+                    navigate("/vendor/dashboard");
                     return;
                 }
 
@@ -97,7 +105,11 @@ export default function VendorPackageForm() {
                     error
                 );
 
-                alert("Gagal mengambil data paket.");
+                await showAlert({
+                    title: "Gagal Mengambil Data",
+                    message: "Terjadi kesalahan saat mengambil data paket.",
+                    type: "danger",
+                });
             }
         };
 
@@ -228,7 +240,7 @@ export default function VendorPackageForm() {
                     }
                 );
 
-                alert("Paket berhasil diperbarui");
+                showToast("Paket berhasil diperbarui", "success");
             } else {
                 // Tambah paket baru
                 await api.post("/vendor/packages", formData, {
@@ -237,11 +249,11 @@ export default function VendorPackageForm() {
                     },
                 });
 
-                alert("Paket berhasil ditambahkan");
+                showToast("Paket berhasil ditambahkan", "success");
             }
 
             // Setelah berhasil, kembali ke Dashboard
-            window.location.href = "/vendor/dashboard";
+            navigate("/vendor/dashboard");
         } catch (error) {
             console.error(
                 "Gagal menyimpan paket:",
@@ -252,24 +264,23 @@ export default function VendorPackageForm() {
 
             const errors = error.response?.data?.errors;
 
+            let errorMsg = "Gagal menyimpan paket. Silakan coba lagi.";
             if (errors) {
                 const messages = Object.values(errors).flat();
-                alert(messages.join("\n"));
+                errorMsg = messages.join("\n");
             } else if (error.response?.status === 500) {
-                alert(
-                    "Terjadi kesalahan pada server. Silakan coba lagi."
-                );
+                errorMsg = "Terjadi kesalahan pada server. Silakan coba lagi.";
             } else if (error.response?.data?.message) {
-                alert(error.response.data.message);
+                errorMsg = error.response.data.message;
             } else if (error.request) {
-                alert(
-                    "Koneksi bermasalah atau server tidak merespons. Silakan coba lagi."
-                );
-            } else {
-                alert(
-                    "Gagal menyimpan paket. Silakan coba lagi."
-                );
+                errorMsg = "Koneksi bermasalah atau server tidak merespons. Silakan coba lagi.";
             }
+
+            await showAlert({
+                title: "Gagal Menyimpan Paket",
+                message: errorMsg,
+                type: "danger",
+            });
         } finally {
             setIsSubmitting(false);
         }

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useDialog } from "../../context/DialogContext";
 import api from "../../api/axios";
 
 export default function VendorDashboard() {
     const { user } = useAuth();
+    const { showConfirm, showAlert, showToast } = useDialog();
     const [selectedImage, setSelectedImage] = useState(null);
     const [packages, setPackages] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -29,17 +31,29 @@ export default function VendorDashboard() {
 
     // Menghapus paket
     const handleDelete = async (id) => {
-        if (!confirm("Yakin ingin menghapus paket ini?")) {
+        const confirmed = await showConfirm({
+            title: "Hapus Paket Jasa?",
+            message: "Yakin ingin menghapus paket ini? Tindakan ini tidak dapat dibatalkan.",
+            isDanger: true,
+            confirmText: "Ya, Hapus",
+            cancelText: "Batal",
+        });
+
+        if (!confirmed) {
             return;
         }
 
         try {
             await api.delete(`/vendor/packages/${id}`);
-            alert("Paket berhasil dihapus");
+            showToast("Paket berhasil dihapus", "success");
             await fetchPackages();
         } catch (error) {
             console.error("Gagal menghapus paket:", error);
-            alert("Gagal menghapus paket");
+            showAlert({
+                title: "Gagal Menghapus",
+                message: error.response?.data?.message || "Gagal menghapus paket.",
+                type: "danger",
+            });
         }
     };
 

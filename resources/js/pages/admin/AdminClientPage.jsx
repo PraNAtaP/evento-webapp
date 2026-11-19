@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
+import { useDialog } from "../../context/DialogContext";
 
 const formatDate = (date) => {
     if (!date) return "-";
@@ -29,6 +30,7 @@ const getErrorMessage = (error) =>
 
 export default function AdminClientPage() {
     const queryClient = useQueryClient();
+    const { confirm: showConfirm } = useDialog();
 
     const [search, setSearch] = useState("");
     const [activeTab, setActiveTab] = useState("active");
@@ -203,12 +205,15 @@ export default function AdminClientPage() {
         deleteMutation.mutate(deletingClient.id);
     };
 
-    const handleRestore = (client) => {
+    const handleRestore = async (client) => {
         if (!client.can_restore) return;
 
-        const confirmed = window.confirm(
-            `Pulihkan akun Client ${client.name}? Akun ini akan dapat digunakan untuk login kembali.`
-        );
+        const confirmed = await showConfirm({
+            title: "Pulihkan Akun Client?",
+            message: `Pulihkan akun Client ${client.name}? Akun ini akan dapat digunakan untuk login kembali.`,
+            confirmText: "Ya, Pulihkan Akun",
+            type: "info",
+        });
 
         if (!confirmed) return;
 

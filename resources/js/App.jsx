@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { DialogProvider } from "./context/DialogContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/auth/Login";
@@ -59,7 +60,8 @@ export default function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <AuthProvider>
-                <BrowserRouter>
+                <DialogProvider>
+                    <BrowserRouter>
                     <Routes>
                         <Route path="/" element={<RootRedirect />} />
 
@@ -297,6 +299,7 @@ export default function App() {
                         />
                     </Routes>
                 </BrowserRouter>
+                </DialogProvider>
             </AuthProvider>
         </QueryClientProvider>
     );

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useDialog } from "../context/DialogContext";
 
 /**
  * Mapping rute ke judul halaman dan subjudul ramah pengguna
@@ -82,6 +83,7 @@ const ROUTE_TITLES = {
 
 export default function Header({ onToggleSidebar }) {
     const { user, logout } = useAuth();
+    const { showAlert } = useDialog();
     const location = useLocation();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -218,7 +220,11 @@ export default function Header({ onToggleSidebar }) {
                                     type="button"
                                     onClick={() => {
                                         setIsDropdownOpen(false);
-                                        alert(`Profil: ${user?.name}\nEmail: ${user?.email}\nRole: ${user?.role?.toUpperCase()}`);
+                                        showAlert({
+                                            title: "Profil Pengguna",
+                                            message: `Nama: ${user?.name || "-"}\nEmail: ${user?.email || "-"}\nRole: ${user?.role ? user.role.toUpperCase() : "-"}`,
+                                            type: "info",
+                                        });
                                     }}
                                     className="w-full text-left px-4 py-2 hover:bg-[#FAF6F0] text-[#2F3931] font-semibold flex items-center gap-2.5 transition cursor-pointer"
                                 >
@@ -231,7 +237,11 @@ export default function Header({ onToggleSidebar }) {
                                     type="button"
                                     onClick={() => {
                                         setIsDropdownOpen(false);
-                                        alert("Pengaturan sistem & preferensi notifikasi.");
+                                        showAlert({
+                                            title: "Pengaturan Akun",
+                                            message: "Pengaturan sistem & preferensi notifikasi saat ini aktif secara default.",
+                                            type: "info",
+                                        });
                                     }}
                                     className="w-full text-left px-4 py-2 hover:bg-[#FAF6F0] text-[#2F3931] font-semibold flex items-center gap-2.5 transition cursor-pointer"
                                 >

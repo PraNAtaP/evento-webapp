@@ -1,7 +1,9 @@
     import { useState } from 'react';
     import api from '../../api/axios';
+    import { useDialog } from '../../context/DialogContext';
 
     export default function RevisionModal({ event, onClose, onSuccess }) {
+    const { alert: showAlert } = useDialog();
     const [note, setNote] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -22,7 +24,11 @@
             `/client/events/${event.id}/request-revision`,
             { note }
         );
-        alert(res.data.message);
+        await showAlert({
+            title: "Permintaan Revisi Terkirim",
+            message: res.data.message || "Permintaan revisi berhasil dikirim ke Event Organizer.",
+            type: "success",
+        });
         onSuccess();
         onClose();
         } catch (err) {

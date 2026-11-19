@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
+import { useDialog } from "../../context/DialogContext";
 import { CATEGORY_LABELS } from "../../data/kanbanData";
 import { formatDateTime, formatNumber, formatRupiah } from "../../utils/formatters";
 
 export default function EventOrdersPage() {
     const queryClient = useQueryClient();
+    const { confirm: showConfirm } = useDialog();
     const [statusFilter, setStatusFilter] = useState("request");
     const [page, setPage] = useState(1);
     const [rejectModalData, setRejectModalData] = useState(null);
@@ -122,9 +124,15 @@ export default function EventOrdersPage() {
         },
     });
 
-    const handleAccept = (order) => {
+    const handleAccept = async (order) => {
         const displayClient = order.manual_client_name || order.client?.name || "Klien";
-        if (confirm(`Yakin ingin menerima pesanan acara "${order.event_name}" dari ${displayClient}?`)) {
+        const yakin = await showConfirm({
+            title: "Terima Pesanan Acara?",
+            message: `Yakin ingin menerima pesanan acara "${order.event_name}" dari ${displayClient}? Acara akan diteruskan ke tahap penyusunan penawaran.`,
+            confirmText: "Ya, Terima Pesanan",
+            type: "info",
+        });
+        if (yakin) {
             acceptMutation.mutate(order.id);
         }
     };

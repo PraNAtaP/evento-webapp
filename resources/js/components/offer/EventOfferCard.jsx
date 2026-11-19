@@ -1,7 +1,9 @@
 import { useState } from "react";
 import api from "../../api/axios";
+import { useDialog } from "../../context/DialogContext";
 
 export default function EventOfferCard({ event, onRevision, onSuccess }) {
+    const { confirm: showConfirm, alert: showAlert } = useDialog();
     const [isApproving, setIsApproving] = useState(false);
     const [isTermsOpen, setIsTermsOpen] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
@@ -31,13 +33,20 @@ export default function EventOfferCard({ event, onRevision, onSuccess }) {
 
     const handleApprove = async () => {
         if (!termsAccepted) {
-            alert("Silakan baca dan setujui Syarat dan Ketentuan terlebih dahulu.");
+            await showAlert({
+                title: "Persetujuan S&K Diperlukan",
+                message: "Silakan baca dan centang persetujuan Syarat dan Ketentuan terlebih dahulu.",
+                type: "warning",
+            });
             return;
         }
 
-        const yakin = confirm(
-            `Setujui semua penawaran untuk acara "${event.event_name}"?\n\nTotal: ${rupiah(totalHarga)}\n\nTagihan DP akan otomatis dibuat.`
-        );
+        const yakin = await showConfirm({
+            title: "Setujui Penawaran Acara?",
+            message: `Setujui semua penawaran untuk acara "${event.event_name}"?\n\nTotal Biaya: ${rupiah(totalHarga)}\n\nSetelah disetujui, tagihan Down Payment (DP) akan otomatis diterbitkan.`,
+            confirmText: "Ya, Setujui Penawaran",
+            type: "info",
+        });
         if (!yakin) return;
 
         setIsApproving(true);
@@ -49,7 +58,11 @@ export default function EventOfferCard({ event, onRevision, onSuccess }) {
                 }
             );
 
-            alert(res.data.message);
+            await showAlert({
+                title: "Penawaran Disetujui",
+                message: res.data.message || "Penawaran berhasil disetujui. Tagihan DP telah diterbitkan.",
+                type: "success",
+            });
             onSuccess();
         } catch (err) {
             const msg =
@@ -58,7 +71,11 @@ export default function EventOfferCard({ event, onRevision, onSuccess }) {
                 err.response?.data?.errors?.terms_accepted?.[0] ||
                 "Gagal menyetujui penawaran.";
 
-            alert("Gagal: " + msg);
+            await showAlert({
+                title: "Gagal Menyetujui",
+                message: msg,
+                type: "danger",
+            });
         } finally {
             setIsApproving(false);
         }

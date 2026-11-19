@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useDialog } from '../../context/DialogContext';
 import { getProgressLogs, toggleVisibility } from '../../api/progressApi';
 import ProgressCard from '../../components/progress/ProgressCard';
 
 export default function ProgressApprovalPage() {
     const { user } = useAuth(); // Pastikan role EO
+    const { alert: showAlert } = useDialog();
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -33,7 +35,11 @@ export default function ProgressApprovalPage() {
                 prev.map((l) => (l.id === id ? { ...l, ...data.log } : l))
             );
         } catch (e) {
-            alert(e?.response?.data?.message || 'Gagal mengubah status.');
+            await showAlert({
+                title: "Gagal Mengubah Status",
+                message: e?.response?.data?.message || 'Gagal mengubah status visibilitas progres.',
+                type: "danger",
+            });
         }
     };
 

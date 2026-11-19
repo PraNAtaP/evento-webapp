@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { useDialog } from "../../context/DialogContext";
 
 export default function VendorJobOffers() {
+    const { showAlert, showConfirm, showToast } = useDialog();
     const [jobOffers, setJobOffers] = useState([]);
     const [activeJobs, setActiveJobs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -43,7 +45,25 @@ export default function VendorJobOffers() {
         const reason = rejectionReasons[assignmentId]?.trim() || "";
 
         if (status === "rejected" && !reason) {
-            alert("Alasan penolakan wajib diisi.");
+            await showAlert({
+                title: "Alasan Diperlukan",
+                message: "Alasan penolakan wajib diisi.",
+                type: "warning",
+            });
+            return;
+        }
+
+        const confirmed = await showConfirm({
+            title: status === "accepted" ? "Terima Pekerjaan?" : "Tolak Tawaran Pekerjaan?",
+            message: status === "accepted"
+                ? "Apakah Anda yakin ingin menerima tawaran pekerjaan ini?"
+                : "Apakah Anda yakin ingin menolak tawaran pekerjaan ini?",
+            confirmText: status === "accepted" ? "Ya, Terima" : "Ya, Tolak",
+            cancelText: "Batal",
+            isDanger: status === "rejected",
+        });
+
+        if (!confirmed) {
             return;
         }
 
@@ -58,18 +78,20 @@ export default function VendorJobOffers() {
                 }
             );
 
-            alert(
+            showToast(
                 status === "accepted"
                     ? "Tawaran berhasil diterima."
-                    : "Tawaran berhasil ditolak."
+                    : "Tawaran berhasil ditolak.",
+                "success"
             );
 
             fetchJobs();
         } catch (err) {
-            alert(
-                err.response?.data?.message ||
-                "Gagal memproses tawaran."
-            );
+            await showAlert({
+                title: "Gagal Memproses",
+                message: err.response?.data?.message || "Gagal memproses tawaran.",
+                type: "danger",
+            });
         }
     };
 
@@ -79,7 +101,11 @@ export default function VendorJobOffers() {
         const photo = progressPhotos[assignmentId];
 
         if (!note) {
-            alert("Catatan progres wajib diisi.");
+            await showAlert({
+                title: "Catatan Kosong",
+                message: "Catatan progres wajib diisi sebelum menyimpan.",
+                type: "warning",
+            });
             return;
         }
 
@@ -96,7 +122,7 @@ export default function VendorJobOffers() {
                 formData
             );
 
-            alert("Catatan progres berhasil ditambahkan.");
+            showToast("Catatan progres berhasil ditambahkan.", "success");
 
             setProgressNotes((prev) => ({
                 ...prev,
@@ -110,10 +136,11 @@ export default function VendorJobOffers() {
 
             fetchJobs();
         } catch (err) {
-            alert(
-                err.response?.data?.message ||
-                "Gagal menambahkan catatan progres."
-            );
+            await showAlert({
+                title: "Gagal Menyimpan Progres",
+                message: err.response?.data?.message || "Gagal menambahkan catatan progres.",
+                type: "danger",
+            });
         }
     };
 
