@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\CustomerVerificationMail;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Services\AdminNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -92,6 +93,14 @@ class VendorRegistrationController extends Controller
         } catch (\Throwable $e) {
             Log::warning("Gagal mengirim email verifikasi ke vendor {$user->email}: ".$e->getMessage());
         }
+
+        AdminNotificationService::notifyAdmins(
+            title: 'Pendaftar Vendor Baru',
+            message: "Mitra vendor baru '{$result['vendor']->business_name}' ({$result['vendor']->category}) telah mendaftar.",
+            category: 'vendor',
+            actionUrl: '/admin/vendors',
+            metadata: ['vendor_id' => $result['vendor']->id]
+        );
 
         return response()->json([
             'message' => $emailSent

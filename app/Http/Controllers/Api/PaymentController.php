@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadPaymentProofRequest;
 use App\Http\Requests\VerifyPaymentRequest;
+use App\Mail\PaymentVerifiedMail;
 use App\Models\Payment;
+use App\Services\AdminNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
@@ -83,6 +87,15 @@ class PaymentController extends Controller
             'rejection_note' => null,
         ]);
 
+        $payment->load(['event.client']);
+        AdminNotificationService::notifyAdmins(
+            title: 'Bukti Pembayaran Masuk',
+            message: "Klien {$payment->event->client?->name} mengunggah bukti bayar {$payment->payment_type} untuk acara '{$payment->event->title}'.",
+            category: 'payment',
+            actionUrl: '/admin/payments',
+            metadata: ['payment_id' => $payment->id, 'event_id' => $payment->event_id]
+        );
+
         return response()->json([
             'message' => 'Bukti transfer berhasil diunggah. Menunggu verifikasi EO.',
             'payment' => $payment->fresh()->load('event'),
@@ -135,6 +148,17 @@ class PaymentController extends Controller
                 $payment->event->update([
                     'kanban_status' => 'on_progress',
                 ]);
+            }
+
+            // Kirim email kwitansi pelunasan / DP ke klien
+            $payment->load(['event.client']);
+            $clientEmail = $payment->event?->client?->email;
+            if ($clientEmail) {
+                try {
+                    Mail::to($clientEmail)->send(new PaymentVerifiedMail($payment, $payment->event));
+                } catch (\Throwable $e) {
+                    Log::warning("Gagal mengirim email PaymentVerifiedMail ke {$clientEmail}: ".$e->getMessage());
+                }
             }
 
             $message = 'Pembayaran berhasil diverifikasi sebagai LUNAS.';

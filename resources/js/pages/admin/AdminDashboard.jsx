@@ -84,6 +84,15 @@ const ACTION_CONFIG = {
         activeBorder: "border-amber-300",
         badgeBg: "bg-amber-500 text-white",
     },
+    vendor_payouts_pending: {
+        label: "Pencairan Vendor",
+        sublabel: "Honor belum cair",
+        icon: Wallet,
+        activeBg: "bg-amber-50",
+        activeText: "text-amber-950",
+        activeBorder: "border-amber-400",
+        badgeBg: "bg-amber-600 text-white",
+    },
 };
 
 export default function AdminDashboard() {

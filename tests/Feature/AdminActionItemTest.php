@@ -54,6 +54,12 @@ class AdminActionItemTest extends TestCase
         EventVendorAssignment::factory()->pending()->create(['event_id' => $draftingEvent->id]);
         EventVendorAssignment::factory()->accepted()->create(['event_id' => $draftingEvent->id]);
 
+        $onProgressEvent = Event::factory()->create(['kanban_status' => 'on_progress']);
+        EventVendorAssignment::factory()->accepted()->create([
+            'event_id' => $onProgressEvent->id,
+            'payout_status' => 'pending',
+        ]);
+
         $counts = $this->countsFor($eo);
 
         $this->assertSame(2, $counts['new_requests']);
@@ -61,6 +67,7 @@ class AdminActionItemTest extends TestCase
         $this->assertSame(1, $counts['payments_pending']);
         $this->assertSame(1, $counts['vendor_registrations']);
         $this->assertSame(1, $counts['vendor_offers_unanswered']);
+        $this->assertSame(1, $counts['vendor_payouts_pending']);
     }
 
     public function test_non_eo_cannot_access_action_items(): void

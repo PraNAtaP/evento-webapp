@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\CancellationApprovedMail;
 use App\Mail\CancellationRejectedMail;
 use App\Models\Event;
+use App\Services\AdminNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -113,6 +114,14 @@ class CancellationRequestController extends Controller
             'cancellation_review_note' => null,
             'cancellation_reviewed_at' => null,
         ]);
+
+        AdminNotificationService::notifyAdmins(
+            title: 'Pengajuan Pembatalan Acara',
+            message: "Klien {$request->user()->name} mengajukan pembatalan untuk acara '{$event->title}'.",
+            category: 'cancellation',
+            actionUrl: '/admin/orders',
+            metadata: ['event_id' => $event->id, 'reason' => $validated['reason']]
+        );
 
         return response()->json([
             'message' => 'Permintaan pembatalan acara berhasil diajukan. Menunggu konfirmasi dari Event Organizer.',

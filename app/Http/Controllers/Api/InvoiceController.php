@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\VendorPayoutMail;
 use App\Models\EventVendorAssignment;
 use App\Models\Payment;
 use Cloudinary\Uploader;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
@@ -249,6 +252,16 @@ class InvoiceController extends Controller
             'payout_receipt_number' => $receiptNumber,
             'payout_note' => $validated['note'] ?? 'Transfer honorarium vendor via Rekening Resmi EO.',
         ]);
+
+        $assignment->load(['vendor.user', 'event']);
+        $vendorEmail = $assignment->vendor?->user?->email;
+        if ($vendorEmail) {
+            try {
+                Mail::to($vendorEmail)->send(new VendorPayoutMail($assignment, $assignment->vendor, $assignment->event));
+            } catch (\Throwable $e) {
+                Log::warning("Gagal mengirim email VendorPayoutMail ke {$vendorEmail}: ".$e->getMessage());
+            }
+        }
 
         return response()->json([
             'message' => "Honorarium untuk {$assignment->vendor->business_name} sebesar Rp ".number_format($nominal, 0, ',', '.').' berhasil dicatat LUNAS.',

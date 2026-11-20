@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Printer, X, Copy, Check, Download, ShieldCheck, Clock, AlertCircle } from "lucide-react";
 import api from "../../api/axios";
@@ -6,6 +6,13 @@ import api from "../../api/axios";
 export default function ClientInvoiceModal({ paymentId, onClose }) {
     const printAreaRef = useRef(null);
     const [copiedAccount, setCopiedAccount] = React.useState(null);
+
+    useEffect(() => {
+        document.body.classList.add("modal-print-open");
+        return () => {
+            document.body.classList.remove("modal-print-open");
+        };
+    }, []);
 
     const { data: invoiceData, isLoading, error } = useQuery({
         queryKey: ["payment-invoice", paymentId],

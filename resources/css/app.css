@@ -64,6 +64,11 @@ body {
 }
 
 @media print {
+    @page {
+        size: A4 portrait;
+        margin: 10mm 12mm;
+    }
+
     html, body {
         background: #ffffff !important;
         color: #000000 !important;
@@ -72,6 +77,18 @@ body {
         width: 100% !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+    }
+
+    /* Sembunyikan navigasi samping, header, dan elemen background saat mencetak modal invoice */
+    body.modal-print-open aside,
+    body.modal-print-open header,
+    body.modal-print-open nav,
+    body.modal-print-open main > *:not(.print-modal-backdrop):not(:has(.print-modal-backdrop)),
+    body:has(.print-modal-backdrop) aside,
+    body:has(.print-modal-backdrop) header,
+    body:has(.print-modal-backdrop) nav,
+    body:has(.print-modal-backdrop) main > *:not(.print-modal-backdrop):not(:has(.print-modal-backdrop)) {
+        display: none !important;
     }
 
     /* Reset background modal saat dialog cetak aktif */
@@ -84,6 +101,8 @@ body {
         overflow: visible !important;
         backdrop-filter: none !important;
         inset: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
     /* Perlebar container modal agar mengisi penuh lembar A4 secara proporsional */

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\VendorApprovedMail;
+use App\Mail\VendorRejectedMail;
 use App\Models\Vendor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -137,7 +138,15 @@ class AdminVendorController extends Controller
             'approved_by' => $request->user()->id,
         ]);
 
-        $vendor->load(['user:id,name,email', 'approver:id,name,email']);
+        $vendor->load(['user:id,name,email,email_verified_at', 'approver:id,name,email']);
+
+        if ($vendor->user && $vendor->user->email) {
+            try {
+                Mail::to($vendor->user->email)->send(new VendorRejectedMail($vendor, $validated['rejection_reason']));
+            } catch (\Throwable $e) {
+                Log::warning("Gagal mengirim email penolakan vendor via SMTP ke {$vendor->user->email}: ".$e->getMessage());
+            }
+        }
 
         return response()->json([
             'message' => "Pendaftaran vendor '{$vendor->business_name}' telah ditolak.",

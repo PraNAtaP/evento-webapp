@@ -87,7 +87,12 @@ export function AuthProvider({ children }) {
     };
 
     const getRoleDashboard = (role, currentUser = user) => {
-        if (currentUser && currentUser.role === "client" && !currentUser.email_verified_at && currentUser.is_email_verified !== true) {
+        if (
+            currentUser &&
+            (currentUser.role === "client" || currentUser.role === "vendor") &&
+            !currentUser.email_verified_at &&
+            currentUser.is_email_verified !== true
+        ) {
             return "/verify-email";
         }
         switch (role) {

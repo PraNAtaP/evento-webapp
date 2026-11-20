@@ -25,7 +25,7 @@ export default function KanbanCard({ card, onSelectCard }) {
     }
 
     // Badge pembayaran: hanya muncul mulai kolom awaiting_dp
-    const showPaymentBadge = ["awaiting_dp", "on_progress", "done"].includes(kanbanStatus);
+    const showPaymentBadge = ["awaiting_dp", "on_progress", "in_progress", "done"].includes(kanbanStatus);
     const payment = getPaymentStatus(agreedPrice, paidAmount);
 
     // Deteksi Prioritas Tindakan EO
@@ -36,7 +36,7 @@ export default function KanbanCard({ card, onSelectCard }) {
     const unpaidVendorsCount = vendorAssignments.filter(
         (v) => (v.offer_status === "accepted" || v.eo_offer_status === "accepted") && v.payout_status !== "paid"
     ).length;
-    const showUnpaidPayoutBadge = ["on_progress", "done"].includes(kanbanStatus) && unpaidVendorsCount > 0;
+    const showUnpaidPayoutBadge = ["on_progress", "in_progress", "done"].includes(kanbanStatus) && unpaidVendorsCount > 0;
     const payments = card.payments || [];
     const hasPendingPayment = payments.some((p) => p.status === "pending");
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBookingRequest;
 use App\Models\Event;
+use App\Services\AdminNotificationService;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -72,6 +73,14 @@ class BookingController extends Controller
                 'end_date' => $isMultiDay ? ($validated['end_date'] ?? null) : null,
                 'kanban_status' => 'request',
             ]);
+
+            AdminNotificationService::notifyAdmins(
+                title: 'Pesanan Acara Baru Masuk',
+                message: "Klien {$request->user()->name} mengajukan pesanan acara '{$event->event_name}' ({$event->category}).",
+                category: 'order',
+                actionUrl: '/admin/orders',
+                metadata: ['event_id' => $event->id]
+            );
         } catch (UniqueConstraintViolationException|QueryException $e) {
             throw ValidationException::withMessages([
                 'event_date' => ['Tanggal sudah terisi'],

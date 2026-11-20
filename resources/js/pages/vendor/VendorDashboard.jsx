@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
     Briefcase,
     Clock,
@@ -31,6 +31,11 @@ export default function VendorDashboard() {
     const [loading, setLoading] = useState(true);
 
     const vendor = user?.vendor;
+    const isUnverified = user && !user.email_verified_at && user.is_email_verified !== true;
+
+    if (isUnverified) {
+        return <Navigate to="/verify-email" replace />;
+    }
 
     useEffect(() => {
         const fetchDashboardData = async () => {

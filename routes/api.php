@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminActionItemController;
 use App\Http\Controllers\Api\AdminCalendarBookingController;
 use App\Http\Controllers\Api\AdminClientController;
 use App\Http\Controllers\Api\AdminEventOrderController;
+use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\AdminVendorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
@@ -192,6 +193,16 @@ Route::middleware('auth:sanctum')->group(function () {
         // Pencairan Honorarium Vendor oleh EO (Payout / Settlement)
         Route::post('/admin/vendor-assignments/{assignment}/payout', [InvoiceController::class, 'disburseVendorPayout'])
             ->name('api.admin.vendor-assignments.payout');
+
+        // Kotak Masuk Notifikasi Admin EO (Web Notification Center)
+        Route::get('/admin/notifications', [AdminNotificationController::class, 'index'])
+            ->name('api.admin.notifications.index');
+        Route::patch('/admin/notifications/{id}/read', [AdminNotificationController::class, 'markAsRead'])
+            ->name('api.admin.notifications.read');
+        Route::post('/admin/notifications/mark-all-read', [AdminNotificationController::class, 'markAllRead'])
+            ->name('api.admin.notifications.mark-all-read');
+        Route::delete('/admin/notifications/{id}', [AdminNotificationController::class, 'destroy'])
+            ->name('api.admin.notifications.destroy');
     });
 
     // Booking Acara (Modul Klien - Dian)

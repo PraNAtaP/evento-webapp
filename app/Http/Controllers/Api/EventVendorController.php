@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEventVendorRequest;
 use App\Http\Resources\EventVendorResource;
+use App\Mail\QuotationSentMail;
+use App\Mail\VendorJobOfferMail;
 use App\Models\Event;
 use App\Models\EventVendorAssignment;
 use App\Models\VendorPackage;
@@ -14,6 +16,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class EventVendorController extends Controller
@@ -53,7 +57,16 @@ class EventVendorController extends Controller
             ]);
         }
 
-        $assignment->refresh()->load('vendor:id,business_name,category');
+        $assignment->refresh()->load(['vendor.user', 'event']);
+
+        $vendorUserEmail = $assignment->vendor?->user?->email;
+        if ($vendorUserEmail) {
+            try {
+                Mail::to($vendorUserEmail)->send(new VendorJobOfferMail($assignment, $assignment->vendor, $event));
+            } catch (\Throwable $e) {
+                Log::warning("Gagal mengirim email VendorJobOfferMail ke {$vendorUserEmail}: ".$e->getMessage());
+            }
+        }
 
         return (new EventVendorResource($assignment))
             ->response()
@@ -111,6 +124,16 @@ class EventVendorController extends Controller
                 ['dp_percentage' => $validated['dp_percentage'] ?? null]
             );
         });
+
+        $event->load('client');
+        $clientEmail = $event->client?->email;
+        if ($clientEmail) {
+            try {
+                Mail::to($clientEmail)->send(new QuotationSentMail($event));
+            } catch (\Throwable $e) {
+                Log::warning("Gagal mengirim email QuotationSentMail ke {$clientEmail}: ".$e->getMessage());
+            }
+        }
 
         return response()->json([
             'message' => 'Penawaran berhasil dikirim ke klien.',

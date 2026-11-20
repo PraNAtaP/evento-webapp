@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Printer, X, ShieldCheck, Check, Clock, Upload, DollarSign, Building } from "lucide-react";
 import api from "../../api/axios";
@@ -10,6 +10,13 @@ export default function VendorPayoutModal({ assignmentId, isEo = false, onClose,
     const [proofFile, setProofFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
+
+    useEffect(() => {
+        document.body.classList.add("modal-print-open");
+        return () => {
+            document.body.classList.remove("modal-print-open");
+        };
+    }, []);
 
     const { data: invoiceData, isLoading, error } = useQuery({
         queryKey: ["vendor-invoice", assignmentId],

@@ -33,6 +33,10 @@ class AdminActionItemController extends Controller
             'vendor_offers_unanswered' => EventVendorAssignment::where('eo_offer_status', 'pending')
                 ->whereHas('event', fn ($query) => $query->where('kanban_status', Event::VENDOR_MANAGEABLE_STATUS))
                 ->count(),
+            'vendor_payouts_pending' => EventVendorAssignment::where('eo_offer_status', 'accepted')
+                ->where('payout_status', 'pending')
+                ->whereHas('event', fn ($query) => $query->whereIn('kanban_status', ['on_progress', 'done']))
+                ->count(),
         ];
 
         $items = [
@@ -42,6 +46,7 @@ class AdminActionItemController extends Controller
             ['key' => 'payments_pending', 'label' => 'Bukti bayar menunggu verifikasi', 'path' => '/admin/payments'],
             ['key' => 'vendor_registrations', 'label' => 'Pendaftar vendor menunggu', 'path' => '/admin/vendors'],
             ['key' => 'vendor_offers_unanswered', 'label' => 'Tawaran vendor belum dijawab', 'path' => '/admin/kanban'],
+            ['key' => 'vendor_payouts_pending', 'label' => 'Pencairan honor vendor pending', 'path' => '/admin/kanban'],
         ];
 
         $items = array_map(fn (array $item) => $item + ['count' => $counts[$item['key']]], $items);
