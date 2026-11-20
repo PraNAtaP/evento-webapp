@@ -52,7 +52,10 @@ class EmailVerificationController extends Controller
                 ]);
             }
 
-            return redirect('/login?verified=already');
+            $token = $user->createToken('auth_token')->plainTextToken;
+            $redirectPath = $user->role === 'vendor' ? '/vendor/dashboard' : '/client/dashboard';
+
+            return redirect("{$redirectPath}?verified=already&token={$token}");
         }
 
         if ($user->markEmailAsVerified()) {
@@ -66,7 +69,10 @@ class EmailVerificationController extends Controller
             ]);
         }
 
-        return redirect('/login?verified=1');
+        $token = $user->createToken('auth_token')->plainTextToken;
+        $redirectPath = $user->role === 'vendor' ? '/vendor/dashboard' : '/client/dashboard';
+
+        return redirect("{$redirectPath}?verified=1&token={$token}");
     }
 
     /**
@@ -109,12 +115,45 @@ class EmailVerificationController extends Controller
             Log::warning("Gagal mengirim ulang email verifikasi ke {$user->email}: ".$e->getMessage());
 
             return response()->json([
-                'message' => 'Gagal mengirim email verifikasi. Silakan hubungi admin atau coba beberapa saat lagi.',
+                'message' => 'Gagal mengirim email verifikasi. Server email SMTP mengalami kendala koneksi atau autentikasi.',
             ], 500);
         }
 
         return response()->json([
             'message' => 'Tautan verifikasi baru berhasil dikirim ke alamat email Anda.',
+        ]);
+    }
+
+    /**
+     * Check verification status for the authenticated user or by email query.
+     */
+    public function status(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user && $request->filled('email')) {
+            $user = User::where('email', $request->query('email'))->first();
+        }
+
+        if (! $user) {
+            return response()->json([
+                'verified' => false,
+                'message' => 'Pengguna tidak ditemukan.',
+            ], 404);
+        }
+
+        $isVerified = $user->hasVerifiedEmail();
+        $token = null;
+
+        if ($isVerified && ! $request->user()) {
+            $token = $user->createToken('auth_token')->plainTextToken;
+        }
+
+        return response()->json([
+            'verified' => $isVerified,
+            'email' => $user->email,
+            'role' => $user->role,
+            'token' => $token,
         ]);
     }
 }

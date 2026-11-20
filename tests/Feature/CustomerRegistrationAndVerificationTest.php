@@ -126,6 +126,25 @@ class CustomerRegistrationAndVerificationTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
+    public function test_customer_registration_prevents_duplicate_email_even_if_unverified(): void
+    {
+        User::factory()->unverified()->create([
+            'email' => 'unverified.existing@evento.test',
+        ]);
+
+        $payload = [
+            'name' => 'New Person Same Email',
+            'email' => 'unverified.existing@evento.test',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ];
+
+        $response = $this->postJson('/api/register', $payload);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+    }
+
     public function test_customer_can_verify_email_via_valid_signed_url(): void
     {
         Event::fake([Verified::class]);
@@ -145,7 +164,10 @@ class CustomerRegistrationAndVerificationTest extends TestCase
 
         $response = $this->get($verificationUrl);
 
-        $response->assertRedirect('/login?verified=1');
+        $response->assertRedirect();
+        $this->assertStringContainsString('/client/dashboard', (string) $response->headers->get('Location'));
+        $this->assertStringContainsString('verified=1', (string) $response->headers->get('Location'));
+        $this->assertStringContainsString('token=', (string) $response->headers->get('Location'));
 
         $this->assertNotNull($user->fresh()->email_verified_at);
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
@@ -234,7 +256,30 @@ class CustomerRegistrationAndVerificationTest extends TestCase
 
         $response = $this->get($verificationUrl);
 
-        $response->assertRedirect('/login?verified=already');
+        $response->assertRedirect();
+        $this->assertStringContainsString('/client/dashboard', (string) $response->headers->get('Location'));
+        $this->assertStringContainsString('verified=already', (string) $response->headers->get('Location'));
+        $this->assertStringContainsString('token=', (string) $response->headers->get('Location'));
+    }
+
+    public function test_can_check_verification_status_via_api(): void
+    {
+        $unverified = User::factory()->unverified()->create([
+            'email' => 'status.check@evento.test',
+        ]);
+
+        $response = $this->getJson('/api/email/verification-status?email=status.check@evento.test');
+        $response->assertOk()
+            ->assertJsonPath('verified', false)
+            ->assertJsonPath('email', 'status.check@evento.test');
+
+        $unverified->markEmailAsVerified();
+
+        $response2 = $this->getJson('/api/email/verification-status?email=status.check@evento.test');
+        $response2->assertOk()
+            ->assertJsonPath('verified', true)
+            ->assertJsonPath('email', 'status.check@evento.test');
+        $this->assertNotNull($response2->json('token'));
     }
 
     public function test_unverified_customer_can_request_resend_verification_email(): void

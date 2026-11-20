@@ -17,7 +17,7 @@ export default function Login() {
 
     useEffect(() => {
         if (isAuthenticated && user) {
-            navigate(getRoleDashboard(user.role), { replace: true });
+            navigate(getRoleDashboard(user.role, user), { replace: true });
         }
     }, [isAuthenticated, user, navigate, getRoleDashboard]);
 
@@ -28,7 +28,7 @@ export default function Login() {
 
         try {
             const loggedInUser = await login(email, password);
-            navigate(getRoleDashboard(loggedInUser.role), { replace: true });
+            navigate(getRoleDashboard(loggedInUser.role, loggedInUser), { replace: true });
         } catch (err) {
             if (err.response && err.response.data && err.response.data.message) {
                 setError(err.response.data.message);

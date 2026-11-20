@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CustomerVerificationMail;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 class VendorRegistrationController extends Controller
 {
@@ -46,6 +50,7 @@ class VendorRegistrationController extends Controller
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'role' => 'vendor',
+                'email_verified_at' => null,
             ]);
 
             $vendor = Vendor::create([
@@ -70,14 +75,37 @@ class VendorRegistrationController extends Controller
             ];
         });
 
+        $user = $result['user'];
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            [
+                'id' => $user->id,
+                'hash' => sha1($user->getEmailForVerification()),
+            ]
+        );
+
+        $emailSent = false;
+        try {
+            Mail::to($user->email)->send(new CustomerVerificationMail($user, $verificationUrl));
+            $emailSent = true;
+        } catch (\Throwable $e) {
+            Log::warning("Gagal mengirim email verifikasi ke vendor {$user->email}: ".$e->getMessage());
+        }
+
         return response()->json([
-            'message' => 'Pendaftaran vendor berhasil diajukan! Profil Anda sedang dalam tahap peninjauan oleh tim EO EVENTO.',
+            'message' => $emailSent
+                ? 'Pendaftaran akun vendor berhasil! Silakan periksa email Anda untuk memverifikasi akun sebelum profil dapat disetujui oleh tim EO.'
+                : 'Pendaftaran akun vendor berhasil diajukan, namun server email mengalami kendala saat mengirim tautan. Silakan gunakan tombol kirim ulang di halaman verifikasi.',
             'token' => $result['token'],
+            'email_sent' => $emailSent,
             'user' => [
                 'id' => $result['user']->id,
                 'name' => $result['user']->name,
                 'email' => $result['user']->email,
                 'role' => $result['user']->role,
+                'email_verified_at' => $result['user']->email_verified_at,
+                'is_email_verified' => false,
                 'vendor' => [
                     'id' => $result['vendor']->id,
                     'business_name' => $result['vendor']->business_name,

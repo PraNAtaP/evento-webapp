@@ -46,6 +46,8 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])
 // Verifikasi Email
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->name('api.verification.verify');
+Route::get('/email/verification-status', [EmailVerificationController::class, 'status'])
+    ->name('api.verification.status');
 Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
     ->middleware('throttle:6,1')
     ->name('api.verification.send');

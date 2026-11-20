@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Mail\CustomerVerificationMail;
 use App\Mail\VendorApprovedMail;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class VendorRegistrationAndApprovalTest extends TestCase
@@ -15,6 +17,8 @@ class VendorRegistrationAndApprovalTest extends TestCase
 
     public function test_vendor_can_register_successfully_with_pending_status(): void
     {
+        Mail::fake();
+
         $payload = [
             'name' => 'Budi Catering Master',
             'email' => 'budicatering@evento.test',
@@ -34,11 +38,13 @@ class VendorRegistrationAndApprovalTest extends TestCase
             ->assertJsonStructure([
                 'message',
                 'token',
+                'email_sent',
                 'user' => [
                     'id',
                     'name',
                     'email',
                     'role',
+                    'is_email_verified',
                     'vendor' => [
                         'id',
                         'business_name',
@@ -52,6 +58,8 @@ class VendorRegistrationAndApprovalTest extends TestCase
                 ],
             ])
             ->assertJsonPath('user.role', 'vendor')
+            ->assertJsonPath('user.is_email_verified', false)
+            ->assertJsonPath('email_sent', true)
             ->assertJsonPath('user.vendor.status', 'pending')
             ->assertJsonPath('user.vendor.business_name', 'CV Berkah Rasa Nusantara')
             ->assertJsonPath('user.vendor.social_media', '@budicatering_id');
@@ -59,6 +67,7 @@ class VendorRegistrationAndApprovalTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'budicatering@evento.test',
             'role' => 'vendor',
+            'email_verified_at' => null,
         ]);
 
         $this->assertDatabaseHas('vendors', [
@@ -70,6 +79,10 @@ class VendorRegistrationAndApprovalTest extends TestCase
 
         $vendor = Vendor::where('business_name', 'CV Berkah Rasa Nusantara')->first();
         $this->assertNotNull($vendor->agreement_accepted_at);
+
+        Mail::assertSent(CustomerVerificationMail::class, function ($mail) {
+            return $mail->hasTo('budicatering@evento.test');
+        });
     }
 
     public function test_vendor_registration_validates_required_fields(): void
@@ -231,6 +244,63 @@ class VendorRegistrationAndApprovalTest extends TestCase
         Mail::assertSent(VendorApprovedMail::class, function ($mail) {
             return $mail->hasTo('partner@vendor.test');
         });
+    }
+
+    public function test_eo_cannot_approve_vendor_if_email_is_not_verified(): void
+    {
+        Mail::fake();
+
+        $eo = User::factory()->eo()->create();
+        $vendorUser = User::factory()->vendor()->unverified()->create(['email' => 'unverified@vendor.test']);
+        $vendor = Vendor::create([
+            'user_id' => $vendorUser->id,
+            'business_name' => 'Kandidat Vendor Belum Verif',
+            'category' => 'Photography',
+            'contact_number' => '083333',
+            'address' => 'Surabaya',
+            'social_media' => '@unverifiedvendor',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($eo, 'sanctum')
+            ->patchJson("/api/admin/vendors/{$vendor->id}/approve");
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'message' => 'Vendor belum dapat disetujui karena belum memverifikasi alamat email.',
+            ]);
+
+        $this->assertDatabaseHas('vendors', [
+            'id' => $vendor->id,
+            'status' => 'pending',
+        ]);
+
+        Mail::assertNothingSent();
+    }
+
+    public function test_vendor_can_verify_email_via_signed_url_and_redirects_to_vendor_dashboard(): void
+    {
+        $vendorUser = User::factory()->vendor()->unverified()->create([
+            'email' => 'vendor.verify@evento.test',
+        ]);
+
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            [
+                'id' => $vendorUser->id,
+                'hash' => sha1($vendorUser->getEmailForVerification()),
+            ]
+        );
+
+        $response = $this->get($verificationUrl);
+
+        $response->assertRedirect();
+        $this->assertStringContainsString('/vendor/dashboard', (string) $response->headers->get('Location'));
+        $this->assertStringContainsString('verified=1', (string) $response->headers->get('Location'));
+        $this->assertStringContainsString('token=', (string) $response->headers->get('Location'));
+
+        $this->assertTrue($vendorUser->fresh()->hasVerifiedEmail());
     }
 
     public function test_eo_can_reject_vendor_with_reason(): void

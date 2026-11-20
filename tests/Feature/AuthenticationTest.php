@@ -36,6 +36,24 @@ class AuthenticationTest extends TestCase
             ->assertJsonPath('user.role', 'eo');
     }
 
+    public function test_unverified_client_can_login_and_returns_unverified_flag(): void
+    {
+        $user = User::factory()->client()->unverified()->create([
+            'email' => 'client.unverified@evento.test',
+            'password' => 'password123',
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'email' => 'client.unverified@evento.test',
+            'password' => 'password123',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('user.role', 'client')
+            ->assertJsonPath('user.is_email_verified', false)
+            ->assertJsonPath('user.email_verified_at', null);
+    }
+
     public function test_user_cannot_login_with_invalid_credentials(): void
     {
         User::factory()->create([

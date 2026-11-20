@@ -11,6 +11,8 @@ import {
     Camera,
     MapPin,
     Mail,
+    CheckCircle2,
+    AlertTriangle,
 } from "lucide-react";
 import api from "../../api/axios";
 
@@ -360,6 +362,22 @@ export default function VendorRegistrationPage() {
                                         <td className="py-3.5 px-4">
                                             <div className="font-semibold text-[#2F3931]">{vendor.user?.name || "-"}</div>
                                             <div className="text-[11px] text-[#738075] mt-0.5">{vendor.user?.email || "-"}</div>
+                                            <div className="mt-1">
+                                                {vendor.user?.email_verified_at || vendor.user?.is_email_verified ? (
+                                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md">
+                                                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                                        <span>Email Terverifikasi</span>
+                                                    </span>
+                                                ) : (
+                                                    <span
+                                                        className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md"
+                                                        title="Vendor belum memverifikasi email aktivasi akun"
+                                                    >
+                                                        <AlertTriangle className="w-3 h-3 text-amber-600" />
+                                                        <span>Email Belum Diverifikasi</span>
+                                                    </span>
+                                                )}
+                                            </div>
                                         </td>
 
                                         {/* Contact & Address */}
@@ -434,7 +452,17 @@ export default function VendorRegistrationPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => setVendorToApprove(vendor)}
-                                                        className="px-2.5 py-1.5 bg-[#657166] hover:bg-[#556056] text-white rounded-lg text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 cursor-pointer"
+                                                        disabled={!(vendor.user?.email_verified_at || vendor.user?.is_email_verified)}
+                                                        title={
+                                                            !(vendor.user?.email_verified_at || vendor.user?.is_email_verified)
+                                                                ? "Vendor belum dapat disetujui karena belum memverifikasi alamat email."
+                                                                : "Setujui pendaftaran vendor"
+                                                        }
+                                                        className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 ${
+                                                            !(vendor.user?.email_verified_at || vendor.user?.is_email_verified)
+                                                                ? "bg-[#FAF6F0] text-[#A2ADA4] border border-[#E8E2D7] cursor-not-allowed opacity-60"
+                                                                : "bg-[#657166] hover:bg-[#556056] text-white cursor-pointer"
+                                                        }`}
                                                     >
                                                         <Check className="w-3 h-3 stroke-[2.5]" />
                                                         <span>Setujui</span>
@@ -510,10 +538,36 @@ export default function VendorRegistrationPage() {
                                     <div className="font-bold text-[#2F3931] mt-0.5">{selectedVendorForDetail.user?.name || "-"}</div>
                                 </div>
                                 <div className="p-3 bg-[#FAF6F0]/60 rounded-xl border border-[#E8E2D7]">
-                                    <span className="text-[#738075] text-[10px] uppercase font-bold">Email Bisnis</span>
+                                    <div className="flex items-center justify-between gap-1">
+                                        <span className="text-[#738075] text-[10px] uppercase font-bold">Email Bisnis</span>
+                                        {selectedVendorForDetail.user?.email_verified_at || selectedVendorForDetail.user?.is_email_verified ? (
+                                            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.2 rounded">
+                                                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                                <span>Verif</span>
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.2 rounded">
+                                                <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
+                                                <span>Belum Verif</span>
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="font-bold text-[#2F3931] mt-0.5 truncate">{selectedVendorForDetail.user?.email || "-"}</div>
                                 </div>
                             </div>
+
+                            {/* Peringatan jika email belum diverifikasi */}
+                            {!(selectedVendorForDetail.user?.email_verified_at || selectedVendorForDetail.user?.is_email_verified) && (
+                                <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-950 flex items-start gap-2.5">
+                                    <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="font-bold text-amber-900">Email Belum Diverifikasi</p>
+                                        <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                                            Vendor ini belum mengklik tautan verifikasi email mereka. Demi keamanan dan keabsahan kontak mitra, tombol persetujuan dinonaktifkan sampai vendor memverifikasi email.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="p-3 bg-[#FAF6F0]/60 rounded-xl border border-[#E8E2D7]">
                                 <span className="text-[#738075] text-[10px] uppercase font-bold">Kontak / WhatsApp</span>
@@ -615,7 +669,17 @@ export default function VendorRegistrationPage() {
                                         setVendorToApprove(selectedVendorForDetail);
                                         setSelectedVendorForDetail(null);
                                     }}
-                                    className="px-4 py-2 bg-[#657166] hover:bg-[#556056] text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+                                    disabled={!(selectedVendorForDetail.user?.email_verified_at || selectedVendorForDetail.user?.is_email_verified)}
+                                    title={
+                                        !(selectedVendorForDetail.user?.email_verified_at || selectedVendorForDetail.user?.is_email_verified)
+                                            ? "Vendor belum dapat disetujui karena belum memverifikasi alamat email."
+                                            : "Setujui Vendor"
+                                    }
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 ${
+                                        !(selectedVendorForDetail.user?.email_verified_at || selectedVendorForDetail.user?.is_email_verified)
+                                            ? "bg-[#FAF6F0] text-[#A2ADA4] border border-[#E8E2D7] cursor-not-allowed opacity-60"
+                                            : "bg-[#657166] hover:bg-[#556056] text-white cursor-pointer"
+                                    }`}
                                 >
                                     <Check className="w-3.5 h-3.5" />
                                     <span>Setujui Vendor</span>
@@ -653,6 +717,18 @@ export default function VendorRegistrationPage() {
                             </p>
                         </div>
 
+                        {!(vendorToApprove.user?.email_verified_at || vendorToApprove.user?.is_email_verified) && (
+                            <div className="mt-3 p-3 bg-amber-50 border border-amber-300 rounded-xl text-left text-xs text-amber-950 flex items-start gap-2">
+                                <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-bold text-amber-900">Email Belum Diverifikasi</p>
+                                    <p className="text-[11px] text-amber-800 mt-0.5">
+                                        Vendor ini belum memverifikasi alamat email. Persetujuan belum dapat diproses oleh sistem.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="mt-6 flex items-center justify-center gap-3">
                             <button
                                 type="button"
@@ -663,7 +739,10 @@ export default function VendorRegistrationPage() {
                             </button>
                             <button
                                 type="button"
-                                disabled={approveMutation.isPending}
+                                disabled={
+                                    approveMutation.isPending ||
+                                    !(vendorToApprove.user?.email_verified_at || vendorToApprove.user?.is_email_verified)
+                                }
                                 onClick={handleConfirmApprove}
                                 className="px-5 py-2.5 bg-[#657166] hover:bg-[#556056] text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-2 disabled:opacity-50"
                             >

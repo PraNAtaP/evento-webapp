@@ -53,15 +53,19 @@ class CustomerRegistrationController extends Controller
         );
 
         $emailSent = false;
+        $mailError = null;
         try {
             Mail::to($user->email)->send(new CustomerVerificationMail($user, $verificationUrl));
             $emailSent = true;
         } catch (\Throwable $e) {
+            $mailError = $e->getMessage();
             Log::warning("Gagal mengirim email verifikasi ke {$user->email}: ".$e->getMessage());
         }
 
         return response()->json([
-            'message' => 'Pendaftaran akun berhasil! Silakan periksa email Anda untuk verifikasi akun.',
+            'message' => $emailSent
+                ? 'Pendaftaran akun berhasil! Silakan periksa email Anda untuk verifikasi akun.'
+                : 'Pendaftaran akun berhasil, namun server email mengalami kendala saat mengirim tautan. Silakan gunakan tombol kirim ulang atau hubungi admin.',
             'token' => $token,
             'email_sent' => $emailSent,
             'user' => [

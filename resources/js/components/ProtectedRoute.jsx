@@ -1,7 +1,7 @@
 import { Navigate, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export default function ProtectedRoute({ children, allowedRoles, requireVerified = false }) {
+export default function ProtectedRoute({ children, allowedRoles, requireVerified = true }) {
     const { user, isAuthenticated, isLoading, getRoleDashboard } = useAuth();
     const location = useLocation();
 
@@ -21,8 +21,9 @@ export default function ProtectedRoute({ children, allowedRoles, requireVerified
         return <Navigate to={getRoleDashboard(user.role)} replace />;
     }
 
-    if (requireVerified && user && !user.email_verified_at && user.is_email_verified !== true) {
-        return <Navigate to="/client/dashboard" replace />;
+    // Jika akun klien atau vendor belum diverifikasi email-nya, wajib diarahkan ke halaman verifikasi email
+    if (requireVerified && user && (user.role === "client" || user.role === "vendor") && !user.email_verified_at && user.is_email_verified !== true) {
+        return <Navigate to="/verify-email" replace />;
     }
 
     return children ? children : <Outlet />;
