@@ -266,8 +266,8 @@ export default function VendorJobOffers() {
                             Segera terima atau tolak tawaran dari EO
                         </p>
                     </div>
-                    <div className="w-12 h-12 rounded-2xl bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2] flex items-center justify-center font-bold">
-                        <Clock className="w-6 h-6 text-[#63482B]" />
+                    <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-950 border border-amber-300 flex items-center justify-center font-bold">
+                        <Clock className="w-6 h-6 text-amber-800" />
                     </div>
                 </div>
 
@@ -288,8 +288,8 @@ export default function VendorJobOffers() {
                             Acara sedang dipersiapkan dan butuh update log
                         </p>
                     </div>
-                    <div className="w-12 h-12 rounded-2xl bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9] flex items-center justify-center font-bold">
-                        <Briefcase className="w-6 h-6 text-[#224436]" />
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-950 border border-emerald-300 flex items-center justify-center font-bold">
+                        <Briefcase className="w-6 h-6 text-emerald-800" />
                     </div>
                 </div>
             </div>
@@ -452,7 +452,7 @@ export default function VendorJobOffers() {
                                 <h2 className="text-base font-extrabold text-[#2F3931] flex items-center gap-2">
                                     <Clock className="w-4 h-4 text-amber-700" />
                                     <span>Tawaran Pekerjaan dari EO</span>
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2]">
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-950 border border-amber-300 font-bold">
                                         {jobOffers.length}
                                     </span>
                                 </h2>
@@ -543,7 +543,7 @@ export default function VendorJobOffers() {
                                                 <button
                                                     type="button"
                                                     onClick={() => handleResponse(job.id, "rejected")}
-                                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-700 hover:text-rose-800 text-xs font-bold border border-rose-200 transition-colors cursor-pointer"
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-700 hover:text-rose-800 text-xs font-bold border border-rose-300 shadow-2xs transition-colors cursor-pointer"
                                                 >
                                                     <X className="w-3.5 h-3.5" />
                                                     <span>Tolak Tawaran</span>
@@ -621,12 +621,12 @@ export default function VendorJobOffers() {
                                                     </span>
                                                     <div className="flex flex-wrap items-center gap-2 mt-1">
                                                         {job.payout_status === "paid" ? (
-                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]">
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-950 border border-emerald-300">
                                                                 <Check className="w-3.5 h-3.5" />
                                                                 <span>Honor Lunas Dicairkan ({formatRupiah(job.payout_nominal || job.package_price || 0)})</span>
                                                             </span>
                                                         ) : (
-                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2]">
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-950 border border-amber-300">
                                                                 <Clock className="w-3.5 h-3.5" />
                                                                 <span>Honor Menunggu Pencairan ({formatRupiah(job.package_price || job.locked_price || 0)})</span>
                                                             </span>

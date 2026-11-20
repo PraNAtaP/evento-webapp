@@ -73,13 +73,13 @@ export default function VendorDashboard() {
         <div className="max-w-6xl mx-auto flex flex-col gap-6 pb-10">
             {/* 1. Status Pendaftaran Akun Banner (Pending / Rejected) */}
             {vendor?.status === "pending" && (
-                <div className="bg-[#FDE8D3]/80 border border-[#E8CEB2] rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3.5">
-                        <div className="w-10 h-10 rounded-xl bg-[#FDE8D3] border border-[#E8CEB2] text-[#63482B] flex items-center justify-center font-bold shrink-0">
-                            <Clock className="w-5 h-5 text-[#63482B]" />
+                        <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center font-bold shrink-0">
+                            <Clock className="w-5 h-5 text-amber-700" />
                         </div>
                         <div>
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2]">
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-950 border border-amber-300">
                                 Status Akun: Menunggu Verifikasi EO
                             </div>
                             <h3 className="text-sm font-bold text-[#2F3931] mt-1">
@@ -94,19 +94,19 @@ export default function VendorDashboard() {
             )}
 
             {vendor?.status === "rejected" && (
-                <div className="bg-red-50 border border-red-200 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="bg-rose-50 border border-rose-300 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3.5">
-                        <div className="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-bold shrink-0">
-                            <AlertCircle className="w-5 h-5 text-red-700" />
+                        <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-800 border border-rose-300 flex items-center justify-center font-bold shrink-0">
+                            <AlertCircle className="w-5 h-5 text-rose-700" />
                         </div>
                         <div>
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-900 border border-rose-300">
                                 Status Akun: Belum Disetujui
                             </div>
-                            <h3 className="text-sm font-bold text-red-900 mt-1">
+                            <h3 className="text-sm font-bold text-rose-950 mt-1">
                                 Pendaftaran Profil Vendor Belum Disetujui
                             </h3>
-                            <p className="text-xs text-red-700 mt-0.5 leading-relaxed">
+                            <p className="text-xs text-rose-800 mt-0.5 leading-relaxed">
                                 <strong>Catatan Tim EO:</strong>{" "}
                                 {vendor?.rejection_reason || "Mohon lengkapi informasi profil usaha Anda dan hubungi tim EVENTO."}
                             </p>
@@ -427,8 +427,8 @@ export default function VendorDashboard() {
                                                         <span
                                                             className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
                                                                 isPaid
-                                                                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                                                                    : "bg-amber-50 text-amber-800 border-amber-200"
+                                                                    ? "bg-emerald-100 text-emerald-950 border-emerald-300"
+                                                                    : "bg-amber-100 text-amber-950 border-amber-300"
                                                             }`}
                                                         >
                                                             {isPaid ? "Honor Lunas Ditransfer" : "Menunggu Pencairan EO"}

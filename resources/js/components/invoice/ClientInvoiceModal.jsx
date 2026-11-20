@@ -35,8 +35,36 @@ export default function ClientInvoiceModal({ paymentId, onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-5 overflow-y-auto">
-            <div className="relative bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto border border-[#E8E2D7]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-5 overflow-y-auto print-modal-backdrop print:p-0 print:static print:bg-transparent print:overflow-visible">
+            {/* Direct print rules for A4 Paper standard sizing */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                @page {
+                    size: A4 portrait;
+                    margin: 12mm 15mm;
+                }
+                @media print {
+                    html, body {
+                        background: #ffffff !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        width: 100% !important;
+                    }
+                    .print-modal-container {
+                        max-width: 100% !important;
+                        width: 100% !important;
+                        box-shadow: none !important;
+                        border: none !important;
+                        border-radius: 0 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    .printable-document {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                    }
+                }
+            `}} />
+            <div className="relative bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto border border-[#E8E2D7] print-modal-container print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:my-0">
                 
                 {/* Modal Action Header (Tidak ikut tercetak saat diprint) */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8E2D7] bg-[#FAF6F0] print:hidden">
@@ -71,7 +99,7 @@ export default function ClientInvoiceModal({ paymentId, onClose }) {
                 </div>
 
                 {/* Document Body (Area yang tercetak) */}
-                <div className="overflow-y-auto p-6 sm:p-10 text-[#2F3931] font-sans print:p-0 print:overflow-visible" ref={printAreaRef}>
+                <div className="overflow-y-auto p-6 sm:p-10 text-[#2F3931] font-sans print-modal-body print:p-0 print:overflow-visible print:w-full" ref={printAreaRef}>
                     {isLoading ? (
                         <div className="py-20 text-center text-sm text-[#738075]">
                             Menyiapkan lembar dokumen resmi...
@@ -84,7 +112,7 @@ export default function ClientInvoiceModal({ paymentId, onClose }) {
                         <div className="flex flex-col gap-6 printable-document">
                             
                             {/* KOP SURAT RESMI */}
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b-2 border-[#2F3931]">
+                            <div className="flex flex-col sm:flex-row print:flex-row justify-between items-start sm:items-center print:items-center gap-4 pb-6 border-b-2 border-[#2F3931]">
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xl font-black tracking-tight text-[#2F3931]">
@@ -102,21 +130,21 @@ export default function ClientInvoiceModal({ paymentId, onClose }) {
                                     </p>
                                 </div>
 
-                                <div className="text-left sm:text-right shrink-0">
+                                <div className="text-left sm:text-right print:text-right shrink-0">
                                     <span className="text-xs font-black tracking-widest uppercase text-[#657166] block">
                                         {invoiceData.title}
                                     </span>
                                     <p className="text-sm font-extrabold text-[#2F3931] mt-0.5">
                                         {invoiceData.receipt_number || invoiceData.invoice_number}
                                     </p>
-                                    <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full border">
+                                    <div className="mt-2">
                                         {invoiceData.payment.status === "paid" ? (
-                                            <span className="bg-emerald-50 text-emerald-800 border-emerald-300 inline-flex items-center gap-1">
+                                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300">
                                                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
                                                 LUNAS
                                             </span>
                                         ) : (
-                                            <span className="bg-amber-50 text-amber-800 border-amber-300 inline-flex items-center gap-1">
+                                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300">
                                                 <Clock className="w-3.5 h-3.5 text-amber-700" />
                                                 MENUNGGU PEMBAYARAN
                                             </span>
@@ -126,7 +154,7 @@ export default function ClientInvoiceModal({ paymentId, onClose }) {
                             </div>
 
                             {/* INFORMASI TANGGAL & PIHAK KLIEN */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-[#FAF6F0] p-5 rounded-2xl border border-[#E8E2D7]">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-6 bg-[#FAF6F0] p-5 rounded-2xl border border-[#E8E2D7]">
                                 <div>
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#738075] block">
                                         Ditagihkan Kepada:
@@ -221,9 +249,9 @@ export default function ClientInvoiceModal({ paymentId, onClose }) {
                             </div>
 
                             {/* RINGKASAN TAGIHAN & PEMBAYARAN */}
-                            <div className="flex flex-col sm:flex-row justify-between items-start gap-6 pt-2">
+                            <div className="flex flex-col sm:flex-row print:flex-row justify-between items-start gap-6 pt-2 avoid-page-break">
                                 {/* Instruksi Pembayaran (Muncul jika belum lunas) */}
-                                <div className="w-full sm:w-1/2">
+                                <div className="w-full sm:w-1/2 print:w-1/2">
                                     <h4 className="text-xs font-extrabold text-[#2F3931] uppercase tracking-wider mb-2">
                                         Instruksi Pembayaran Resmi:
                                     </h4>
@@ -256,7 +284,7 @@ export default function ClientInvoiceModal({ paymentId, onClose }) {
                                 </div>
 
                                 {/* Kotak Total Keuangan */}
-                                <div className="w-full sm:w-5/12 bg-[#FAF6F0] p-4 rounded-2xl border border-[#E8E2D7] space-y-2">
+                                <div className="w-full sm:w-5/12 print:w-5/12 bg-[#FAF6F0] p-4 rounded-2xl border border-[#E8E2D7] space-y-2">
                                     <div className="flex justify-between text-xs text-[#738075]">
                                         <span>Total Nilai Kontrak Acara:</span>
                                         <strong className="text-[#2F3931] font-semibold">
@@ -287,7 +315,7 @@ export default function ClientInvoiceModal({ paymentId, onClose }) {
                             </div>
 
                             {/* TANDA TANGAN / CAP OTORISASI */}
-                            <div className="pt-6 border-t border-[#E8E2D7] flex justify-between items-end">
+                            <div className="pt-6 border-t border-[#E8E2D7] flex justify-between items-end print:flex print:justify-between print:items-end avoid-page-break">
                                 <div className="text-[10px] text-[#A8B2A4] max-w-xs">
                                     Dokumen ini diterbitkan secara sah oleh sistem manajemen EVENTO dan diakui sebagai bukti transaksi yang berkekuatan hukum.
                                 </div>

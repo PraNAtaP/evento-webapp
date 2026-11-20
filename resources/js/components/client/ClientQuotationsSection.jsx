@@ -92,7 +92,7 @@ export default function ClientQuotationsSection() {
                     </div>
                 </div>
 
-                <span className="self-start sm:self-auto px-3 py-1 text-xs font-bold text-[#5A3A1D] bg-[#FDE8D3] rounded-full border border-[#E8CEB2]">
+                <span className="self-start sm:self-auto px-3 py-1 text-xs font-bold text-amber-950 bg-amber-100 rounded-full border border-amber-300">
                     {reviewEvents.length} Penawaran Masuk
                 </span>
             </div>
@@ -100,10 +100,10 @@ export default function ClientQuotationsSection() {
             {/* Alert Notifikasi Aksi */}
             {actionMessage && (
                 <div
-                    className={`p-3.5 rounded-xl text-xs font-medium flex items-center justify-between ${
+                    className={`p-3.5 rounded-xl text-xs font-bold flex items-center justify-between ${
                         actionMessage.type === "success"
-                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                            : "bg-rose-50 text-rose-800 border border-rose-200"
+                            ? "bg-emerald-100 text-emerald-950 border border-emerald-300"
+                            : "bg-rose-100 text-rose-950 border border-rose-300"
                     }`}
                 >
                     <span>{actionMessage.text}</span>

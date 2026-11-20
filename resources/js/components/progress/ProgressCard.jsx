@@ -67,12 +67,12 @@ export default function ProgressCard({ log, onToggle }) {
 
                     <div className="shrink-0">
                         {isVisible ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9] shadow-2xs">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-950 border border-emerald-300 shadow-2xs">
                                 <Eye className="w-3.5 h-3.5" />
                                 <span>Terlihat Klien</span>
                             </span>
                         ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#FAF6F0] text-[#738075] border border-[#E8E2D7]">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-950 border border-amber-300">
                                 <EyeOff className="w-3.5 h-3.5" />
                                 <span>Internal EO</span>
                             </span>

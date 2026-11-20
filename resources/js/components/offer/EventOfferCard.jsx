@@ -93,7 +93,7 @@ export default function EventOfferCard({ event, onRevision, onSuccess }) {
                         Tanggal Pelaksanaan: {formatTanggal(event.event_date)} &bull; Lokasi: {event.venue || "Lokasi menyusul"}
                     </p>
                 </div>
-                <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-bold bg-[#FDE8D3] text-[#5A3A1D] border border-[#E8CEB2]">
+                <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-950 border border-amber-300">
                     Menunggu Persetujuan Anda
                 </span>
             </div>

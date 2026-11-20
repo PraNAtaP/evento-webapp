@@ -124,23 +124,23 @@ export default function VendorRegistrationPage() {
         switch (status) {
             case "approved":
                 return (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#DAEBE3] text-[#33422A] border border-[#B6C2AA]/40">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#657166]"></span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                         Disetujui
                     </span>
                 );
             case "rejected":
                 return (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#F3C3B2]/40 text-[#6B3222] border border-[#F3C3B2]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#C25841]"></span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-900 border border-rose-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
                         Ditolak
                     </span>
                 );
             case "pending":
             default:
                 return (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-950 border border-amber-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
                         Menunggu Review
                     </span>
                 );
@@ -208,48 +208,48 @@ export default function VendorRegistrationPage() {
                     onClick={() => setFilterStatus("pending")}
                     className={`cursor-pointer p-4 rounded-2xl border transition-all ${
                         filterStatus === "pending"
-                            ? "bg-[#FDE8D3]/40 border-amber-500 ring-2 ring-amber-500/20 shadow-xs"
+                            ? "bg-amber-50 border-amber-500 ring-2 ring-amber-500/20 shadow-xs"
                             : "bg-white/80 border-[#E8E2D7] hover:border-[#CFD8C4]"
                     }`}
                 >
-                    <div className="text-[11px] font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <div className="text-[11px] font-bold text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-amber-600"></span>
                         Menunggu Review
                     </div>
-                    <div className="text-2xl sm:text-3xl font-black text-amber-900 mt-1">{summary.pending}</div>
-                    <div className="text-[10px] text-amber-700 mt-0.5">Perlu tindakan verifikasi EO</div>
+                    <div className="text-2xl sm:text-3xl font-black text-amber-950 mt-1">{summary.pending}</div>
+                    <div className="text-[10px] text-amber-800 mt-0.5">Perlu tindakan verifikasi EO</div>
                 </div>
 
                 <div
                     onClick={() => setFilterStatus("approved")}
                     className={`cursor-pointer p-4 rounded-2xl border transition-all ${
                         filterStatus === "approved"
-                            ? "bg-[#DAEBE3]/40 border-[#657166] ring-2 ring-[#657166]/20 shadow-xs"
+                            ? "bg-emerald-50 border-emerald-600 ring-2 ring-emerald-600/20 shadow-xs"
                             : "bg-white/80 border-[#E8E2D7] hover:border-[#CFD8C4]"
                     }`}
                 >
-                    <div className="text-[11px] font-bold text-[#33422A] uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#657166]"></span>
+                    <div className="text-[11px] font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
                         Disetujui (Aktif)
                     </div>
-                    <div className="text-2xl sm:text-3xl font-black text-[#2F3931] mt-1">{summary.approved}</div>
-                    <div className="text-[10px] text-[#738075] mt-0.5">Dapat menerima pesanan</div>
+                    <div className="text-2xl sm:text-3xl font-black text-emerald-950 mt-1">{summary.approved}</div>
+                    <div className="text-[10px] text-emerald-800 mt-0.5">Dapat menerima pesanan</div>
                 </div>
 
                 <div
                     onClick={() => setFilterStatus("rejected")}
                     className={`cursor-pointer p-4 rounded-2xl border transition-all ${
                         filterStatus === "rejected"
-                            ? "bg-[#F3C3B2]/30 border-[#C25841] ring-2 ring-[#C25841]/20 shadow-xs"
+                            ? "bg-rose-50 border-rose-500 ring-2 ring-rose-500/20 shadow-xs"
                             : "bg-white/80 border-[#E8E2D7] hover:border-[#CFD8C4]"
                     }`}
                 >
-                    <div className="text-[11px] font-bold text-[#6B3222] uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#C25841]"></span>
+                    <div className="text-[11px] font-bold text-rose-950 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-rose-600"></span>
                         Ditolak
                     </div>
-                    <div className="text-2xl sm:text-3xl font-black text-[#6B3222] mt-1">{summary.rejected}</div>
-                    <div className="text-[10px] text-[#738075] mt-0.5">Belum memenuhi syarat</div>
+                    <div className="text-2xl sm:text-3xl font-black text-rose-950 mt-1">{summary.rejected}</div>
+                    <div className="text-[10px] text-rose-800 mt-0.5">Belum memenuhi syarat</div>
                 </div>
             </div>
 
