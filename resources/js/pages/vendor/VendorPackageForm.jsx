@@ -61,7 +61,7 @@ export default function VendorPackageForm() {
                         message: "Data paket tidak ditemukan atau telah dihapus.",
                         type: "warning",
                     });
-                    navigate("/vendor/dashboard");
+                    navigate("/vendor/packages");
                     return;
                 }
 
@@ -252,8 +252,8 @@ export default function VendorPackageForm() {
                 showToast("Paket berhasil ditambahkan", "success");
             }
 
-            // Setelah berhasil, kembali ke Dashboard
-            navigate("/vendor/dashboard");
+            // Setelah berhasil, kembali ke Daftar Paket
+            navigate("/vendor/packages");
         } catch (error) {
             console.error(
                 "Gagal menyimpan paket:",
@@ -293,7 +293,7 @@ export default function VendorPackageForm() {
                 <div className="mb-6">
                     <button
                         type="button"
-                        onClick={() => navigate("/vendor/dashboard")}
+                        onClick={() => navigate("/vendor/packages")}
                         className="inline-flex items-center gap-2 bg-[#FAF6F0] hover:bg-[#F2ECE3] text-[#2F3931] font-semibold px-4 py-2 rounded-xl text-xs border border-[#E8E2D7] transition shadow-2xs cursor-pointer"
                     >
                             {/* Icon Back */}

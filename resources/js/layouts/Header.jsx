@@ -44,6 +44,10 @@ const ROUTE_TITLES = {
         subtitle: "Tinjau dan bagikan update progress dari vendor ke klien",
     },
     "/vendor/dashboard": {
+        title: "Dashboard Vendor",
+        subtitle: "Ringkasan performa usaha, antrean tawaran pekerjaan, dan progres acara aktif",
+    },
+    "/vendor/packages": {
         title: "Kelola Paket Jasa",
         subtitle: "Kelola paket jasa, harga, foto, dan deskripsi yang ditawarkan",
     },

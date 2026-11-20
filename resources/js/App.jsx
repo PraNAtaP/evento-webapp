@@ -19,6 +19,7 @@ import VendorRegistrationPage from "./pages/admin/VendorRegistrationPage";
 import KanbanPage from "./pages/admin/KanbanPage";
 import PaymentVerificationPage from "./pages/admin/PaymentVerificationPage";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
+import VendorPackages from "./pages/vendor/VendorPackages";
 import VendorPackageForm from "./pages/vendor/VendorPackageForm";
 import VendorJobOffers from "./pages/vendor/VendorJobOffers";
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -189,6 +190,16 @@ export default function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={["vendor"]}>
                                         <VendorDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            {/* Kelola Paket Jasa Vendor */}
+                            <Route
+                                path="/vendor/packages"
+                                element={
+                                    <ProtectedRoute allowedRoles={["vendor"]}>
+                                        <VendorPackages />
                                     </ProtectedRoute>
                                 }
                             />

@@ -123,8 +123,18 @@ const ROLE_MENUS = {
 
     vendor: [
         {
-            title: "Kelola Paket Jasa",
+            title: "Dashboard",
             path: "/vendor/dashboard",
+            badge: null,
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+            ),
+        },
+        {
+            title: "Kelola Paket Jasa",
+            path: "/vendor/packages",
             badge: null,
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -143,16 +153,6 @@ const ROLE_MENUS = {
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="7" width="18" height="14" rx="2" />
                     <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
-                </svg>
-            ),
-        },
-        {
-            title: "Katalog Vendor",
-            path: "/vendors",
-            badge: null,
-            icon: (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
             ),
         },
