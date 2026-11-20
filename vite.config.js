@@ -12,4 +12,8 @@ export default defineConfig({
         react(),
         tailwindcss(),
     ],
+    test: {
+        include: ["resources/js/**/*.{test,spec}.{js,jsx}"],
+        exclude: ["tests/e2e/**", "node_modules/**"],
+    },
 });

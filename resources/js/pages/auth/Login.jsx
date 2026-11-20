@@ -100,7 +100,7 @@ export default function Login() {
                     )}
 
                     {error && (
-                        <div className="p-3 mb-4 bg-[#F3C3B2]/30 border border-[#F3C3B2] text-[#6B3222] rounded-xl text-xs font-medium">
+                        <div role="alert" data-testid="login-error" className="p-3 mb-4 bg-[#F3C3B2]/30 border border-[#F3C3B2] text-[#6B3222] rounded-xl text-xs font-medium">
                             {error}
                         </div>
                     )}
