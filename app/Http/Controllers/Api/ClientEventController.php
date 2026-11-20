@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\InvoiceIssuedMail;
 use App\Models\Event;
+use App\Services\AdminNotificationService;
 use App\Services\KanbanTransitionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class ClientEventController extends Controller
@@ -135,6 +139,26 @@ class ClientEventController extends Controller
         // Jalankan transisi ke awaiting_dp (membuat tagihan DP dan pelunasan)
         $updatedEvent = $this->transitionService->transition($event, 'awaiting_dp');
 
+        // Kirim email tagihan DP ke klien
+        $dpPayment = $updatedEvent->payments()->where('payment_type', 'dp')->first();
+        $clientEmail = $request->user()->email;
+        if ($clientEmail) {
+            try {
+                Mail::to($clientEmail)->send(new InvoiceIssuedMail($updatedEvent, $dpPayment));
+            } catch (\Throwable $e) {
+                Log::warning("Gagal mengirim email InvoiceIssuedMail ke {$clientEmail}: ".$e->getMessage());
+            }
+        }
+
+        // Kirim notifikasi internal ke Admin EO
+        AdminNotificationService::notifyAdmins(
+            title: 'Penawaran Disetujui Klien',
+            message: "Klien {$request->user()->name} telah menyetujui penawaran acara '{$event->title}'. Menunggu pembayaran DP.",
+            category: 'payment',
+            actionUrl: '/admin/payments',
+            metadata: ['event_id' => $event->id]
+        );
+
         return response()->json([
             'message' => 'Penawaran berhasil disetujui. Tagihan pembayaran DP telah diterbitkan.',
             'event' => $updatedEvent,
@@ -166,6 +190,15 @@ class ClientEventController extends Controller
         $updatedEvent = $this->transitionService->transition($event, 'drafting_quotation', [
             'revision_note' => $validated['note'] ?? null,
         ]);
+
+        // Kirim notifikasi internal ke Admin EO
+        AdminNotificationService::notifyAdmins(
+            title: 'Permintaan Revisi Penawaran',
+            message: "Klien {$request->user()->name} mengajukan revisi penawaran acara '{$event->title}'.",
+            category: 'order',
+            actionUrl: '/admin/orders',
+            metadata: ['event_id' => $event->id]
+        );
 
         return response()->json([
             'message' => 'Permintaan revisi berhasil dikirim ke Event Organizer.',

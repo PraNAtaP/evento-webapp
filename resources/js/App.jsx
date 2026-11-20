@@ -30,6 +30,7 @@ import OfferReviewPage from "./pages/client/OfferReviewPage";
 import VendorCatalogIndex from "./pages/vendors/VendorCatalogIndex";
 import VendorCatalogShow from "./pages/vendors/VendorCatalogShow";
 import ProgressApprovalPage from './pages/admin/ProgressApprovalPage';
+import VerifyEmailNotice from "./pages/auth/VerifyEmailNotice";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ export default function App() {
                         <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/register/client" element={<Register />} />
+                        <Route path="/verify-email" element={<VerifyEmailNotice />} />
                         <Route path="/register/vendor" element={<VendorRegister />} />
                         <Route path="/vendor/register" element={<VendorRegister />} />
 

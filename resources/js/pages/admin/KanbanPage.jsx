@@ -159,6 +159,24 @@ export default function KanbanPage() {
         return matchesCategory && matchesSearch;
     });
 
+    // Deteksi prioritas operasional di seluruh acara
+    const totalCancellationRequests = events.filter(
+        (e) => e.cancellation_request_status === "pending" || e.has_cancellation_request
+    ).length;
+
+    const totalUnpaidVendorsEvents = events.filter((e) => {
+        const status = e.kanban_status ?? e.status;
+        if (!["on_progress", "done"].includes(status)) return false;
+        const assignments = e.vendor_assignments || e.vendorAssignments || [];
+        return assignments.some(
+            (v) => (v.offer_status === "accepted" || v.eo_offer_status === "accepted") && v.payout_status !== "paid"
+        );
+    }).length;
+
+    const totalRevisions = events.filter(
+        (e) => (e.kanban_status ?? e.status) === "drafting_quotation" && Boolean(e.revision_note)
+    ).length;
+
     const handleEventUpdated = (updatedEvent) => {
         if (!updatedEvent) return;
         setEvents((prevEvents) =>
@@ -260,6 +278,35 @@ export default function KanbanPage() {
                     ))}
                 </div>
             </div>
+
+            {/* Baris Notifikasi Prioritas Operasional */}
+            {!isLoading && (totalCancellationRequests > 0 || totalUnpaidVendorsEvents > 0 || totalRevisions > 0) && (
+                <div className="bg-white rounded-2xl border border-[#E8E2D7] p-3.5 shadow-xs flex flex-wrap items-center justify-between gap-3 animate-fadeIn">
+                    <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping inline-block"></span>
+                        <span className="text-xs font-black uppercase tracking-wider text-[#2F3931]">
+                            Fokus Tindakan Prioritas EO:
+                        </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                        {totalCancellationRequests > 0 && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-extrabold rounded-xl bg-rose-100 text-rose-800 border border-rose-300 shadow-2xs">
+                                🚨 {totalCancellationRequests} Permohonan Batal Klien
+                            </span>
+                        )}
+                        {totalUnpaidVendorsEvents > 0 && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-extrabold rounded-xl bg-amber-100 text-amber-950 border border-amber-300 shadow-2xs">
+                                ⚡ {totalUnpaidVendorsEvents} Acara dengan Honor Vendor Belum Cair
+                            </span>
+                        )}
+                        {totalRevisions > 0 && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-extrabold rounded-xl bg-amber-100 text-amber-950 border border-amber-300 shadow-2xs">
+                                📝 {totalRevisions} Revisi Penawaran Klien
+                            </span>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Loading State */}
             {isLoading && (

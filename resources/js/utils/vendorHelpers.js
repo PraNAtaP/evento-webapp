@@ -1,9 +1,9 @@
 export const NO_CATEGORY_LABEL = "Tanpa kategori";
 
 export const OFFER_STATUS_META = {
-    pending: { label: "Menunggu vendor", className: "bg-amber-50 text-amber-700 border-amber-200" },
-    accepted: { label: "Diterima vendor", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-    rejected: { label: "Ditolak vendor", className: "bg-rose-50 text-rose-700 border-rose-200" },
+    pending: { label: "Menunggu vendor", className: "bg-amber-100 text-amber-900 border-amber-300 font-bold" },
+    accepted: { label: "Diterima vendor", className: "bg-emerald-100 text-emerald-900 border-emerald-300 font-bold" },
+    rejected: { label: "Ditolak vendor", className: "bg-rose-100 text-rose-900 border-rose-300 font-bold" },
 };
 
 /** Label kategori vendor; null/kosong -> "Tanpa kategori". */

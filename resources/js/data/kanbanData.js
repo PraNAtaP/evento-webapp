@@ -152,8 +152,8 @@ export const getPaymentStatus = (agreedPrice = 0, paidAmount = 0) => {
         return {
             label: "Belum Bayar (0%)",
             percentage: 0,
-            badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
-            dotColor: "bg-rose-500",
+            badgeClass: "bg-rose-100 text-rose-900 border-rose-300 font-bold",
+            dotColor: "bg-rose-600",
         };
     }
 
@@ -161,8 +161,8 @@ export const getPaymentStatus = (agreedPrice = 0, paidAmount = 0) => {
         return {
             label: "Lunas (100%)",
             percentage: 100,
-            badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
-            dotColor: "bg-emerald-500",
+            badgeClass: "bg-emerald-100 text-emerald-950 border-emerald-300 font-bold",
+            dotColor: "bg-emerald-600",
         };
     }
 
@@ -172,16 +172,16 @@ export const getPaymentStatus = (agreedPrice = 0, paidAmount = 0) => {
         return {
             label: `DP Lunas (${percentage}%)`,
             percentage,
-            badgeClass: "bg-[#99CDD8]/30 text-[#1D4A54] border-[#85BAC5]",
-            dotColor: "bg-[#1D4A54]",
+            badgeClass: "bg-sky-100 text-sky-950 border-sky-300 font-bold",
+            dotColor: "bg-sky-700",
         };
     }
 
     return {
         label: `Termin (${percentage}%)`,
         percentage,
-        badgeClass: "bg-[#DAEBE3] text-[#224436] border-[#BCD4C9]",
-        dotColor: "bg-[#506B59]",
+        badgeClass: "bg-teal-100 text-teal-950 border-teal-300 font-bold",
+        dotColor: "bg-teal-700",
     };
 };
 

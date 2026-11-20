@@ -420,8 +420,8 @@ export default function AdminClientPage() {
                                                 </td>
 
                                                 <td className="px-5 py-4">
-                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#DAEBE3] text-[#506B59] text-[10px] font-bold">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#6D9677]" />
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300 text-[10px] font-bold">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
                                                         Aktif
                                                     </span>
                                                 </td>
@@ -617,13 +617,13 @@ export default function AdminClientPage() {
 
                                                 <td className="px-5 py-4">
                                                     {client.can_restore ? (
-                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFF2D8] text-[#927343] text-[10px] font-bold">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-[#C69B4D]" />
+                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 text-[10px] font-bold">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
                                                             Menunggu Pemulihan
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 text-red-600 text-[10px] font-bold">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-100 text-rose-900 border border-rose-300 text-[10px] font-bold">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
                                                             Masa Pemulihan Habis
                                                         </span>
                                                     )}

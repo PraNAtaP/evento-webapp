@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\EventVendorAssignment;
+use App\Services\AdminNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -95,6 +96,16 @@ class VendorJobController extends Controller
                 : null;
 
         $assignment->save();
+
+        $assignment->load('event');
+        $statusText = $validated['status'] === 'accepted' ? 'menerima' : 'menolak';
+        AdminNotificationService::notifyAdmins(
+            title: 'Respon Tawaran Pekerjaan Vendor',
+            message: "Vendor {$vendor->business_name} telah {$statusText} tawaran pekerjaan untuk acara '{$assignment->event->title}'.",
+            category: 'vendor',
+            actionUrl: '/admin/kanban',
+            metadata: ['assignment_id' => $assignment->id, 'event_id' => $assignment->event_id, 'status' => $validated['status']]
+        );
 
         return response()->json([
             'message' => $validated['status'] === 'accepted'

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, ArrowRight, Zap } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -6,12 +6,18 @@ import api from "../../api/axios";
 
 export default function Register() {
     const navigate = useNavigate();
-    const { isAuthenticated, user, getRoleDashboard } = useAuth();
+    const { isAuthenticated, user, getRoleDashboard, setAuthSession } = useAuth();
 
-    // Jika sudah login, arahkan ke dashboard perannya
-    if (isAuthenticated && user) {
-        navigate(getRoleDashboard(user.role), { replace: true });
-    }
+    // Jika sudah login, arahkan ke dashboard perannya atau ke verifikasi
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            if (user.role === "client" && !user.email_verified_at && user.is_email_verified !== true) {
+                navigate("/verify-email", { replace: true });
+            } else {
+                navigate(getRoleDashboard(user.role, user), { replace: true });
+            }
+        }
+    }, [isAuthenticated, user, navigate, getRoleDashboard]);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -24,6 +30,7 @@ export default function Register() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [registrationSuccess, setRegistrationSuccess] = useState(false);
     const [registeredUser, setRegisteredUser] = useState(null);
+    const [emailSentStatus, setEmailSentStatus] = useState(true);
     const [isResending, setIsResending] = useState(false);
     const [resendStatus, setResendStatus] = useState(null);
 
@@ -69,12 +76,12 @@ export default function Register() {
             });
 
             const { token, user: createdUser } = response.data;
-            if (token) {
-                localStorage.setItem("auth_token", token);
+            if (token && createdUser) {
+                setAuthSession(token, createdUser);
             }
 
-            setRegisteredUser(createdUser);
-            setRegistrationSuccess(true);
+            // Langsung arahkan ke halaman verifikasi email dengan email terdaftar
+            navigate(`/verify-email?email=${encodeURIComponent(formData.email)}&registered=1`, { replace: true });
         } catch (err) {
             if (err.response && err.response.data && err.response.data.errors) {
                 setErrors(err.response.data.errors);
@@ -155,6 +162,16 @@ export default function Register() {
                                 </div>
                             </div>
 
+                            {/* Peringatan jika SMTP gagal terkirim */}
+                            {!emailSentStatus && (
+                                <div className="p-3 bg-amber-50 border border-amber-300 text-amber-950 rounded-2xl text-xs text-left">
+                                    <p className="font-bold text-amber-900">Catatan Pengiriman Email:</p>
+                                    <p className="text-[11px] text-amber-800 mt-0.5">
+                                        Server email SMTP sedang mengalami kendala otentikasi. Silakan gunakan tombol <strong>Kirim Ulang Email Verifikasi</strong> di bawah atau hubungi administrator.
+                                    </p>
+                                </div>
+                            )}
+
                             <div className="bg-[#FAF6F0] border border-[#E8E2D7] rounded-2xl p-4 text-left text-xs text-[#556056] space-y-2">
                                 <p className="font-bold text-[#2F3931] flex items-center gap-1.5">
                                     <ArrowRight className="w-3.5 h-3.5 text-[#2F3931]" />
@@ -191,10 +208,10 @@ export default function Register() {
 
                                 <button
                                     type="button"
-                                    onClick={() => navigate("/client/dashboard")}
+                                    onClick={() => navigate("/login")}
                                     className="w-full py-3 px-4 bg-[#657166] hover:bg-[#556056] text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer border border-[#525C53]"
                                 >
-                                    Lanjut ke Dashboard Customer →
+                                    Sudah Verifikasi? Masuk / Login Sekarang →
                                 </button>
                             </div>
                         </div>

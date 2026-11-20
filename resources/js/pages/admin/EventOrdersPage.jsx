@@ -248,7 +248,7 @@ export default function EventOrdersPage() {
                         }}
                         className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                             statusFilter === "accepted"
-                                ? "bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]"
+                                ? "bg-emerald-100 text-emerald-950 border border-emerald-300"
                                 : "text-[#738075] hover:text-[#2F3931]"
                         }`}
                     >
@@ -262,7 +262,7 @@ export default function EventOrdersPage() {
                         }}
                         className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                             statusFilter === "rejected"
-                                ? "bg-[#F3C3B2]/40 text-[#6B3222] border border-[#E8CEB2]"
+                                ? "bg-rose-100 text-rose-900 border border-rose-300"
                                 : "text-[#738075] hover:text-[#2F3931]"
                         }`}
                     >
@@ -427,26 +427,26 @@ export default function EventOrdersPage() {
                                             {/* Kolom 5: Status */}
                                             <td className="py-3.5 px-4">
                                                 {isCancelReq ? (
-                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#224436]"></span>
-                                                        {order.kanban_status}
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-950 border border-amber-300">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
+                                                        Tiket Batal ({order.kanban_status})
                                                     </span>
                                                 ) : (
                                                     <>
                                                         {order.kanban_status === "request" && (
-                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#99CDD8]/30 text-[#1D4A54] border border-[#86BAC5]">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-[#1D4A54]"></span>
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-950 border border-amber-300">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
                                                                 Menunggu Review
                                                             </span>
                                                         )}
                                                         {order.kanban_status === "rejected" && (
                                                             <div>
-                                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-900 border border-rose-300">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
                                                                     Ditolak
                                                                 </span>
                                                                 {order.rejection_reason && (
-                                                                    <p className="text-[10px] text-rose-600 mt-1 italic max-w-xs">
+                                                                    <p className="text-[10px] text-rose-700 mt-1 italic max-w-xs">
                                                                         &ldquo;{order.rejection_reason}&rdquo;
                                                                     </p>
                                                                 )}
@@ -454,7 +454,7 @@ export default function EventOrdersPage() {
                                                         )}
                                                         {order.kanban_status === "cancelled" && (
                                                             <div>
-                                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-900 border border-rose-300">
                                                                     <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
                                                                     Dibatalkan
                                                                 </span>
@@ -466,8 +466,8 @@ export default function EventOrdersPage() {
                                                             </div>
                                                         )}
                                                         {order.kanban_status !== "request" && order.kanban_status !== "rejected" && order.kanban_status !== "cancelled" && (
-                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-[#224436]"></span>
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-950 border border-emerald-300">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                                                                 Diterima ({order.kanban_status})
                                                             </span>
                                                         )}

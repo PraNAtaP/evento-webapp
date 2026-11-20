@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Printer, X, ShieldCheck, Check, Clock, Upload, DollarSign, Building } from "lucide-react";
 import api from "../../api/axios";
@@ -10,6 +10,13 @@ export default function VendorPayoutModal({ assignmentId, isEo = false, onClose,
     const [proofFile, setProofFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
+
+    useEffect(() => {
+        document.body.classList.add("modal-print-open");
+        return () => {
+            document.body.classList.remove("modal-print-open");
+        };
+    }, []);
 
     const { data: invoiceData, isLoading, error } = useQuery({
         queryKey: ["vendor-invoice", assignmentId],
@@ -60,8 +67,32 @@ export default function VendorPayoutModal({ assignmentId, isEo = false, onClose,
     const isPaid = invoiceData?.assignment?.payout_status === "paid";
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-5 overflow-y-auto">
-            <div className="relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto border border-[#E8E2D7]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-5 overflow-y-auto print-modal-backdrop print:p-0 print:static print:bg-transparent print:overflow-visible">
+            {/* Direct print rules for A4 Paper standard sizing */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                @page {
+                    size: A4 portrait;
+                    margin: 12mm 15mm;
+                }
+                @media print {
+                    html, body {
+                        background: #ffffff !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        width: 100% !important;
+                    }
+                    .print-modal-container {
+                        max-width: 100% !important;
+                        width: 100% !important;
+                        box-shadow: none !important;
+                        border: none !important;
+                        border-radius: 0 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                }
+            `}} />
+            <div className="relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto border border-[#E8E2D7] print-modal-container print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:my-0">
                 
                 {/* Header Modal */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8E2D7] bg-[#FAF6F0] print:hidden">
@@ -96,7 +127,7 @@ export default function VendorPayoutModal({ assignmentId, isEo = false, onClose,
                 </div>
 
                 {/* Konten Dokumen */}
-                <div className="overflow-y-auto p-6 sm:p-8 text-[#2F3931] font-sans print:p-0 print:overflow-visible">
+                <div className="overflow-y-auto p-6 sm:p-8 text-[#2F3931] font-sans print-modal-body print:p-0 print:overflow-visible print:w-full">
                     {isLoading ? (
                         <div className="py-16 text-center text-sm text-[#738075]">
                             Memuat data honorarium vendor...
@@ -120,17 +151,17 @@ export default function VendorPayoutModal({ assignmentId, isEo = false, onClose,
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-[11px] font-bold px-3 py-1 rounded-full border inline-block">
+                                    <div className="inline-block">
                                         {isPaid ? (
-                                            <span className="text-emerald-800 bg-emerald-50 font-bold">
+                                            <span className="text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-300 text-emerald-950 bg-emerald-100 inline-block">
                                                 LUNAS DITRANSFER
                                             </span>
                                         ) : (
-                                            <span className="text-amber-800 bg-amber-50 font-bold">
+                                            <span className="text-[11px] font-bold px-3 py-1 rounded-full border border-amber-300 text-amber-950 bg-amber-100 inline-block">
                                                 MENUNGGU PENCAIRAN
                                             </span>
                                         )}
-                                    </span>
+                                    </div>
                                     {invoiceData.payout_date && (
                                         <p className="text-[11px] text-[#738075] mt-1">
                                             Tanggal: {invoiceData.payout_date}

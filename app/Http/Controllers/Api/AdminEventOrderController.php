@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderAcceptedMail;
 use App\Mail\OrderRejectedMail;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class AdminEventOrderController extends Controller
@@ -62,6 +64,16 @@ class AdminEventOrderController extends Controller
             'kanban_status' => 'drafting_quotation',
             'rejection_reason' => null,
         ]);
+
+        $event->load('client');
+        $clientEmail = $event->client?->email;
+        if ($clientEmail) {
+            try {
+                Mail::to($clientEmail)->send(new OrderAcceptedMail($event));
+            } catch (\Throwable $e) {
+                Log::warning("Gagal mengirim email OrderAcceptedMail ke {$clientEmail}: ".$e->getMessage());
+            }
+        }
 
         return response()->json([
             'message' => 'Pesanan acara berhasil diterima dan masuk ke tahap penyusunan penawaran.',

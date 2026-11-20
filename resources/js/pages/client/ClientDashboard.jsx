@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { PartyPopper, Mail, ClipboardList } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -15,6 +15,16 @@ export default function ClientDashboard() {
     const [resendStatus, setResendStatus] = useState(null);
 
     const isUnverified = user && !user.email_verified_at && user.is_email_verified !== true;
+
+    React.useEffect(() => {
+        if (verifiedParam) {
+            localStorage.setItem("email_verified", "true");
+        }
+    }, [verifiedParam]);
+
+    if (isUnverified) {
+        return <Navigate to="/verify-email" replace />;
+    }
 
     const handleResend = async () => {
         setIsResending(true);

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDialog } from "../context/DialogContext";
+import NotificationBell from "../components/notifications/NotificationBell";
 
 /**
  * Mapping rute ke judul halaman dan subjudul ramah pengguna
@@ -162,12 +163,15 @@ export default function Header({ onToggleSidebar }) {
                 </div>
             </div>
 
-            {/* Sisi Kanan: Role Badge & Dropdown Profil Modern */}
+            {/* Sisi Kanan: Role Badge, Notifikasi & Dropdown Profil Modern */}
             <div className="flex items-center gap-3">
                 {/* Badge Role */}
                 <span className={`hidden sm:inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold border ${currentBadge.color}`}>
                     {currentBadge.label}
                 </span>
+
+                {/* Kotak Masuk Notifikasi Admin EO */}
+                {user?.role === "eo" && <NotificationBell />}
 
                 {/* Dropdown Profil Pengguna (Area Interaktif dengan Chevron Down) */}
                 <div className="relative pl-2 border-l border-[#E8E2D7]" ref={dropdownRef}>

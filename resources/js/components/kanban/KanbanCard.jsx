@@ -25,8 +25,20 @@ export default function KanbanCard({ card, onSelectCard }) {
     }
 
     // Badge pembayaran: hanya muncul mulai kolom awaiting_dp
-    const showPaymentBadge = ["awaiting_dp", "on_progress", "done"].includes(kanbanStatus);
+    const showPaymentBadge = ["awaiting_dp", "on_progress", "in_progress", "done"].includes(kanbanStatus);
     const payment = getPaymentStatus(agreedPrice, paidAmount);
+
+    // Deteksi Prioritas Tindakan EO
+    const hasCancellationRequest = Boolean(
+        card.has_cancellation_request || card.cancellation_request_status === "pending"
+    );
+    const vendorAssignments = card.vendor_assignments || card.vendorAssignments || [];
+    const unpaidVendorsCount = vendorAssignments.filter(
+        (v) => (v.offer_status === "accepted" || v.eo_offer_status === "accepted") && v.payout_status !== "paid"
+    ).length;
+    const showUnpaidPayoutBadge = ["on_progress", "in_progress", "done"].includes(kanbanStatus) && unpaidVendorsCount > 0;
+    const payments = card.payments || [];
+    const hasPendingPayment = payments.some((p) => p.status === "pending");
 
     const [isDragging, setIsDragging] = useState(false);
 
@@ -50,6 +62,30 @@ export default function KanbanCard({ card, onSelectCard }) {
             <h4 className="text-sm font-bold text-slate-800 leading-snug group-hover:text-[#657166] transition-colors">
                 {eventName}
             </h4>
+
+            {/* Indikator Prioritas / Butuh Tindakan EO */}
+            {(hasCancellationRequest || showUnpaidPayoutBadge || hasPendingPayment) && (
+                <div className="flex flex-wrap gap-1.5 -mt-0.5">
+                    {hasCancellationRequest && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 border border-rose-300 shadow-2xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse"></span>
+                            🚨 Tiket Batal
+                        </span>
+                    )}
+                    {showUnpaidPayoutBadge && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-amber-100 text-amber-950 border border-amber-300 shadow-2xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                            ⚡ {unpaidVendorsCount} Honor Belum Cair
+                        </span>
+                    )}
+                    {hasPendingPayment && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-amber-100 text-amber-950 border border-amber-300 shadow-2xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                            💳 Verif Bayar
+                        </span>
+                    )}
+                </div>
+            )}
 
             {/* Kategori Acara (tanpa background kotak, gaya mirip baris tanggal) */}
             <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
@@ -153,10 +189,12 @@ export default function KanbanCard({ card, onSelectCard }) {
 
                 {kanbanStatus === "drafting_quotation" && card.revision_note && (
                     <div
-                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 flex flex-col gap-1 text-black"
+                        className="rounded-xl border border-amber-300 bg-amber-50/80 px-3 py-2 flex flex-col gap-1 text-amber-950 shadow-2xs"
                     >
-                        <span className="text-[10px] font-bold uppercase tracking-wider">Revisi diminta</span>
-                        <p className="text-[11px] leading-snug line-clamp-2">{card.revision_note}</p>
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-900 flex items-center gap-1">
+                            <span>📝</span> Revisi Klien Diminta
+                        </span>
+                        <p className="text-[11px] leading-snug line-clamp-2 text-amber-800 font-medium">{card.revision_note}</p>
                     </div>
                 )}
 

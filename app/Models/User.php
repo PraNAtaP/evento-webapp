@@ -21,6 +21,15 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'is_email_verified',
+    ];
+
+    /**
      * Mengatur tipe data atribut pada model User.
      */
     protected function casts(): array
@@ -35,6 +44,14 @@ class User extends Authenticatable implements MustVerifyEmail
      * Memeriksa apakah email pengguna sudah diverifikasi.
      */
     public function isEmailVerified(): bool
+    {
+        return ! is_null($this->email_verified_at);
+    }
+
+    /**
+     * Accessor untuk atribut is_email_verified.
+     */
+    public function getIsEmailVerifiedAttribute(): bool
     {
         return ! is_null($this->email_verified_at);
     }

@@ -124,8 +124,8 @@
 
         {/* Pesan Penolakan (Jika Ada) */}
         {payment.rejection_note && (
-            <div className="mb-4 bg-[#FDE8D3] text-[#63482B] text-sm p-3 rounded-xl border border-[#E8CEB2]">
-            <span className="font-bold">Catatan EO:</span> {payment.rejection_note}
+            <div className="mb-4 bg-rose-50 text-rose-900 text-sm p-3.5 rounded-xl border border-rose-300 font-medium">
+            <span className="font-bold text-rose-950">Catatan Penolakan EO:</span> {payment.rejection_note}
             </div>
         )}
 
@@ -153,13 +153,13 @@
                 <>
                 <button
                     onClick={() => onVerify(payment, 'approve')}
-                    className="bg-[#DAEBE3] hover:bg-[#C5DED4] text-[#2F3931] border border-[#CFD8C4] px-4 py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-700 px-4 py-2 rounded-xl text-sm font-bold shadow-xs transition-colors cursor-pointer"
                 >
                     Tandai Lunas
                 </button>
                 <button
                     onClick={() => onVerify(payment, 'reject')}
-                    className="bg-[#F3C3B2] hover:bg-[#EAAFA0] text-[#63482B] border border-[#EAAFA0] px-4 py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer"
+                    className="bg-white hover:bg-rose-50 text-rose-700 hover:text-rose-800 border border-rose-300 px-4 py-2 rounded-xl text-sm font-bold shadow-xs transition-colors cursor-pointer"
                 >
                     Tolak
                 </button>

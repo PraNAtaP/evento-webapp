@@ -588,47 +588,47 @@ export default function ClientBookedEventsPage() {
             case "request":
                 return {
                     label: "Menunggu Review EO",
-                    className: "bg-[#99CDD8]/30 text-[#1D4A54] border-[#86BAC5]",
+                    className: "bg-amber-100 text-amber-950 border-amber-300 font-bold",
                 };
             case "drafting_quotation":
                 return {
                     label: "Penyusunan Penawaran",
-                    className: "bg-[#DAEBE3] text-[#224436] border-[#BCD4C9]",
+                    className: "bg-sky-100 text-sky-950 border-sky-300 font-bold",
                 };
             case "client_review":
                 return {
                     label: "Review Penawaran Klien",
-                    className: "bg-[#FDE8D3] text-[#5A3A1D] border-[#E8CEB2]",
+                    className: "bg-amber-100 text-amber-950 border-amber-300 font-bold",
                 };
             case "awaiting_dp":
                 return {
                     label: "Menunggu Pembayaran DP",
-                    className: "bg-[#F3C3B2]/40 text-[#552316] border-[#E8CEB2]",
+                    className: "bg-orange-100 text-orange-950 border-orange-300 font-bold",
                 };
             case "on_progress":
                 return {
                     label: "Sedang Dikerjakan",
-                    className: "bg-[#CFD8C4] text-[#2D3A28] border-[#B6C2AA]",
+                    className: "bg-sky-100 text-sky-950 border-sky-300 font-bold",
                 };
             case "done":
                 return {
                     label: "Selesai Diselenggarakan",
-                    className: "bg-[#657166] text-white border-[#525C53]",
+                    className: "bg-emerald-100 text-emerald-950 border-emerald-300 font-bold",
                 };
             case "rejected":
                 return {
                     label: "Ditolak EO",
-                    className: "bg-rose-50 text-rose-700 border-rose-200",
+                    className: "bg-rose-100 text-rose-900 border-rose-300 font-bold",
                 };
             case "cancelled":
                 return {
                     label: "Dibatalkan oleh EO",
-                    className: "bg-rose-100 text-rose-800 border-rose-300",
+                    className: "bg-rose-100 text-rose-900 border-rose-300 font-bold",
                 };
             default:
                 return {
                     label: status || "Diproses",
-                    className: "bg-[#FAF6F0] text-[#738075] border-[#E8E2D7]",
+                    className: "bg-[#FAF6F0] text-[#738075] border-[#E8E2D7] font-semibold",
                 };
         }
     };
@@ -856,14 +856,14 @@ export default function ClientBookedEventsPage() {
                                     {/* Tombol Ajukan Pembatalan */}
                                     {["drafting_quotation", "client_review", "awaiting_dp", "on_progress"].includes(activeEvent.kanban_status) && (
                                         activeEvent.cancellation_request_status === "pending" ? (
-                                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-                                                <Clock className="w-3.5 h-3.5" />
+                                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-950 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full shadow-2xs">
+                                                <Clock className="w-3.5 h-3.5 text-amber-700" />
                                                 <span>Menunggu Review EO</span>
                                             </span>
                                         ) : (
                                             <button
                                                 onClick={() => setCancellationEvent(activeEvent)}
-                                                className="text-[11px] font-bold text-rose-600 border border-rose-200 hover:bg-rose-50 px-3 py-1 rounded-full transition-colors cursor-pointer"
+                                                className="text-[11px] font-bold text-rose-700 border border-rose-300 hover:bg-rose-50 px-3 py-1 rounded-full transition-colors cursor-pointer"
                                             >
                                                 Ajukan Pembatalan
                                             </button>
@@ -872,9 +872,9 @@ export default function ClientBookedEventsPage() {
 
                                     {/* Notif hasil review pembatalan */}
                                     {activeEvent.cancellation_request_status === "rejected" && (
-                                        <div className="text-left bg-orange-50 border border-orange-200 rounded-xl px-3 py-2 max-w-xs">
-                                            <p className="text-[10px] font-black text-orange-700">Pembatalan Ditolak EO</p>
-                                            <p className="text-[10px] text-orange-600 mt-0.5">{activeEvent.cancellation_review_note}</p>
+                                        <div className="text-left bg-rose-50 border border-rose-300 rounded-xl px-3 py-2 max-w-xs">
+                                            <p className="text-[10px] font-black text-rose-900">Pembatalan Ditolak EO</p>
+                                            <p className="text-[10px] text-rose-700 mt-0.5">{activeEvent.cancellation_review_note}</p>
                                         </div>
                                     )}
                                 </div>

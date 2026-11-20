@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\VendorApprovedMail;
+use App\Mail\VendorRejectedMail;
 use App\Models\Vendor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class AdminVendorController extends Controller
         $status = $request->query('status', 'all');
         $search = $request->query('search');
 
-        $query = Vendor::with(['user:id,name,email', 'approver:id,name,email'])
+        $query = Vendor::with(['user:id,name,email,email_verified_at', 'approver:id,name,email'])
             ->withCount('packages');
 
         if ($status && in_array($status, [Vendor::STATUS_PENDING, Vendor::STATUS_APPROVED, Vendor::STATUS_REJECTED])) {
@@ -64,7 +65,7 @@ class AdminVendorController extends Controller
      */
     public function show(Vendor $vendor): JsonResponse
     {
-        $vendor->load(['user:id,name,email', 'approver:id,name,email', 'packages.images']);
+        $vendor->load(['user:id,name,email,email_verified_at', 'approver:id,name,email', 'packages.images']);
 
         return response()->json([
             'data' => $vendor,
@@ -76,6 +77,14 @@ class AdminVendorController extends Controller
      */
     public function approve(Request $request, Vendor $vendor): JsonResponse
     {
+        $vendor->load('user');
+
+        if (! $vendor->user || ! $vendor->user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Vendor belum dapat disetujui karena belum memverifikasi alamat email.',
+            ], 422);
+        }
+
         $vendor->update([
             'status' => Vendor::STATUS_APPROVED,
             'approved_at' => now(),
@@ -83,7 +92,7 @@ class AdminVendorController extends Controller
             'rejection_reason' => null,
         ]);
 
-        $vendor->load(['user:id,name,email', 'approver:id,name,email']);
+        $vendor->load(['user:id,name,email,email_verified_at', 'approver:id,name,email']);
 
         $emailSent = false;
         $emailErrorMessage = null;
@@ -129,7 +138,15 @@ class AdminVendorController extends Controller
             'approved_by' => $request->user()->id,
         ]);
 
-        $vendor->load(['user:id,name,email', 'approver:id,name,email']);
+        $vendor->load(['user:id,name,email,email_verified_at', 'approver:id,name,email']);
+
+        if ($vendor->user && $vendor->user->email) {
+            try {
+                Mail::to($vendor->user->email)->send(new VendorRejectedMail($vendor, $validated['rejection_reason']));
+            } catch (\Throwable $e) {
+                Log::warning("Gagal mengirim email penolakan vendor via SMTP ke {$vendor->user->email}: ".$e->getMessage());
+            }
+        }
 
         return response()->json([
             'message' => "Pendaftaran vendor '{$vendor->business_name}' telah ditolak.",

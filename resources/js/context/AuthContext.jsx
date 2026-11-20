@@ -10,7 +10,14 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         const initAuth = async () => {
-            const savedToken = localStorage.getItem("auth_token");
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenFromUrl = urlParams.get("token");
+            if (tokenFromUrl) {
+                localStorage.setItem("auth_token", tokenFromUrl);
+                localStorage.setItem("email_verified", "true");
+            }
+
+            const savedToken = tokenFromUrl || localStorage.getItem("auth_token");
             if (!savedToken) {
                 setIsLoading(false);
                 return;
@@ -19,6 +26,7 @@ export function AuthProvider({ children }) {
             try {
                 const response = await api.get("/user");
                 setUser(response.data.user);
+                setToken(savedToken);
             } catch (error) {
                 console.error("Gagal memuat sesi pengguna:", error);
                 localStorage.removeItem("auth_token");
@@ -31,6 +39,29 @@ export function AuthProvider({ children }) {
 
         initAuth();
     }, []);
+
+    const setAuthSession = (newToken, newUser) => {
+        if (newToken) {
+            localStorage.setItem("auth_token", newToken);
+            setToken(newToken);
+        }
+        if (newUser) {
+            setUser(newUser);
+        }
+    };
+
+    const refreshUser = async () => {
+        try {
+            const response = await api.get("/user");
+            if (response.data?.user) {
+                setUser(response.data.user);
+                return response.data.user;
+            }
+        } catch (error) {
+            console.error("Gagal refresh user:", error);
+        }
+        return null;
+    };
 
     const login = async (email, password) => {
         const response = await api.post("/login", { email, password });
@@ -55,7 +86,15 @@ export function AuthProvider({ children }) {
         }
     };
 
-    const getRoleDashboard = (role) => {
+    const getRoleDashboard = (role, currentUser = user) => {
+        if (
+            currentUser &&
+            (currentUser.role === "client" || currentUser.role === "vendor") &&
+            !currentUser.email_verified_at &&
+            currentUser.is_email_verified !== true
+        ) {
+            return "/verify-email";
+        }
         switch (role) {
             case "eo":
                 return "/admin/dashboard";
@@ -75,6 +114,8 @@ export function AuthProvider({ children }) {
         login,
         logout,
         getRoleDashboard,
+        setAuthSession,
+        refreshUser,
     };
 
     return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Zap, Clock, Camera, Info, FileText, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -6,12 +6,18 @@ import api from "../../api/axios";
 
 export default function VendorRegister() {
     const navigate = useNavigate();
-    const { isAuthenticated, user, getRoleDashboard } = useAuth();
+    const { isAuthenticated, user, getRoleDashboard, setAuthSession } = useAuth();
 
-    // Jika sudah login, redirect ke dashboard perannya
-    if (isAuthenticated && user) {
-        navigate(getRoleDashboard(user.role), { replace: true });
-    }
+    // Jika sudah login, redirect sesuai status verifikasi
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            if (!user.email_verified_at && user.is_email_verified !== true) {
+                navigate("/verify-email", { replace: true });
+            } else {
+                navigate(getRoleDashboard(user.role), { replace: true });
+            }
+        }
+    }, [isAuthenticated, user, navigate, getRoleDashboard]);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -102,13 +108,13 @@ export default function VendorRegister() {
                 description: formData.description,
             });
 
-            // Simpan token otomatis jika API mengembalikan token
-            if (response.data.token) {
-                localStorage.setItem("auth_token", response.data.token);
+            const { token, user: createdUser } = response.data;
+            if (token && createdUser) {
+                setAuthSession(token, createdUser);
             }
 
-            setRegisteredVendor(response.data.user?.vendor || null);
-            setRegistrationSuccess(true);
+            // Arahkan ke halaman verifikasi email untuk verifikasi awal sebelum disetujui EO
+            navigate(`/verify-email?email=${encodeURIComponent(formData.email)}&registered=1`, { replace: true });
         } catch (err) {
             if (err.response?.data?.errors) {
                 setErrors(err.response.data.errors);
