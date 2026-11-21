@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'role'])]
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'avatar_url', 'address', 'bio'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -98,5 +98,25 @@ class User extends Authenticatable implements MustVerifyEmail
     public function vendor(): HasOne
     {
         return $this->hasOne(Vendor::class);
+    }
+
+    /**
+     * Mengambil seluruh ulasan yang dibuat oleh pengguna.
+     *
+     * @return HasMany<Review, $this>
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'client_id');
+    }
+
+    /**
+     * Mengambil seluruh pesan diskusi event yang dikirim pengguna.
+     *
+     * @return HasMany<EventDiscussion, $this>
+     */
+    public function discussions(): HasMany
+    {
+        return $this->hasMany(EventDiscussion::class, 'user_id');
     }
 }

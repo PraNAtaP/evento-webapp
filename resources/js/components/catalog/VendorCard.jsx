@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin } from "lucide-react";
+import { MapPin, Star } from "lucide-react";
 
 export default function VendorCard({ vendor }) {
     const [imageError, setImageError] = useState(false);
@@ -38,10 +38,16 @@ export default function VendorCard({ vendor }) {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 mb-1">
+                    <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                         <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#CFD8C4]/50 text-[#2D3A28] border border-[#B6C2AA]">
                             {vendor.category || "Mitra EO"}
                         </span>
+                        {vendor.average_rating > 0 && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
+                                <span>{vendor.average_rating} ({vendor.review_count || 0})</span>
+                            </span>
+                        )}
                     </div>
 
                     <h3 className="text-sm font-bold text-[#2F3931] group-hover:text-[#657166] transition-colors truncate">

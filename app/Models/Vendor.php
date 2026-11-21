@@ -42,6 +42,14 @@ class Vendor extends Model
     public const STATUS_REJECTED = 'rejected';
 
     /**
+     * @var list<string>
+     */
+    protected $appends = [
+        'average_rating',
+        'review_count',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -122,5 +130,33 @@ class Vendor extends Model
     public function packages(): HasMany
     {
         return $this->hasMany(VendorPackage::class);
+    }
+
+    /**
+     * Get all reviews given to this vendor.
+     *
+     * @return HasMany<Review, $this>
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Calculate average rating for this vendor.
+     */
+    public function getAverageRatingAttribute(): float
+    {
+        $avg = $this->reviews()->avg('rating');
+
+        return $avg ? round((float) $avg, 1) : 0.0;
+    }
+
+    /**
+     * Total reviews received by this vendor.
+     */
+    public function getReviewCountAttribute(): int
+    {
+        return $this->reviews()->count();
     }
 }

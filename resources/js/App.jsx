@@ -31,6 +31,8 @@ import VendorCatalogIndex from "./pages/vendors/VendorCatalogIndex";
 import VendorCatalogShow from "./pages/vendors/VendorCatalogShow";
 import ProgressApprovalPage from './pages/admin/ProgressApprovalPage';
 import VerifyEmailNotice from "./pages/auth/VerifyEmailNotice";
+import ProfileSettingsPage from "./pages/profile/ProfileSettingsPage";
+import NotFoundPage from "./pages/error/NotFoundPage";
 
 const queryClient = new QueryClient();
 
@@ -303,12 +305,30 @@ export default function App() {
                                     </ProtectedRoute>
                                 }
                             />
+
+                            {/* Rute Pengaturan Profil & Keamanan Akun Mandiri */}
+                            <Route
+                                path="/profile"
+                                element={
+                                    <ProtectedRoute>
+                                        <ProfileSettingsPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/settings"
+                                element={
+                                    <ProtectedRoute>
+                                        <ProfileSettingsPage />
+                                    </ProtectedRoute>
+                                }
+                            />
                         </Route>
 
-                        {/* Fallback */}
+                        {/* Halaman 404 Not Found Ramah Pengguna */}
                         <Route
                             path="*"
-                            element={<Navigate to="/" replace />}
+                            element={<NotFoundPage />}
                         />
                     </Routes>
                 </BrowserRouter>

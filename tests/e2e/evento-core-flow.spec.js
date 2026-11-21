@@ -149,4 +149,91 @@ test.describe("EVENTO Platform - E2E Integration Testing", () => {
 
         expect(printRules).toBeTruthy();
     });
+
+    test("8. Login Vendor Mitra, Portal Dashboard Vendor, Paket Layanan, dan Tawaran Pekerjaan", async ({ page }) => {
+        const loginResponse = await page.request.post("/api/login", {
+            data: {
+                email: "vendor@evento.test",
+                password: "testing@123$",
+            },
+        });
+
+        if (loginResponse.ok()) {
+            const data = await loginResponse.json();
+            const token = data.token;
+
+            await page.addInitScript((authToken) => {
+                localStorage.setItem("auth_token", authToken);
+            }, token);
+
+            // Buka Dashboard Vendor
+            await page.goto("/vendor/dashboard");
+            await expect(page.getByText(/dashboard|pekerjaan aktif|tawaran/i).first()).toBeVisible({ timeout: 10000 });
+
+            // Buka halaman Paket Vendor
+            await page.goto("/vendor/packages");
+            await expect(page.getByText(/paket|layanan/i).first()).toBeVisible();
+
+            // Buka tawaran pekerjaan
+            await page.goto("/vendor/job-offers");
+            await expect(page.getByText(/tawaran|job offer/i).first()).toBeVisible();
+        }
+    });
+
+    test("9. Pengujian Responsivitas Mobile Viewport (Layar HP 375x667)", async ({ page }) => {
+        // Atur layar ke ukuran mobile (iPhone SE ukuran 375x667)
+        await page.setViewportSize({ width: 375, height: 667 });
+        await page.goto("/login");
+
+        // Memastikan logo dan form login tetap tampil rapi tanpa overflow horizontal
+        const logo = page.locator("img[alt='EVENTO']").first();
+        await expect(logo).toBeVisible();
+
+        const emailInput = page.locator("input[type='email']");
+        await expect(emailInput).toBeVisible();
+
+        const box = await emailInput.boundingBox();
+        expect(box).toBeTruthy();
+        expect(box.width).toBeLessThanOrEqual(375);
+    });
+
+    test("10. Proteksi Rute dan Otorisasi (Guest & Cross-role Guard)", async ({ page }) => {
+        // Pastikan tamu yang belum login ditolak saat mengakses rute terproteksi
+        await page.goto("/admin/dashboard");
+        await expect(page).toHaveURL(/.*login.*/);
+
+        await page.goto("/client/dashboard");
+        await expect(page).toHaveURL(/.*login.*/);
+
+        await page.goto("/vendor/dashboard");
+        await expect(page).toHaveURL(/.*login.*/);
+    });
+
+    test("11. Halaman 404 (Not Found) ramah pengguna", async ({ page }) => {
+        await page.goto("/halaman-yang-pasti-tidak-ada-12345");
+        await expect(page.getByText(/404/i).first()).toBeVisible();
+        await expect(page.getByText(/halaman tidak ditemukan/i).first()).toBeVisible();
+    });
+
+    test("12. Akses Pengaturan Profil Pengguna & Ganti Password", async ({ page }) => {
+        const loginResponse = await page.request.post("/api/login", {
+            data: {
+                email: "client@evento.test",
+                password: "testing@123$",
+            },
+        });
+
+        if (loginResponse.ok()) {
+            const data = await loginResponse.json();
+            const token = data.token;
+
+            await page.addInitScript((authToken) => {
+                localStorage.setItem("auth_token", authToken);
+            }, token);
+
+            await page.goto("/profile");
+            await expect(page.getByText(/informasi profil akun/i).first()).toBeVisible({ timeout: 10000 });
+            await expect(page.getByText(/ganti password/i).first()).toBeVisible();
+        }
+    });
 });

@@ -12,11 +12,14 @@ import {
     Clock,
     Check,
     ClipboardList,
+    Star,
 } from "lucide-react";
 import api from "../../api/axios";
 import ProgressTimeline from "../../components/client/ProgressTimeline";
 import PaymentCard from "../../components/payment/PaymentCard";
 import UploadProofForm from "../../components/payment/UploadProofForm";
+import EventDiscussionSection from "../../components/discussion/EventDiscussionSection";
+import EventReviewModal from "../../components/review/EventReviewModal";
 import { CATEGORY_LABELS } from "../../data/kanbanData";
 import { formatRupiah } from "../../utils/formatters";
 
@@ -535,6 +538,7 @@ export default function ClientBookedEventsPage() {
     const [cancellationEvent, setCancellationEvent] = useState(null);
     const [selectedVendorAssignment, setSelectedVendorAssignment] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
+    const [reviewingEvent, setReviewingEvent] = useState(null);
     const [page, setPage] = useState(1);
 
     // 1. Fetch seluruh acara yang sudah dibooking oleh klien
@@ -1093,6 +1097,42 @@ export default function ClientBookedEventsPage() {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Section 4: Rating & Ulasan Bintang (Hanya tampil jika acara Selesai) */}
+                            {(activeEvent.kanban_status === "completed" || activeEvent.completed_at) && (
+                                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fadeIn">
+                                    <div className="flex items-center gap-3.5">
+                                        <div className="w-11 h-11 rounded-2xl bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center shrink-0">
+                                            <Star className="w-6 h-6 fill-amber-400 text-amber-500" />
+                                        </div>
+                                        <div>
+                                            <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 bg-amber-200/60 px-2 py-0.5 rounded-md border border-amber-300">
+                                                Acara Selesai
+                                            </span>
+                                            <h4 className="text-sm font-extrabold text-[#2F3931] mt-0.5">
+                                                Bagikan Pengalaman & Penilaian Anda
+                                            </h4>
+                                            <p className="text-xs text-[#738075]">
+                                                Berikan rating bintang (1-5) dan testimoni ulasan untuk EO serta Mitra Vendor penugasan.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setReviewingEvent(activeEvent)}
+                                        className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+                                    >
+                                        <Star className="w-4 h-4 fill-white" />
+                                        <span>Beri Ulasan & Rating</span>
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Section 5: Diskusi & Catatan Khusus Acara */}
+                            <EventDiscussionSection
+                                eventId={activeEvent.id}
+                                eventTitle={activeEvent.event_name}
+                            />
                         </div>
                     ) : (
                         /* Empty State Saat Belum Ada Acara yang Dipilih */
@@ -1147,6 +1187,18 @@ export default function ClientBookedEventsPage() {
                 <ImagePreviewModal
                     src={previewImage}
                     onClose={() => setPreviewImage(null)}
+                />
+            )}
+
+            {/* Modal Beri Ulasan & Rating Acara */}
+            {reviewingEvent && (
+                <EventReviewModal
+                    event={reviewingEvent}
+                    onClose={() => setReviewingEvent(null)}
+                    onSuccess={() => {
+                        refetch();
+                        setReviewingEvent(null);
+                    }}
                 />
             )}
         </div>
