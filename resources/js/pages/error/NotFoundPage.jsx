@@ -11,8 +11,8 @@ export default function NotFoundPage() {
         <div className="min-h-screen bg-[#FAF6F0] flex flex-col justify-center items-center px-4 py-12">
             <div className="w-full max-w-md bg-white rounded-3xl border border-[#E8E2D7] shadow-lg p-8 sm:p-10 text-center animate-fadeIn">
                 {/* Visual Icon */}
-                <div className="w-20 h-20 rounded-2xl bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9] flex items-center justify-center mx-auto mb-6 shadow-xs">
-                    <Compass className="w-10 h-10 animate-spin-slow" />
+                <div className="w-20 h-20 rounded-2xl bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9] flex items-center justify-center mx-auto mb-6 shadow-xs group">
+                    <Compass className="w-10 h-10 transition-transform duration-500 group-hover:rotate-45" />
                 </div>
 
                 <span className="inline-block px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-[#FDE8D3] text-[#63482B] border border-[#E8CEB2] mb-3">

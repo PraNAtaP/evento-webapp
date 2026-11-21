@@ -61,9 +61,15 @@ class ProfileController extends Controller
         }
 
         $user->name = $validated['name'];
-        $user->phone = $validated['phone'] ?? $user->phone;
-        $user->address = $validated['address'] ?? $user->address;
-        $user->bio = $validated['bio'] ?? $user->bio;
+        if (array_key_exists('phone', $validated)) {
+            $user->phone = $validated['phone'];
+        }
+        if (array_key_exists('address', $validated)) {
+            $user->address = $validated['address'];
+        }
+        if (array_key_exists('bio', $validated)) {
+            $user->bio = $validated['bio'];
+        }
         $user->save();
 
         // Update data profil vendor jika user adalah mitra vendor

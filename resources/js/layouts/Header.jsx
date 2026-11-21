@@ -162,8 +162,8 @@ export default function Header({ onToggleSidebar }) {
                 </button>
 
                 {/* Judul Halaman */}
-                <div>
-                    <h2 className="text-base font-extrabold text-[#2F3931] leading-tight">
+                <div className="min-w-0">
+                    <h2 className="text-sm sm:text-base font-extrabold text-[#2F3931] leading-tight truncate max-w-[150px] sm:max-w-xs md:max-w-none">
                         {currentMeta.title}
                     </h2>
                     <p className="hidden md:block text-[11px] text-[#738075] mt-0.5">

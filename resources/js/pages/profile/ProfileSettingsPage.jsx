@@ -100,18 +100,18 @@ export default function ProfileSettingsPage() {
 
         try {
             const formData = new FormData();
-            formData.append("name", profileData.name);
-            formData.append("phone", profileData.phone);
-            formData.append("address", profileData.address);
-            formData.append("bio", profileData.bio);
+            formData.append("name", profileData.name || "");
+            formData.append("phone", profileData.phone || "");
+            formData.append("address", profileData.address || "");
+            formData.append("bio", profileData.bio || "");
 
             if (user?.role === "vendor") {
-                formData.append("business_name", profileData.business_name);
-                formData.append("description", profileData.description);
-                formData.append("contact_number", profileData.phone);
-                formData.append("bank_name", profileData.bank_name);
-                formData.append("bank_account_number", profileData.bank_account_number);
-                formData.append("bank_account_holder", profileData.bank_account_holder);
+                formData.append("business_name", profileData.business_name || "");
+                formData.append("description", profileData.description || "");
+                formData.append("contact_number", profileData.phone || "");
+                formData.append("bank_name", profileData.bank_name || "");
+                formData.append("bank_account_number", profileData.bank_account_number || "");
+                formData.append("bank_account_holder", profileData.bank_account_holder || "");
             }
 
             if (avatarFile) {
@@ -175,10 +175,10 @@ export default function ProfileSettingsPage() {
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
             {/* Header Profil */}
-            <div className="bg-white rounded-3xl border border-[#E8E2D7] p-6 sm:p-8 shadow-xs mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-                <div className="flex items-center gap-5">
-                    <div className="relative group">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#657166] text-[#FDE8D3] font-black text-2xl flex items-center justify-center border-2 border-[#E8E2D7] shadow-xs">
+            <div className="bg-white rounded-3xl border border-[#E8E2D7] p-5 sm:p-8 shadow-xs mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div className="flex items-center gap-4 sm:gap-5 flex-wrap sm:flex-nowrap">
+                    <div className="relative group shrink-0">
+                        <div className="w-18 h-18 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#657166] text-[#FDE8D3] font-black text-xl sm:text-2xl flex items-center justify-center border-2 border-[#E8E2D7] shadow-xs">
                             {avatarPreview ? (
                                 <img
                                     src={avatarPreview}
@@ -200,18 +200,18 @@ export default function ProfileSettingsPage() {
                         </label>
                     </div>
 
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-xl sm:text-2xl font-black text-[#2F3931]">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h1 className="text-lg sm:text-2xl font-black text-[#2F3931] truncate">
                                 {profileData.name || "Pengguna"}
                             </h1>
-                            <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9]">
+                            <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#DAEBE3] text-[#224436] border border-[#BCD4C9] shrink-0">
                                 {user?.role === "eo" ? "EO Admin" : user?.role === "vendor" ? "Mitra Vendor" : "Klien"}
                             </span>
                         </div>
-                        <p className="text-xs sm:text-sm text-[#738075] mt-1">{profileData.email}</p>
-                        <p className="text-[11px] text-[#A0AAA2] mt-0.5">
-                            Kelola informasi data pribadi dan keamanan akun EVENTO Anda.
+                        <p className="text-xs sm:text-sm text-[#738075] mt-0.5 sm:mt-1 truncate">{profileData.email}</p>
+                        <p className="text-[10px] sm:text-[11px] text-[#A0AAA2] mt-0.5">
+                            Kelola data pribadi dan keamanan akun EVENTO Anda.
                         </p>
                     </div>
                 </div>

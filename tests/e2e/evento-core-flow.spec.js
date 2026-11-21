@@ -236,4 +236,68 @@ test.describe("EVENTO Platform - E2E Integration Testing", () => {
             await expect(page.getByText(/ganti password/i).first()).toBeVisible();
         }
     });
+
+    test("13. Pengujian Komprehensif Antarmuka Mobile (Hamburger Menu & Zero Horizontal Scroll)", async ({ page }) => {
+        // Uji tampilan pada viewport smartphone (375x667)
+        await page.setViewportSize({ width: 375, height: 667 });
+
+        const loginResponse = await page.request.post("/api/login", {
+            data: {
+                email: "client@evento.test",
+                password: "testing@123$",
+            },
+        });
+
+        if (loginResponse.ok()) {
+            const data = await loginResponse.json();
+            const token = data.token;
+
+            await page.addInitScript((authToken) => {
+                localStorage.setItem("auth_token", authToken);
+            }, token);
+
+            // Buka dashboard pada layar mobile
+            await page.goto("/client/dashboard");
+            await page.waitForLoadState("networkidle");
+
+            // Pastikan tidak ada horizontal scroll overflow
+            const isOverflowing = await page.evaluate(() => {
+                return document.documentElement.scrollWidth > window.innerWidth;
+            });
+            expect(isOverflowing).toBeFalsy();
+
+            // Pastikan tombol hamburger mobile ada di header
+            const hamburgerBtn = page.getByRole("button", { name: /buka menu navigasi/i }).first();
+            await expect(hamburgerBtn).toBeVisible();
+
+            // Klik tombol hamburger untuk membuka sidebar drawer
+            await hamburgerBtn.click();
+
+            // Pastikan sidebar menu terbuka dan tombol tutup terlihat
+            const closeBtn = page.getByRole("button", { name: /tutup menu/i }).first();
+            await expect(closeBtn).toBeVisible();
+
+            // Klik tombol tutup menu untuk menutup kembali drawer
+            await closeBtn.click();
+            await expect(page.locator("aside")).toHaveClass(/.*-translate-x-full.*/);
+
+            // Periksa halaman Profil pada layar mobile
+            await page.goto("/profile");
+            await page.waitForLoadState("networkidle");
+
+            const isProfileOverflowing = await page.evaluate(() => {
+                return document.documentElement.scrollWidth > window.innerWidth;
+            });
+            expect(isProfileOverflowing).toBeFalsy();
+
+            // Periksa halaman 404 pada layar mobile
+            await page.goto("/url-palsu-mobile-test");
+            await page.waitForLoadState("networkidle");
+
+            const is404Overflowing = await page.evaluate(() => {
+                return document.documentElement.scrollWidth > window.innerWidth;
+            });
+            expect(is404Overflowing).toBeFalsy();
+        }
+    });
 });

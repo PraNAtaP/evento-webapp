@@ -267,13 +267,19 @@ function ClientVendorDetailModal({ assignment, isUnmasked, onClose, onPreviewIma
                             </div>
                         )}
                         <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 <h3 className="font-extrabold text-base text-[#2F3931] leading-tight">
                                     {vendor.business_name || "Mitra Vendor"}
                                 </h3>
                                 <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#CFD8C4]/60 text-[#2D3A28] border border-[#B6C2AA]">
                                     {vendor.category || "Vendor"}
                                 </span>
+                                {vendor.average_rating > 0 && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-900 bg-amber-100/80 px-2.5 py-0.5 rounded-full border border-amber-300">
+                                        <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
+                                        <span>{vendor.average_rating} ({vendor.review_count || 0} Ulasan)</span>
+                                    </span>
+                                )}
                             </div>
                             <p className="text-[11px] text-[#738075] mt-0.5">
                                 {isUnmasked ? "Profil resmi mitra vendor terverifikasi" : "Mitra vendor terpilih oleh Event Organizer"}
@@ -935,9 +941,9 @@ export default function ClientBookedEventsPage() {
                                     )}
                                 </div>
 
-                                {activeEvent.vendorAssignments && activeEvent.vendorAssignments.length > 0 ? (
+                                {((activeEvent.vendor_assignments || activeEvent.vendorAssignments) && (activeEvent.vendor_assignments || activeEvent.vendorAssignments).length > 0) ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                        {activeEvent.vendorAssignments.map((assignment) => {
+                                        {(activeEvent.vendor_assignments || activeEvent.vendorAssignments).map((assignment) => {
                                             const vendor = assignment.vendor || {};
                                             const pkg = assignment.package || {};
                                             const isUnmasked = activeEvent.is_vendor_unmasked;
@@ -967,6 +973,12 @@ export default function ClientBookedEventsPage() {
                                                                     <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-[#CFD8C4]/60 text-[#2D3A28] border border-[#B6C2AA]">
                                                                         {vendor.category || "Layanan"}
                                                                     </span>
+                                                                    {vendor.average_rating > 0 && (
+                                                                        <span className="inline-flex items-center gap-1 text-[9px] font-black text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-md border border-amber-300">
+                                                                            <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
+                                                                            <span>{vendor.average_rating} ({vendor.review_count || 0})</span>
+                                                                        </span>
+                                                                    )}
                                                                     {assignment.eo_offer_status && (
                                                                         <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-white text-[#738075] border border-[#E8E2D7]">
                                                                             {assignment.eo_offer_status}

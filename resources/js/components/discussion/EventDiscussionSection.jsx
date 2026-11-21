@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, Send, User, Clock, ShieldCheck } from "lucide-react";
+import { MessageSquare, Send, User, Clock, ShieldCheck, RefreshCw } from "lucide-react";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import { formatDateTime } from "../../utils/formatters";
@@ -27,6 +27,11 @@ export default function EventDiscussionSection({ eventId, eventTitle = "Acara" }
 
     useEffect(() => {
         fetchDiscussions();
+        // Polling riwayat pesan setiap 8 detik agar percakapan tetap sinkron
+        const interval = setInterval(() => {
+            if (!sending) fetchDiscussions();
+        }, 8000);
+        return () => clearInterval(interval);
     }, [eventId]);
 
     useEffect(() => {
@@ -91,9 +96,20 @@ export default function EventDiscussionSection({ eventId, eventTitle = "Acara" }
                     </div>
                 </div>
 
-                <span className="text-[10px] font-bold text-[#738075] bg-[#FAF6F0] px-2.5 py-1 rounded-full border border-[#E8E2D7]">
-                    {messages.length} Catatan
-                </span>
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={fetchDiscussions}
+                        disabled={loading}
+                        className="p-1.5 text-[#738075] hover:text-[#2F3931] hover:bg-[#FAF6F0] rounded-lg transition cursor-pointer"
+                        title="Segarkan diskusi"
+                    >
+                        <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                    </button>
+                    <span className="text-[10px] font-bold text-[#738075] bg-[#FAF6F0] px-2.5 py-1 rounded-full border border-[#E8E2D7]">
+                        {messages.length} Catatan
+                    </span>
+                </div>
             </div>
 
             {/* Area Pesan Thread */}

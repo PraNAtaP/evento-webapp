@@ -83,6 +83,7 @@ class DatabaseSeeder extends Seeder
             EventCategorySeeder::class,
             VendorCatalogSeeder::class,
             EventWorkflowSeeder::class,
+            ReviewSeeder::class,
         ]);
     }
 }

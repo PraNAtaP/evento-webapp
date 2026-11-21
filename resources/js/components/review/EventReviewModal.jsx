@@ -3,9 +3,12 @@ import { Star, X, CheckCircle2, AlertCircle } from "lucide-react";
 import api from "../../api/axios";
 
 export default function EventReviewModal({ event, onClose, onSuccess }) {
-    const [revieweeType, setRevieweeType] = useState("vendor"); // 'vendor' | 'eo'
+    const assignments = event?.vendor_assignments || event?.vendorAssignments || [];
+    const vendors = assignments.map((a) => a.vendor).filter(Boolean);
+
+    const [revieweeType, setRevieweeType] = useState(vendors.length > 0 ? "vendor" : "eo");
     const [selectedVendorId, setSelectedVendorId] = useState(
-        event?.vendorAssignments?.[0]?.vendor_id || ""
+        vendors[0]?.id || assignments[0]?.vendor_id || ""
     );
     const [rating, setRating] = useState(5);
     const [hoverRating, setHoverRating] = useState(0);
@@ -13,8 +16,6 @@ export default function EventReviewModal({ event, onClose, onSuccess }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
-
-    const vendors = event?.vendorAssignments?.map((a) => a.vendor).filter(Boolean) || [];
 
     const handleSubmit = async (e) => {
         e.preventDefault();
