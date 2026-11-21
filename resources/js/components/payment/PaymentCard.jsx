@@ -181,7 +181,7 @@
                 </button>
                 {proofOpen && (
                     <ProofModal
-                        url={`/storage/${payment.payment_proof_url}`}
+                        url={/^https?:\/\//.test(payment.payment_proof_url) ? payment.payment_proof_url : `/storage/${payment.payment_proof_url}`}
                         onClose={() => setProofOpen(false)}
                     />
                 )}

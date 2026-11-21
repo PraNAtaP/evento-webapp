@@ -8,6 +8,7 @@ use App\Http\Requests\VerifyPaymentRequest;
 use App\Mail\PaymentVerifiedMail;
 use App\Models\Payment;
 use App\Services\AdminNotificationService;
+use Cloudinary\Uploader;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -74,15 +75,26 @@ class PaymentController extends Controller
             ], 422);
         }
 
-        if ($payment->payment_proof_url) {
+        if ($payment->payment_proof_url && ! str_starts_with($payment->payment_proof_url, 'http')) {
             Storage::disk('public')->delete($payment->payment_proof_url);
         }
 
-        $path = $request->file('payment_proof')
-            ->store('payment-proofs', 'public');
+        $proofFile = $request->file('payment_proof');
+
+        try {
+            \Cloudinary::config();
+            $upload = Uploader::upload(
+                $proofFile->getRealPath(),
+                ['folder' => 'evento/payment-proofs']
+            );
+            $proofUrl = $upload['secure_url'];
+        } catch (\Throwable $e) {
+            // Fallback ke penyimpanan lokal jika Cloudinary tidak tersedia.
+            $proofUrl = $proofFile->store('payment-proofs', 'public');
+        }
 
         $payment->update([
-            'payment_proof_url' => $path,
+            'payment_proof_url' => $proofUrl,
             'status' => 'pending_verification',
             'rejection_note' => null,
         ]);
