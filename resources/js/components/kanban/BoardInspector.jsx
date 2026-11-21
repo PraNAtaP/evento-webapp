@@ -16,6 +16,7 @@ import InspectorField from "./InspectorField";
 import InspectorSection from "./InspectorSection";
 import InspectorVendorSection from "./InspectorVendorSection";
 import RescheduleDatePicker from "./RescheduleDatePicker";
+import EventDiscussionSection from "../discussion/EventDiscussionSection";
 
 const TITLE_ID = "board-inspector-title";
 const FOCUSABLE_SELECTOR =
@@ -566,8 +567,15 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                             </div>
                         </div>
                     </div>
-                ) : event.kanban_status !== "done" ? (
-                    <div className="mt-8 mb-4 rounded-2xl border border-rose-200 bg-rose-50/40 p-4 sm:p-5">
+                ) : null}
+
+                {/* Diskusi & Catatan Koordinasi Acara (Thread EO - Klien) */}
+                <div className="mt-6 mb-4">
+                    <EventDiscussionSection eventId={event.id} eventTitle={event.event_name} />
+                </div>
+
+                {!isCancelled && event.kanban_status !== "done" ? (
+                    <div className="mt-6 mb-4 rounded-2xl border border-rose-200 bg-rose-50/40 p-4 sm:p-5">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-rose-900">

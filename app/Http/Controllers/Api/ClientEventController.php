@@ -28,6 +28,7 @@ class ClientEventController extends Controller
             'vendorAssignments' => fn ($query) => $query->where('eo_offer_status', '!=', 'rejected'),
             'vendorAssignments.package.images',
             'vendorAssignments.vendor',
+            'vendorAssignments.vendor.reviews' => fn ($q) => $q->with('client:id,name,avatar_url')->latest()->take(5),
             'vendorAssignments.progressLogs' => fn ($query) => $query->where('is_visible_to_client', true)->orderByDesc('created_at'),
             'payments',
         ])
@@ -74,6 +75,7 @@ class ClientEventController extends Controller
             'vendorAssignments' => fn ($query) => $query->where('eo_offer_status', '!=', 'rejected'),
             'vendorAssignments.package.images',
             'vendorAssignments.vendor',
+            'vendorAssignments.vendor.reviews' => fn ($q) => $q->with('client:id,name,avatar_url')->latest()->take(5),
             'vendorAssignments.progressLogs' => fn ($query) => $query->where('is_visible_to_client', true)->orderByDesc('created_at'),
             'payments',
         ]);

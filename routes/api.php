@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ClientEventController;
 use App\Http\Controllers\Api\CustomerRegistrationController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\EventCategoryController;
+use App\Http\Controllers\Api\EventDiscussionController;
 use App\Http\Controllers\Api\EventInspectorController;
 use App\Http\Controllers\Api\EventSummaryController;
 use App\Http\Controllers\Api\EventVendorController;
@@ -21,7 +22,9 @@ use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\KanbanController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProgressApprovalController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\VendorCatalogController;
 use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\VendorJobController;
@@ -56,6 +59,20 @@ Route::post('/email/verification-notification', [EmailVerificationController::cl
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me'])->name('api.me');
     Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
+
+    // Modul Profil Pengguna & Ganti Password
+    Route::get('/profile', [ProfileController::class, 'show'])->name('api.profile.show');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('api.profile.update');
+    Route::post('/profile/change-password', [ProfileController::class, 'changePassword'])->name('api.profile.change-password');
+
+    // Modul Diskusi & Catatan Acara (Thread Chat Klien - EO)
+    Route::get('/events/{event}/discussions', [EventDiscussionController::class, 'index'])->name('api.events.discussions.index');
+    Route::post('/events/{event}/discussions', [EventDiscussionController::class, 'store'])->name('api.events.discussions.store');
+
+    // Modul Ulasan & Rating Bintang (Client Review)
+    Route::get('/events/{event}/reviews', [ReviewController::class, 'indexForEvent'])->name('api.events.reviews.index');
+    Route::post('/events/{event}/reviews', [ReviewController::class, 'store'])->name('api.events.reviews.store');
+    Route::get('/vendors/{vendor}/reviews', [ReviewController::class, 'indexForVendor'])->name('api.vendors.reviews.index');
 
     // Kategori Acara Aktif (dapat dibaca oleh Klien dan EO)
     Route::get('/event-categories', [EventCategoryController::class, 'index'])

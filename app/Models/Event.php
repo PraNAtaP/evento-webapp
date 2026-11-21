@@ -319,4 +319,24 @@ class Event extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    /**
+     * Get reviews associated with this event.
+     *
+     * @return HasMany<Review, $this>
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Get discussions associated with this event.
+     *
+     * @return HasMany<EventDiscussion, $this>
+     */
+    public function discussions(): HasMany
+    {
+        return $this->hasMany(EventDiscussion::class);
+    }
 }
