@@ -574,7 +574,7 @@ function InspectorPanel({ eventId, onClose, onQuotationSent, onEventRescheduled,
                     <EventDiscussionSection eventId={event.id} eventTitle={event.event_name} />
                 </div>
 
-                {!isCancelled && event.kanban_status !== "done" ? (
+                {event.kanban_status !== "cancelled" && event.kanban_status !== "done" ? (
                     <div className="mt-6 mb-4 rounded-2xl border border-rose-200 bg-rose-50/40 p-4 sm:p-5">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
