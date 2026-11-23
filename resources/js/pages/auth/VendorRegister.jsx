@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Zap, Clock, Camera, Info, FileText, X } from "lucide-react";
+import { Zap, Clock, Camera, Info, FileText, X, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 
@@ -34,6 +34,8 @@ export default function VendorRegister() {
     });
 
     const [showTermsModal, setShowTermsModal] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -283,15 +285,25 @@ export default function VendorRegister() {
                                     <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
                                         Kata Sandi <span className="text-red-500">* (Min. 8 Karakter)</span>
                                     </label>
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        required
-                                        placeholder="••••••••"
-                                        className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl px-3.5 py-2.5 text-xs text-[#2F3931] placeholder-[#98A29A] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            name="password"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="••••••••"
+                                            className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl pl-3.5 pr-10 py-2.5 text-xs text-[#2F3931] placeholder-[#98A29A] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword((prev) => !prev)}
+                                            aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#738075] hover:text-[#2F3931] transition-colors cursor-pointer"
+                                        >
+                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
                                     {errors.password && (
                                         <p className="text-[11px] text-red-600 mt-1">{errors.password[0]}</p>
                                     )}
@@ -301,15 +313,25 @@ export default function VendorRegister() {
                                     <label className="block text-xs font-bold text-[#2F3931] mb-1.5">
                                         Konfirmasi Kata Sandi <span className="text-red-500">*</span>
                                     </label>
-                                    <input
-                                        type="password"
-                                        name="password_confirmation"
-                                        value={formData.password_confirmation}
-                                        onChange={handleChange}
-                                        required
-                                        placeholder="••••••••"
-                                        className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl px-3.5 py-2.5 text-xs text-[#2F3931] placeholder-[#98A29A] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showPasswordConfirmation ? "text" : "password"}
+                                            name="password_confirmation"
+                                            value={formData.password_confirmation}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="••••••••"
+                                            className="w-full border border-[#E8E2D7] bg-[#FAF6F0]/50 rounded-xl pl-3.5 pr-10 py-2.5 text-xs text-[#2F3931] placeholder-[#98A29A] focus:outline-none focus:ring-2 focus:ring-[#99CDD8] focus:border-[#99CDD8] transition"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswordConfirmation((prev) => !prev)}
+                                            aria-label={showPasswordConfirmation ? "Sembunyikan konfirmasi kata sandi" : "Tampilkan konfirmasi kata sandi"}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#738075] hover:text-[#2F3931] transition-colors cursor-pointer"
+                                        >
+                                            {showPasswordConfirmation ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
                                     {errors.password_confirmation && (
                                         <p className="text-[11px] text-red-600 mt-1">{errors.password_confirmation[0]}</p>
                                     )}
